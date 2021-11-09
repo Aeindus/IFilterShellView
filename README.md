@@ -78,7 +78,7 @@ With the `IFilterShellView` filter window now open, start typing a search query 
 
 
 Example of a search query:
-<img src="Gallery/View3.png" />
+<img src="Gallery/View3.png" width="250" align="left"/>
 In the image above you can observe the results of a search query. 
 
 Actions that can be performed on a query result item:
