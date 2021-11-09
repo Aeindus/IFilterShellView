@@ -35,13 +35,13 @@
 
 [![IFilterShellView Product Screenshot][product-screenshot]](https://github.com/Aeindus/IFilterShellView)
 
-There are not that many great features built into the window's explorer. It is true however that the explorer is not in fact a `simple` program built by Microsoft. It is rather a quite complicated system that integrates the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course. 
+There are not that many great features built into the window's explorer. It is true however that the explorer is not in fact a `simple` program built by Microsoft. It is rather a quite complicated system that includes the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course. 
 
 
-However, windows namespace extensions are not being developed as many of the modern developers tend to choose the easy path. That is the reason why you won't see new plugins for the windows explorer - Microsoft lacks the will and people lack the knowledge as well as the will :-)
+However, windows namespace extensions are not developed - Microsoft lacks the will and developers lack both knowledge and will :-)
 
-The `IFilterShellView` is an extension built for the windows explorer that improves the searching experience and allows a broader spectrum of actions to be performed on the filtered folders and files. The following methods of fitlering items are suported at the time:
-* Via text placement (e.g in the beggining or ending or in the middle)
+The `IFilterShellView` is an extension built for the windows explorer that improves the searching experience and allows a broader spectrum of actions to be performed on the filtered folders and files. The following methods of filtering items are suported at the time:
+* Via text placement (e.g in the beggining or ending or in the middle of the text)
 * Via regular expresion
 * Via parsed command that supports filtering via attributes (e.g dates, size, type, extension, ...) as well as the above
 
@@ -51,11 +51,20 @@ The methods can be extended and will be in the future with your support and feed
 
 
 
-<!-- GETTING STARTED -->
-## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+
+## Installing the binaries
+To install the latest version of the plugin `IFilterShellView` you have to download the latest binaries from <a href="https://github.com/Aeindus/IFilterShellView/releases/tag/published">the release page</a> and install them. You can choose to either download the installer or download the portable version.
+
+### Warning
+If you choose to `upgrade` to a newer version then you must uninstall the previous version. Only afterwards you may proceed with the process of installing the newer version.
+
+## Getting Started
+After the intallation is complete, run the recently installed image named distinctively `IFilterShellView.exe`. It can be found inside the installation folder (either the default one or the set by you during the installation). To `/summon/` the instance of `IFilterShellView` bring forward a new explorer window and navigate to a folder populated with items. Then press the hotkey `CTRL+F`. 
+
+### Warning
+`IFilterShellView` can only filter through items that have a physical corespondent on the disk. In other words you cannot filter through elements of a virtual folder inside the namespace such as `My Computer` or `This PC` or `Control Panel` etc.
+
 
 ### Prerequisites
 
