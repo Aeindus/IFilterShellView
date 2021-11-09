@@ -13,25 +13,22 @@
 
 <br />
 
-<style>
-.column {
-  float: left;
-  width: 50%;
-}
 
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-</style>
+<table>
+  <tr>
+    <th></th>
+    <th></th> 
+  </tr>
+  <tr>
+    <td>
+      dasdas
+    </td>
 
-<div class="row">
-  <div class="column">asdasd</div>
-  <div class="column">adasd</div>
-</div> 
-
+    <td>
+      asdasd
+    </td>     
+  </tr>
+</table>
 
 
 <div align="center">
