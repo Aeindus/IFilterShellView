@@ -109,7 +109,7 @@ Example of a command query
 
 ### Download the project's source code
 
-_Bellow you can see the steps required to get the code on your machine and get it running_
+Bellow you can see the steps required to get the code on your machine and get it running
 
 1. Clone the repository
 ```sh
@@ -121,33 +121,9 @@ cd IFilterShellView
 ```
 4. Run `ExplorerFilter.sln` to start the project
 
-And that's all.
 
 <p align="right"><a href="#top">back to top</a></p>
 
-
-
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right"><a href="#top">back to top</a></p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [x] Add Changelog
-- [x] Add back to top links
-- [] Add Additional Templates w/ Examples
-- [] Add "components" document to easily copy & paste sections of the readme
-- [] Multi-language Support
-- [] Chinese
-- [] Spanish
 
 See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
 
