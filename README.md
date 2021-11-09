@@ -72,13 +72,21 @@ Light view
 `IFilterShellView` can only filter through items that have a physical corespondent on the disk. In other words you cannot filter through elements of a virtual folder inside the namespace such as `My Computer` or `This PC` or `Control Panel` etc.
 
 
-### Prerequisites
+### How to use
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
-```
+With the `IFilterShellView` filter window now open, start typing a search query inside the text input and results with matched data will start showing up. As an item is matched against your search query, it is automatically selected inside the explorer window. That means that after the searching is done you can move/copy/rename all the selected items from the explorer window. 
+
+
+Example of a search query:
+<img src="Gallery/View3.png" />
+In the image above you can observe the results of a search query. 
+
+Actions that can be performed on a query result item:
+* Right click - invokes a context menu
+* Left click - makes the explorer window navigate to the selected item (if item is a folder) or opens the items with the default associated handler
+* `Selecting and dragging` to another window performs a `drag-and-drop` to the target window.
+
+
 
 ### Installation
 
