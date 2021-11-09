@@ -14,13 +14,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/Aeindus/IFilterShellView">
-    <img src="IFilterShellView/Resources/IFilterIcon.png" alt="Logo" width="80" height="80">
+    <img src="IFilterShellView/Resources/IFilterIcon.png" alt="Logo" width="100" height="100">
   </a>
 
   <h3 align="center">IShellFilterView - Shell Extension</h3>
 
   <p align="center">
-    Another tool to help you survive in the windows world
+     - Another tool to help you survive in the windows world -
     <br />
     <br />
     <a href="IFilterShellView/Demo">View Demo</a>
@@ -64,7 +64,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![IShellFilterView Product Screenshot][product-screenshot]](https://github.com/Aeindus/IFilterShellView)
 
 There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
 
@@ -76,23 +76,6 @@ Here's why:
 Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
 
 Use the `BLANK_README.md` to get started.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [Next.js](https://nextjs.org/)
-* [React.js](https://reactjs.org/)
-* [Vue.js](https://vuejs.org/)
-* [Angular](https://angular.io/)
-* [Svelte](https://svelte.dev/)
-* [Laravel](https://laravel.com)
-* [Bootstrap](https://getbootstrap.com)
-* [JQuery](https://jquery.com)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -220,4 +203,4 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: Gallery/screenshot.png
