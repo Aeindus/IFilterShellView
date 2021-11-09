@@ -96,34 +96,32 @@ Example of a command query
 ```bash
 ? older 10/10/2022
 # or
-? older 10/10/2022 & newer 5/5/2015
+? older 10/10/2022 & newer 5/5/2015               # older that X date and newer than Y date
 # or 
 ? o 10/10/2022 & n 5/5/2015 | ( start "Test" )    # notice that "o" is an alias for the "older" command
 # or 
-? o 10/10/2022 & n 5/5/2015 | ( s "Test" ) & file # notice that "s" is an alias for the 
+? o 10/10/2022 & n 5/5/2015 | ( s "Test" ) & file # notice that "s" is an alias for the "start"-with command
 # or
 ? o 10/10/2022 & n 5/5/2015 | s Test & file       # if the argument won't contain white spaces then quotes are not necesary
 # or any other combination
 ```
-* Warning! If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
+`Warning!` If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
 
-### Installation
+### Download the project's source code
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+_Bellow you can see the steps required to get the code on your machine and get it running_
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repository
 ```sh
-git clone https://github.com/your_username_/Project-Name.git
+git clone https://github.com/Aeindus/IFilterShellView.git
 ```
-3. Install NPM packages
+2. Browse to the solution
 ```sh
-npm install
+cd IFilterShellView
 ```
-4. Enter your API in `config.js`
-```js
-const API_KEY = 'ENTER YOUR API';
-```
+4. Run `ExplorerFilter.sln` to start the project
+
+And that's all.
 
 <p align="right"><a href="#top">back to top</a></p>
 
