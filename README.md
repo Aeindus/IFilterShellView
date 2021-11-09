@@ -86,7 +86,26 @@ Actions that can be performed on a query result item:
 * Left click - makes the explorer window navigate to the selected item (if item is a folder) or opens the items with the default associated handler
 * `Selecting and dragging` to another window performs a `drag-and-drop` to the target window.
 
+<br>
 
+### How to do a complex query
+If a text placement query or a regex query won't help you, then you can invoke the `xpress parser` via the command symbol `?`. When the parser encounters that symbol it will know that the query that follows will be a special command.
+To obtain the list of available commands installed with the binary, click on the button `Show list of available commands` that can be found inside the far-right command bar.
+
+Example of a command query
+```bash
+? older 10/10/2022
+# or
+? older 10/10/2022 & newer 5/5/2015
+# or 
+? o 10/10/2022 & n 5/5/2015 | ( start "Test" )    # notice that "o" is an alias for the "older" command
+# or 
+? o 10/10/2022 & n 5/5/2015 | ( s "Test" ) & file # notice that "s" is an alias for the 
+# or
+? o 10/10/2022 & n 5/5/2015 | s Test & file       # if the argument won't contain white spaces then quotes are not necesary
+# or any other combination
+```
+* Warning! If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
 
 ### Installation
 
