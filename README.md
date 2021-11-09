@@ -13,11 +13,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/Aeindus/IFilterShellView">
+    <img src="IFilterShellView/Resources/IFilterIcon.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">Best-README-Template</h3>
+  <h3 align="center">IShellFilterView - Shell Extension</h3>
 
   <p align="center">
     An awesome README template to jumpstart your projects!
