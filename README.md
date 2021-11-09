@@ -10,8 +10,30 @@
 
 
 
-<!-- PROJECT LOGO -->
+
 <br />
+
+<style>
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+
+<div class="row">
+  <div class="column">asdasd</div>
+  <div class="column">adasd</div>
+</div> 
+
+
+
 <div align="center">
   <a href="https://github.com/Aeindus/IFilterShellView">
     <img src="IFilterShellView/Resources/IFilterIcon.png" alt="Logo" width="100" height="100">
@@ -20,7 +42,7 @@
   <h3 align="center">IShellFilterView - Shell Extension</h3>
 
   <p align="center">
-     - Another tool to help you survive in the windows world -
+    Another tool to help you survive in the windows world
     <br />
     <br />
     <a href="IFilterShellView/Demo">View Demo</a>
