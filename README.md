@@ -141,7 +141,7 @@ _Note 1_: This is a free and opensource project. Consider a donation to suport t
 
 _Note 2_: If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
 
-_Note 3_: If the Microsoft's PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
+_Note 3_: If the @PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
 <p align="right"><a href="#top">back to top</a></p>
 
 
