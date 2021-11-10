@@ -157,7 +157,9 @@ Distributed under the GPL-2.0 License. See `LICENSE.txt` for more information.
 
 Your Name - [@aiendus]aiendus.inc@gmail.com
 Project Link: [https://github.com/Aeindus/IFilterShellView](https://github.com/Aeindus/IFilterShellView)
+
 Note: This is a free and opensource project. Consider a donation to suport this project. If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
+
 Note 2: If the Microsoft's PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
 <p align="right"><a href="#top">back to top</a></p>
 
