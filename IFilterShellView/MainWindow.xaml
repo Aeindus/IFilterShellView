@@ -137,23 +137,23 @@
                                       Depth="{StaticResource ShadowDepth}" Grid.Row="0" Grid.Column="0" Margin="4,0">
                     <Border VerticalAlignment="Top">
                         <WrapPanel Name="XML_ToolbarLeftSettingsContainer" Margin="8">
-                            <RadioButton GroupName="Placement" Click="FilterSettingsMain_SettingChanged" IsChecked="True" Tag="1" ToolTip="Starts with">
+                            <RadioButton GroupName="Placement" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="True" Tag="1" ToolTip="Starts with">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57762;" />
                             </RadioButton>
-                            <RadioButton GroupName="Placement" Click="FilterSettingsMain_SettingChanged" IsChecked="false" Tag="2" ToolTip="Contains">
+                            <RadioButton GroupName="Placement" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="false" Tag="2" ToolTip="Contains">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57761;" />
                             </RadioButton>
-                            <RadioButton GroupName="Placement" Click="FilterSettingsMain_SettingChanged" IsChecked="false" Tag="4" ToolTip="Ends with">
+                            <RadioButton GroupName="Placement" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="false" Tag="4" ToolTip="Ends with">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57760;" />
                             </RadioButton>
-                            <RadioButton GroupName="Placement" Click="FilterSettingsMain_SettingChanged" IsChecked="false" Tag="8" ToolTip="Regex expression">
+                            <RadioButton GroupName="Placement" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="false" Tag="8" ToolTip="Regex expression">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57710;" />
                             </RadioButton>
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
-                            <RadioButton GroupName="FilterCase" Click="FilterSettingsMain_SettingChanged" IsChecked="false" Tag="16" ToolTip="Case sensitive">
+                            <RadioButton GroupName="FilterCase" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="false" Tag="16" ToolTip="Case sensitive">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57800;" />
                             </RadioButton>
-                            <RadioButton GroupName="FilterCase" Click="FilterSettingsMain_SettingChanged" IsChecked="false" Tag="32" ToolTip="Case insensitive">
+                            <RadioButton GroupName="FilterCase" Click="XML_ToolbarLeft_Setting_Changed" IsChecked="false" Tag="32" ToolTip="Case insensitive">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#57799;" />
                             </RadioButton>
                         </WrapPanel>
