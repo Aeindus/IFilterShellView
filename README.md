@@ -1,14 +1,5 @@
 <div id="top"></div>
 
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-
-
 <br />
 
 <img src="IFilterShellView/Resources/IFilterIcon.png" width="128" height="128" align="left"/>
@@ -28,9 +19,6 @@
 <br clear="left"/>
 
 
-
-
-<!-- ABOUT THE PROJECT -->
 ## About The Project
 
 [![IFilterShellView Product Screenshot][product-screenshot]](https://github.com/Aeindus/IFilterShellView)
@@ -48,9 +36,6 @@ The `IFilterShellView` is an extension built for the windows explorer that impro
 The methods can be extended and will be in the future with your support and feedback. The plugin extends the normal behaviour of the windows explorer and minimizes the time you would usually spend searching for items. Moreover it is built using controls that feel native to the windows ecosistem and integrate with the current installed theme. It is a theme aware project which means you don't have to worry for a bright light during the night.
 
 <p align="right"><a href="#top">back to top</a></p>
-
-
-
 
 
 ## Installing the binaries
@@ -143,20 +128,20 @@ Don't forget to give the project a star! Thanks again!
 <p align="right"><a href="#top">back to top</a></p>
 
 
-<!-- LICENSE -->
 ## License
 
 Distributed under the GPL-2.0 License. See `LICENSE.txt` for more information.
 
-<!-- CONTACT -->
 ## Contact
 
-Aiendus - [@aiendus]aiendus.inc@gmail.com
+Aiendus - aiendus.inc@gmail.com
 Project Link: [https://github.com/Aeindus/IFilterShellView](https://github.com/Aeindus/IFilterShellView)
 
-_Note_: This is a free and opensource project. Consider a donation to suport this project. If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
+_Note 1_: This is a free and opensource project. Consider a donation to suport this project. 
 
-_Note 2_: If the Microsoft's PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
+_Note 2_: If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
+
+_Note 3_: If the Microsoft's PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
 <p align="right"><a href="#top">back to top</a></p>
 
 
