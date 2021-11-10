@@ -23,7 +23,7 @@
 
 [![IFilterShellView Product Screenshot][product-screenshot]](https://github.com/Aeindus/IFilterShellView)
 
-There are not that many great features built into the window's explorer. It is true however that the explorer is not in fact a `simple` program built by Microsoft. It is rather a quite complicated system that includes the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course. 
+The windows explorer is not a `simple` piece of software built by Microsoft. It is rather a quite complicated system that includes the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course. 
 
 
 However, windows namespace extensions are not developed - Microsoft lacks the will and developers lack both knowledge and will :-)
