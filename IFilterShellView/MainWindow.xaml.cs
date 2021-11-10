@@ -114,6 +114,7 @@ namespace IFilterShellView
 
 
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -313,6 +314,7 @@ namespace IFilterShellView
             XML_AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
             XML_InfoPanel.Visibility = Visibility.Collapsed;
             XML_ItemsPanel.Visibility = Visibility.Collapsed;
+            XML_CommandPanel.Visibility = Visibility.Collapsed;
         }
 
 

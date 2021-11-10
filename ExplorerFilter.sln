@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31605.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IFilterShellView", "IFilterShellView\IFilterShellView.csproj", "{45A84A09-464B-4CA6-BCEE-258FC750D7EF}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "IShellFilterView-Installer", "IShellFilterView-Installer\IShellFilterView-Installer.vdproj", "{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,16 @@ Global
 		{45A84A09-464B-4CA6-BCEE-258FC750D7EF}.Release|x64.Build.0 = Release|Any CPU
 		{45A84A09-464B-4CA6-BCEE-258FC750D7EF}.Release|x86.ActiveCfg = Release|Any CPU
 		{45A84A09-464B-4CA6-BCEE-258FC750D7EF}.Release|x86.Build.0 = Release|Any CPU
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Debug|Any CPU.ActiveCfg = Debug
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Debug|ARM.ActiveCfg = Debug
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Debug|arm64.ActiveCfg = Debug
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Debug|x64.ActiveCfg = Debug
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Debug|x86.ActiveCfg = Debug
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Release|Any CPU.ActiveCfg = Release
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Release|ARM.ActiveCfg = Release
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Release|arm64.ActiveCfg = Release
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Release|x64.ActiveCfg = Release
+		{FDE8E92F-0AB6-4B65-A9BC-16512DD50BB9}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
