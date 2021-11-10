@@ -30,6 +30,10 @@
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <DocumentationFile>D:\Local Projects\ExplorerFilter\IFilterShellView\IFilterShellView.xml</DocumentationFile>
 	  <OutputPath>D:\Local Projects\Github Projects\Aeindus Group\IFilterShellView\bin\IFilterShellView\</OutputPath>
+	  <WarningLevel>5</WarningLevel>
+	  <DebugType>none</DebugType>
+	  <DebugSymbols>false</DebugSymbols>
+	  <DefineConstants />
 	</PropertyGroup>
 
 	<ItemGroup>

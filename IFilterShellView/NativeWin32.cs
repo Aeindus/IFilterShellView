@@ -35,6 +35,12 @@ namespace IFilterShellView
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern IntPtr SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
 
         public static class SetWinEventHookEvents
         {

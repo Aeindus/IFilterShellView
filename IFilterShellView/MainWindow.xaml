@@ -9,9 +9,10 @@
         xmlns:ui="http://schemas.modernwpf.com/2019" 
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         Topmost="True" Width="Auto" Height="Auto" SizeToContent="WidthAndHeight" Closing="Window_Closing" Deactivated="Window_Deactivated" 
-        IsVisibleChanged="Window_IsVisibleChanged" ui:WindowHelper.UseModernWindowStyle="false" ui:TitleBar.ExtendViewIntoTitleBar="false" 
+        ui:WindowHelper.UseModernWindowStyle="false" ui:TitleBar.ExtendViewIntoTitleBar="false" 
         ShowInTaskbar="False" ResizeMode="NoResize" WindowStyle="None" AllowsTransparency="True"
-        ui:ThemeManager.IsThemeAware="True">
+        ui:ThemeManager.IsThemeAware="True" ShowActivated="True" 
+        FocusManager.FocusedElement="{Binding ElementName=XML_FilterTb}">
 
     <Window.Resources>
         <sys:Double x:Key="ShadowDepth">30</sys:Double>
@@ -162,12 +163,13 @@
 
                 <!-- Filter + ProgressBar -->
                 <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}" 
-                                      Depth="{StaticResource ShadowDepth}" Grid.Row="0" Grid.Column="1" Margin="4,0">
-                    <Border VerticalAlignment="Top">
-                        <StackPanel Margin="8" Orientation="Vertical">
-                            <TextBox Name="XML_FilterTb" 
+                                      Depth="{StaticResource ShadowDepth}" Grid.Row="0" Grid.Column="1" Margin="4,0"
+                                      VerticalAlignment="Stretch">
+                    <Border>
+                        <StackPanel Margin="8" Orientation="Vertical" VerticalAlignment="Stretch">
+                            <TextBox Name="XML_FilterTb"  VerticalAlignment="Bottom"
                                      ui:ControlHelper.PlaceholderText="Filter shell by expression (⊙.⊙)" BorderThickness="0"
-                                     FontSize="18" Focusable="True"
+                                     FontSize="18" Focusable="True" 
                                      KeyDown="XML_FilterTb_KeyDown" 
                                      KeyUp="XML_FilterTb_KeyUp" 
                                      TextChanged="XML_FilterTb_TextChanged"/>

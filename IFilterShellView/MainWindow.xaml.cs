@@ -53,8 +53,7 @@ namespace IFilterShellView
          * - I click outside the popup and it dissapears
          *
          * Expected behaviour
-         * - When I press CTRL+F while in the same folder I want the filtering to continue from where
-         *      I left.
+         * - When I press CTRL+F while in the same folder I want the filtering to continue from where I left.
          */
 
         private static readonly List<Key> Keys = new List<Key> { Key.LeftCtrl, Key.F };
@@ -89,6 +88,7 @@ namespace IFilterShellView
         private DateTime LastTimeTextChanged;
 
 
+
         #region Data related to filtering and partial settings
         private enum FilterSettingsFlags : uint
         {
@@ -107,7 +107,6 @@ namespace IFilterShellView
             { FilterSettingsFlags.F_REGEX, (pidl_name, input) => RegexFilterCallback(pidl_name, input)}
         };
         private static (string Input, Regex CompiledRegex) FilterRegexContainer = ("", null);
-
         private uint FilterSettings;
         #endregion Data related to filtering and partial settings
 
@@ -149,6 +148,9 @@ namespace IFilterShellView
             XML_HistoryList.ItemsSource = ListOfHistoryItems;
 
 
+            // Add focus to the search bar
+            XML_FilterTb.Focus();
+            Keyboard.Focus(XML_FilterTb);
 
             try
             {
@@ -166,12 +168,6 @@ namespace IFilterShellView
             DispatcherInputFilter = new DispatcherTimer();
             DispatcherInputFilter.Tick += Callback_TimerPulse;
             DispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
-        }
-        private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            // Add focus to the search bar
-            XML_FilterTb.Focus();
-            Keyboard.Focus(XML_FilterTb);
         }
         private void Window_Deactivated(object sender, EventArgs e)
         {
@@ -409,8 +405,15 @@ namespace IFilterShellView
             {
                 // Show the window and make it visible
                 ThisWindowRef.Show();
+                ThisWindowRef.Activate(); // must be set before ?
                 ThisWindowRef.Focus();
-                ThisWindowRef.Activate();
+
+                // Make sure that the window is active using native calls
+                WindowExtensions.ActivateWindow(ThisWindowRef);
+
+                // Add focus to the search bar
+                XML_FilterTb.Focus();
+                Keyboard.Focus(XML_FilterTb);
 
                 // Set new window properties
                 // System.Windows.SystemParameters.PrimaryScreenWidth take current screen width into consideration
@@ -745,7 +748,6 @@ namespace IFilterShellView
         /*
          * Event handlers
          */
-
 
         #region Toolbar Left Settings
         private void XML_ToolbarLeft_Setting_Changed(object sender, RoutedEventArgs e)
