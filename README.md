@@ -125,14 +125,9 @@ cd IFilterShellView
 <p align="right"><a href="#top">back to top</a></p>
 
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
-
-<p align="right"><a href="#top">back to top</a></p>
-
-
-
-<!-- CONTRIBUTING -->
 ## Contributing
+
+See the [open issues](https://github.com/Aeindus/IFilterShellView/issues) for a full list of proposed features (and known issues).
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -148,11 +143,10 @@ Don't forget to give the project a star! Thanks again!
 <p align="right"><a href="#top">back to top</a></p>
 
 
-
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the GPL-2.0 License. See `LICENSE.txt` for more information.
 
 <p align="right"><a href="#top">back to top</a></p>
 
@@ -161,10 +155,10 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
+Your Name - [@aiendus]aiendus.inc@gmail.com
+Project Link: [https://github.com/Aeindus/IFilterShellView](https://github.com/Aeindus/IFilterShellView)
+Note: This is a free and opensource project. Consider a donation to suport this project. If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
+Note 2: If the Microsoft's PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
 <p align="right"><a href="#top">back to top</a></p>
 
 
@@ -172,21 +166,13 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+List of resources that I found helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
+* [ModernWPF Toolkit](https://github.com/Kinnara/ModernWpf)
 * [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
 
 <p align="right"><a href="#top">back to top</a></p>
 
 
-
 <!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [product-screenshot]: Gallery/screenshot.png
