@@ -1,10 +1,10 @@
-﻿using IFilterShellView.Shell.Interfaces;
+﻿using IFilterShellView2.Shell.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace IFilterShellView
+namespace IFilterShellView2
 {
     public static class NativeWin32
     {

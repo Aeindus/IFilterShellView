@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows;
 
-namespace IFilterShellView.Extensions
+namespace IFilterShellView2.Extensions
 {
     public static class WindowExtensions
     {

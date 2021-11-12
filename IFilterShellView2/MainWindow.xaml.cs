@@ -14,12 +14,12 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-using IFilterShellView.Exceptions;
-using IFilterShellView.Export;
-using IFilterShellView.Extensions;
-using IFilterShellView.Parser;
-using IFilterShellView.Shell.Interfaces;
-using IFilterShellView.ShellContext;
+using IFilterShellView2.Exceptions;
+using IFilterShellView2.Export;
+using IFilterShellView2.Extensions;
+using IFilterShellView2.Parser;
+using IFilterShellView2.Shell.Interfaces;
+using IFilterShellView2.ShellContext;
 using Microsoft.Win32;
 using SHDocVw;
 using System;
@@ -39,7 +39,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace IFilterShellView
+namespace IFilterShellView2
 {
     public partial class MainWindow : Window
     {
@@ -215,7 +215,7 @@ namespace IFilterShellView
         }
         private void SaveApplicationSettings()
         {
-            List<CHistoryItem> HistoryListFromIObs = ListOfHistoryItems.ToList(); 
+            List<CHistoryItem> HistoryListFromIObs = ListOfHistoryItems.ToList();
             if (ListOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
             {
                 HistoryListFromIObs.RemoveRange(0, Properties.Settings.Default.MaxHistory / 2);

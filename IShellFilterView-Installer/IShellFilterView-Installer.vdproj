@@ -21,7 +21,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_8A64CACFCECD4BCA918F2F0903CF5BEA"
+        "MsmKey" = "8:_CFFB3DCFE0AB4FD485C71F0AD0305323"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -43,6 +43,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -59,6 +67,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -166,15 +182,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IFilterShellView-Installer"
-        "ProductCode" = "8:{E0E8386A-AE97-4409-8BF1-63FB4165FF0C}"
-        "PackageCode" = "8:{A777DF11-D9D3-4474-9C4B-38926A9D58A1}"
+        "ProductCode" = "8:{57D25FCE-1F1A-4337-89ED-C7D85977A426}"
+        "PackageCode" = "8:{DB86548B-F89F-492A-ADCE-98D7C7232F15}"
         "UpgradeCode" = "8:{E047FBD7-F652-4202-91A8-20D9854BFDE1}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:2.3.1.0"
+        "ProductVersion" = "8:2.3.1"
         "Manufacturer" = "8:Aeindus Inc."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -287,18 +303,46 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_84D200D239314595906D912157965461"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_83F73B8EB4B54F09AC7572DF93EF3037"
             {
-            "Name" = "8:IShellFilterView"
+            "Name" = "8:IFilterShellView"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_8A64CACFCECD4BCA918F2F0903CF5BEA"
+            "Target" = "8:_CFFB3DCFE0AB4FD485C71F0AD0305323"
+            "Folder" = "8:_7114C96F2D0B49788F469E4AF69A26D9"
+            "WorkingFolder" = "8:_CA72B1BE2FCF4E79BBA3A7D691033DBB"
+            "Icon" = "8:_1627521254F142EE91D63BD94C4BF070"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_A4864A5F8DA1433686E5D4EF0E3E24E5"
+            {
+            "Name" = "8:IFilterShellView"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_CFFB3DCFE0AB4FD485C71F0AD0305323"
+            "Folder" = "8:_CA72B1BE2FCF4E79BBA3A7D691033DBB"
+            "WorkingFolder" = "8:_CA72B1BE2FCF4E79BBA3A7D691033DBB"
+            "Icon" = "8:_1627521254F142EE91D63BD94C4BF070"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_D43C0A780B7943E988E556552B626CD8"
+            {
+            "Name" = "8:IFilterShellView"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_CFFB3DCFE0AB4FD485C71F0AD0305323"
             "Folder" = "8:_204493817AE341BCB4D784364DF0B594"
             "WorkingFolder" = "8:_CA72B1BE2FCF4E79BBA3A7D691033DBB"
-            "Icon" = "8:"
+            "Icon" = "8:_1627521254F142EE91D63BD94C4BF070"
             "Feature" = "8:"
             }
         }
@@ -700,7 +744,7 @@
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_8A64CACFCECD4BCA918F2F0903CF5BEA"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_CFFB3DCFE0AB4FD485C71F0AD0305323"
             {
             "SourcePath" = "8:..\\IFilterShellView\\obj\\Release\\netcoreapp3.1\\apphost.exe"
             "TargetName" = "8:"

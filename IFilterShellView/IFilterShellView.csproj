@@ -17,7 +17,7 @@
 		<PackageIcon>IFilterIcon.png</PackageIcon>
 		<PackageIconUrl />
 		<ApplicationIcon>Resources\IFilterIcon.ico</ApplicationIcon>
-		<SignAssembly>true</SignAssembly>
+		<SignAssembly>false</SignAssembly>
 		<AssemblyOriginatorKeyFile>ExplorerFilterKey.pfx</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
@@ -34,6 +34,7 @@
 	  <DebugType>none</DebugType>
 	  <DebugSymbols>false</DebugSymbols>
 	  <DefineConstants />
+	  <NoWarn>1701;1702;CS0108;CS1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -51,10 +52,6 @@
 	    <Isolated>false</Isolated>
 	    <EmbedInteropTypes>true</EmbedInteropTypes>
 	  </COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="ModernWpfUI" Version="0.9.4" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -82,6 +79,7 @@
 			<Generator>PublicSettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
+		<None Include="..\.editorconfig" Link=".editorconfig" />
 		<None Include="Resources\IFilterIcon.png">
 		  <Pack>True</Pack>
 		  <PackagePath></PackagePath>
@@ -95,5 +93,9 @@
 
 	<ItemGroup>
 	  <Folder Include="Globals\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="ModernWpfUI" Version="0.9.4" />
 	</ItemGroup>
 </Project>
