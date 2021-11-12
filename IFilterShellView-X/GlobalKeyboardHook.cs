@@ -22,11 +22,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Windows;
-using System.Windows.Input;
+using Windows.System;
 
-namespace IFilterShellView2
+namespace IFilterShellView_X
 {
     public sealed class GlobalKeyboardHook : IDisposable
     {
@@ -70,8 +68,9 @@ namespace IFilterShellView2
         /// <param name="execute">The action to run when the key ocmbination has pressed</param>
         /// <param name="dispose">An action to run when unsubscribing from keyboard hook. can be null</param>
         /// <returns>Event id to use when unregister</returns>
-        public bool AddHotkeys(List<Key> keys, Action execute)
+        public bool AddHotkeys(List<VirtualKey> keys, Action execute)
         {
+
             if (HookEventsDict == null ||
                 keys == null ||
                 execute == null ||
@@ -100,9 +99,8 @@ namespace IFilterShellView2
 
             if (wParam == (IntPtr)WM_KEYDOWN)
             {
-                int k = Marshal.ReadInt32(lParam);
-                Key pk = KeyInterop.KeyFromVirtualKey(k);
-                PressedKeys.Add(pk);
+                VirtualKey vk = (VirtualKey)Marshal.ReadInt32(lParam);
+                PressedKeys.Add(vk);
 
                 if (PressedKeys.Count >= 2)
                 {
@@ -117,9 +115,6 @@ namespace IFilterShellView2
                         {
                             // Trigger the callback inside the worker
                             Worker.RunWorkerAsync((object)KeyAction);
-
-                            // Cancel the key stroke
-                            //return (IntPtr)1; // it produced unwanted sideffects
                         }
                     }
                 }
@@ -133,13 +128,15 @@ namespace IFilterShellView2
         }
         private void STA_BackgroundWorkerThread(object sender, DoWorkEventArgs e)
         {
-            // run all background tasks here
-            Application.Current.Dispatcher.Invoke((Action)e.Argument);
+            // TODO: check is this will work ????
+            // Application.Current.Dispatcher.Invoke();
+
+            DispatcherQueue.GetForCurrentThread().TryEnqueue(() => ((Action)e.Argument)());
         }
 
 
 
-        private bool ValidateKeys(IEnumerable<Key> keys) => keys.All(t => IsKeyValid((int)t));
+        private bool ValidateKeys(IEnumerable<VirtualKey> keys) => keys.All(t => IsKeyValid((int)t));
         private bool IsKeyValid(int key) => (key >= 44 && key <= 69) || (key >= 116 && key <= 119);
 
 
@@ -183,24 +180,24 @@ namespace IFilterShellView2
         private class KeyCombination : IEquatable<KeyCombination>
         {
             private readonly bool _canModify;
-            private readonly List<Key> _keys;
+            private readonly List<VirtualKey> _keys;
 
 
-            public KeyCombination(List<Key> keys) => _keys = keys ?? new List<Key>();
+            public KeyCombination(List<VirtualKey> keys) => _keys = keys ?? new List<VirtualKey>();
             public KeyCombination()
             {
-                _keys = new List<Key>();
+                _keys = new List<VirtualKey>();
                 _canModify = true;
             }
 
 
             public int Count { get { return _keys.Count; } }
 
-            public void Add(Key key)
+            public void Add(VirtualKey key)
             {
                 if (_canModify) _keys.Add(key);
             }
-            public void Remove(Key key)
+            public void Remove(VirtualKey key)
             {
                 if (_canModify) _keys.Remove(key);
             }
@@ -212,7 +209,7 @@ namespace IFilterShellView2
 
 
             public bool Equals(KeyCombination other) => other._keys != null && _keys != null && KeysEqual(other._keys);
-            private bool KeysEqual(List<Key> keys)
+            private bool KeysEqual(List<VirtualKey> keys)
             {
                 if (keys == null || _keys == null || keys.Count != _keys.Count) return false;
                 for (int i = 0; i < _keys.Count; i++)

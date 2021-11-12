@@ -132,9 +132,6 @@
         <SolidColorBrush Opacity="0" />
     </Window.Background>
 
-
-
-
     <StackPanel Orientation="Vertical" Margin="0" >
 
         <!-- Row #1 -->

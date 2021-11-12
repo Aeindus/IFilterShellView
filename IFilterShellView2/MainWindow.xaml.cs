@@ -432,10 +432,15 @@ namespace IFilterShellView2
                 // Set new window properties
                 // System.Windows.SystemParameters.PrimaryScreenWidth take current screen width into consideration
                 int ShellWidth = ShellContext.ShellViewRect.Right - ShellContext.ShellViewRect.Left;
-                ThisWindowRef.Left = ShellContext.ShellViewRect.Left + ShellWidth / 2 - ThisWindowRef.ActualWidth / 2;
-                ThisWindowRef.Top = ShellContext.ShellViewRect.Top;
+                int x = ShellContext.ShellViewRect.Left + ShellWidth / 2 - (int)ThisWindowRef.Width / 2;
+                int y = ShellContext.ShellViewRect.Top;
+
+                // ThisWindowRef.Left = x;
+                // ThisWindowRef.Top = y;
+                
+
                 IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
-                // NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
+                NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, x, y, (int)ThisWindowRef.Width, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
 
                 // ThisWindowRef.Width = ShrinkedWidth;
 
