@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -230,7 +231,6 @@ namespace IFilterShellView2
 
 
 
-
         private bool GatherShellInterfacesLinkedToShell(IntPtr ForegroundWindow)
         {
             ShellWindows pIShellWindows = new ShellWindows();
@@ -277,7 +277,21 @@ namespace IFilterShellView2
                     return false;
                 }
 
-                NativeWin32.GetWindowRect(ForegroundWindow, out ShellContext.ShellViewRect);
+
+                // Old way of positioning the window - removed because of bug caused by KB5007186 
+                //NativeWin32.GetWindowRect(ForegroundWindow, out ShellContext.ShellViewRect);
+                //System.Drawing.Point point = new System.Drawing.Point(0, 0);
+                //NativeWin32.ClientToScreen(ForegroundWindow, ref point);
+
+                IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(ForegroundWindow, NativeWin32.MONITOR_DEFAULTTONEAREST);
+                // var primaryMonitor = NativeWin32.MonitorFromWindow(IntPtr.Zero, NativeWin32.MONITOR_DEFAULTTOPRIMARY);
+                // var isInPrimary = currentMonitor == primaryMonitor;
+
+                NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
+                MonitorInfo.Init();
+                NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
+                ShellContext.ShellViewRect = MonitorInfo.Monitor;
+
 
                 // Set the rest of the ShellContext class
                 ShellContext.pIShellBrowser = pIShellBrowser;

@@ -1,6 +1,7 @@
 ﻿using IFilterShellView2.Shell.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -67,13 +68,18 @@ namespace IFilterShellView2
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
 
-        [StructLayout(LayoutKind.Sequential)]
+        [Serializable, StructLayout(LayoutKind.Sequential)]
         public struct RECT
         {
             public int Left;        // x position of upper-left corner
             public int Top;         // y position of upper-left corner
             public int Right;       // x position of lower-right corner
             public int Bottom;      // y position of lower-right corner
+
+            public Rectangle ToRectangle()
+            {
+                return Rectangle.FromLTRB(Left, Top, Right, Bottom);
+            }
         }
 
 
@@ -85,6 +91,82 @@ namespace IFilterShellView2
 
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOZORDER = 0x0004;
+
+
+
+        [DllImport("user32.dll")]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref System.Drawing.Point lpPoint);
+
+
+
+        public const Int32 MONITOR_DEFAULTTOPRIMARY = 0x00000001;
+        public const Int32 MONITOR_DEFAULTTONEAREST = 0x00000002;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr MonitorFromWindow(IntPtr handle, Int32 flags);
+
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFOEX lpmi);
+
+        // size of a device name string
+        private const int CCHDEVICENAME = 32;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct MONITORINFOEX
+        {
+            /// <summary>
+            /// The size, in bytes, of the structure. Set this member to sizeof(MONITORINFOEX) (72) before calling the GetMonitorInfo function.
+            /// Doing so lets the function determine the type of structure you are passing to it.
+            /// </summary>
+            public int Size;
+
+            /// <summary>
+            /// A RECT structure that specifies the display monitor rectangle, expressed in virtual-screen coordinates.
+            /// Note that if the monitor is not the primary display monitor, some of the rectangle's coordinates may be negative values.
+            /// </summary>
+            public RECT Monitor;
+
+            /// <summary>
+            /// A RECT structure that specifies the work area rectangle of the display monitor that can be used by applications,
+            /// expressed in virtual-screen coordinates. Windows uses this rectangle to maximize an application on the monitor.
+            /// The rest of the area in rcMonitor contains system windows such as the task bar and side bars.
+            /// Note that if the monitor is not the primary display monitor, some of the rectangle's coordinates may be negative values.
+            /// </summary>
+            public RECT WorkArea;
+
+            /// <summary>
+            /// The attributes of the display monitor.
+            ///
+            /// This member can be the following value:
+            ///   1 : MONITORINFOF_PRIMARY
+            /// </summary>
+            public uint Flags;
+
+            /// <summary>
+            /// A string that specifies the device name of the monitor being used. Most applications have no use for a display monitor name,
+            /// and so can save some bytes by using a MONITORINFO structure.
+            /// </summary>
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = CCHDEVICENAME)]
+            public string DeviceName;
+
+            public void Init()
+            {
+                this.Size = 40 + 2 * CCHDEVICENAME;
+                this.DeviceName = string.Empty;
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
