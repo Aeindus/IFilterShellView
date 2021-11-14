@@ -3,7 +3,7 @@
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 
-namespace IFilterShellView_X
+namespace IFilterShellView_WinX
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.

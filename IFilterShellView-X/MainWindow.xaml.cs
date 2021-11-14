@@ -7,9 +7,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using IFilterShellView_X.Extensions;
-using IFilterShellView_X.Shell.Interfaces;
-using IFilterShellView_X.ShellContext;
+using IFilterShellView_WinX.Extensions;
+using IFilterShellView_WinX.Shell.Interfaces;
+using IFilterShellView_WinX.ShellContext;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,7 +21,7 @@ using Windows.System;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
-namespace IFilterShellView_X
+namespace IFilterShellView_WinX
 {
     public partial class MainWindow : Window
     {
