@@ -27,7 +27,7 @@ namespace IFilterShellView_X.Extensions
         public static bool ParseTimeByGlobalDateFormat(string DateString, out DateTime FormatedTime)
         {
             // TODO: settings : DateFormat
-            var DateFormat = AppSettings.GetSettingsHinst<string>("DateFormat");
+            var DateFormat = AppSettings.Get<string>("DateFormat");
 
             return DateTime.TryParseExact(DateString,
                 DateFormat,

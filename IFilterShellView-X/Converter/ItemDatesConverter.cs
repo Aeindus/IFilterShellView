@@ -23,7 +23,7 @@ namespace IFilterShellView_X.Converter
 {
     // TODO: use function binding
 
-    public class ItemDatesConverter : IMultiValueConverter
+    public class ItemDatesConverter /*: IMultiValueConverter*/
     {
         public object Convert(object[] values, Type targetType, object parameter, string culture)
         {
@@ -33,7 +33,7 @@ namespace IFilterShellView_X.Converter
             //OutputData += ((DateTime)values[1]).ToShortDateString() + " | ";
             //OutputData += ((DateTime)values[2]).ToShortDateString();
 
-            var DateFormat = AppSettings.GetSettingsHinst<string>("DateFormat");
+            var DateFormat = AppSettings.Get<string>("DateFormat");
 
 
             OutputData += ((DateTime)values[0]).ToString(DateFormat) + " | ";
