@@ -14,6 +14,7 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using Microsoft.UI.Xaml;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Windows.System;
 
 namespace IFilterShellView_WinX
@@ -79,8 +81,6 @@ namespace IFilterShellView_WinX
                 return false;
             }
 
-            if (!ValidateKeys(keys)) return false;
-
             KeyCombination kc = new KeyCombination(keys);
 
             int id = kc.GetHashCode();
@@ -114,7 +114,9 @@ namespace IFilterShellView_WinX
                         if (!Worker.IsBusy)
                         {
                             // Trigger the callback inside the worker
-                            Worker.RunWorkerAsync((object)KeyAction);
+                            //Worker.RunWorkerAsync((object)KeyAction);
+                            // TODO: if this works then remove the background worker
+                            KeyAction();
                         }
                     }
                 }
@@ -131,14 +133,15 @@ namespace IFilterShellView_WinX
             // TODO: check is this will work ????
             // Application.Current.Dispatcher.Invoke();
 
-            DispatcherQueue.GetForCurrentThread().TryEnqueue(() => ((Action)e.Argument)());
+
+            SynchronizationContext.Current.Post(
+                (o) => ((Action)e.Argument)(),
+                null);
+
+
+            // Not working
+            // DispatcherQueue.GetForCurrentThread().TryEnqueue(() => );
         }
-
-
-
-        private bool ValidateKeys(IEnumerable<VirtualKey> keys) => keys.All(t => IsKeyValid((int)t));
-        private bool IsKeyValid(int key) => (key >= 44 && key <= 69) || (key >= 116 && key <= 119);
-
 
 
         #region IDsiposable
