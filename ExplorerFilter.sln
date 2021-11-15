@@ -12,7 +12,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IFilterShellView2", "IFilte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IFilterShellView-X-OLD", "IFilterShellView-X\IFilterShellView-X-OLD.csproj", "{4FCF5BEA-2E70-44B1-8E4A-0827AEC033A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IFilterShellView-WinX", "IFilterShellView-WinX\IFilterShellView-WinX.csproj", "{37A33622-50F3-42BC-9402-6A0FA089BA40}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IFilterShellView-WinX", "IFilterShellView-WinX\IFilterShellView-WinX.csproj", "{37A33622-50F3-42BC-9402-6A0FA089BA40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +72,7 @@ Global
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|arm64.Build.0 = Debug|arm64
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x64.ActiveCfg = Debug|x64
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x64.Build.0 = Debug|x64
+		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x64.Deploy.0 = Debug|x64
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x86.ActiveCfg = Debug|x86
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x86.Build.0 = Debug|x86
 		{37A33622-50F3-42BC-9402-6A0FA089BA40}.Debug|x86.Deploy.0 = Debug|x86

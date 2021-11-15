@@ -14,6 +14,7 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using IFilterShellView_WinX.Config;
 using System;
 using System.Globalization;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace IFilterShellView_WinX.Extensions
         public static bool ParseTimeByGlobalDateFormat(string DateString, out DateTime FormatedTime)
         {
             // TODO: settings : DateFormat
-            var DateFormat = AppSettings.Get<string>("DateFormat");
+            var DateFormat = AppConfig.DateFormat;
 
             return DateTime.TryParseExact(DateString,
                 DateFormat,

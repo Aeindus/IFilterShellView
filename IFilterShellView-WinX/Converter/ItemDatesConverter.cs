@@ -16,6 +16,7 @@
 
 using System;
 using System.Globalization;
+using IFilterShellView_WinX.Config;
 using Microsoft.UI.Xaml.Data;
 
 
@@ -33,7 +34,7 @@ namespace IFilterShellView_WinX.Converter
             //OutputData += ((DateTime)values[1]).ToShortDateString() + " | ";
             //OutputData += ((DateTime)values[2]).ToShortDateString();
 
-            var DateFormat = AppSettings.Get<string>("DateFormat");
+            var DateFormat = AppConfig.DateFormat;
 
 
             OutputData += ((DateTime)values[0]).ToString(DateFormat) + " | ";
