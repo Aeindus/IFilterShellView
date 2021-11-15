@@ -21,6 +21,7 @@ using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
 using IFilterShellView2.ShellContext;
 using Microsoft.Win32;
+using ModernWpf.Controls.Primitives;
 using SHDocVw;
 using System;
 using System.Collections.Generic;
@@ -1241,6 +1242,11 @@ namespace IFilterShellView2
                     }
                 }
             }
+        }
+
+        private void XML_PlacementSettingsBt_Click(object sender, RoutedEventArgs e)
+        {
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
     }
 }

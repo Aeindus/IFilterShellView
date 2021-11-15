@@ -30,6 +30,8 @@ namespace IFilterShellView2
             // Don't show the window. Not yet
             // The callbacks and event monitors have been set by now.
             // It is up to the user what will happen from now on.
+
+            AppMainWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
