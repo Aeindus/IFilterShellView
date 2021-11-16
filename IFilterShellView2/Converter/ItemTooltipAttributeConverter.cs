@@ -20,8 +20,7 @@ using System.Windows.Data;
 
 namespace IFilterShellView2.Converter
 {
-    [ValueConversion(typeof(CPidlData), typeof(string))]
-    public class ItemAttributeConverter : IValueConverter
+    public class ItemTooltipAttributeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

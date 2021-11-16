@@ -34,6 +34,7 @@ namespace IFilterShellView2.Converter
             OutputData += ((DateTime)values[1]).ToString(Properties.Settings.Default.DateFormat) + " | ";
             OutputData += ((DateTime)values[2]).ToString(Properties.Settings.Default.DateFormat);
 
+
             return OutputData;
         }
 

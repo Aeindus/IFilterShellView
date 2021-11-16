@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:IFilterShellView2"
-        xmlns:local1="clr-namespace:IFilterShellView2.Converter"
+        xmlns:base="clr-namespace:IFilterShellView2"
+        xmlns:cvrtr="clr-namespace:IFilterShellView2.Converter"
         mc:Ignorable="d"
         Title="FilterWindow"
         xmlns:ui="http://schemas.modernwpf.com/2019"
@@ -34,8 +34,11 @@
                    Right="4"
                    Bottom="4" />
 
-        <local1:ItemDatesConverter x:Key="ItemDatesConverter" />
-        <local1:ItemAttributeConverter x:Key="ItemAttributeConverter" />
+        <cvrtr:ItemDatesConverter x:Key="ItemDatesConverter" />
+        <cvrtr:ItemTooltipAttributeConverter x:Key="ItemTooltipAttributeConverter" />
+        <cvrtr:ItemSubtitleConverter x:Key="ItemSubtitleConverter" />
+
+
 
         <Style TargetType="{x:Type Button}"
                BasedOn="{StaticResource {x:Type Button}}">
@@ -78,35 +81,60 @@
 
         <!-- A template view for the item listview -->
         <DataTemplate x:Key="PidlItemTemplate"
-                      DataType="local:CPidlData">
-            <Grid>
+                      DataType="base:CPidlData">
+
+            <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Grid.Column="0"
-                       Source="{Binding BmpImage}"
-                       Width="32"
-                       Height="32" />
-                <StackPanel Grid.Column="1"
-                            Orientation="Vertical"
+                <Image Source="{Binding BmpImage}"
+                       Grid.Column="0"
+                       Width="28"
+                       Height="28" />
+                <StackPanel Orientation="Vertical"
+                            Grid.Column="1"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Stretch"
-                            ToolTip="{Binding Path=dwFileAttributes, Converter={StaticResource ItemAttributeConverter}}"
+                            HorizontalAlignment="Left"
+                            ToolTip="{Binding Path=dwFileAttributes, Converter={StaticResource ItemTooltipAttributeConverter}}"
                             Margin="12,6,0,6">
                     <TextBlock Text="{Binding PidlName}"
                                TextWrapping="Wrap" />
-                    <TextBlock Foreground="{DynamicResource SystemControlForegroundChromeGrayBrush}"
-                               FontSize="12">
-                        <TextBlock.Text>
-                            <MultiBinding Converter="{StaticResource ItemDatesConverter}">
-                                <Binding Path="ftCreationTime" />
-                                <Binding Path="ftLastAccessTime" />
-                                <Binding Path="ftLastWriteTime" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
+                    <TextBlock FontSize="12"
+                               Text="{Binding Path=ftCreationTime, Converter={StaticResource ItemSubtitleConverter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            Grid.Column="2">
+                    <!-- Run file -->
+                    <Button Background="Transparent"
+                            ToolTip="Run file">
+                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                     Glyph="&#57767;"
+                                     FontSize="14" />
+                    </Button>
+                    <!-- Copy -->
+                    <Button Background="Transparent"
+                            ToolTip="Copy file">
+                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                     Glyph="&#57711;"
+                                     FontSize="14" />
+                    </Button>
+                    <!-- Invoke Properties -->
+                    <Button Background="Transparent"
+                            ToolTip="Invoke properties menu">
+                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                     Glyph="&#57694;"
+                                     FontSize="14" />
+                    </Button>
+                    <!-- Delete -->
+                    <Button Background="Transparent"
+                            ToolTip="Delete file">
+                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                     Glyph="&#57607;"
+                                     FontSize="14" />
+                    </Button>
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -114,7 +142,7 @@
 
         <!-- A template view for the command listview -->
         <DataTemplate x:Key="CommandTemplate"
-                      DataType="local:CCommandItem">
+                      DataType="base:CCommandItem">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -145,7 +173,7 @@
 
         <!-- A template view for the history listview -->
         <DataTemplate x:Key="HistoryTemplate"
-                      DataType="local:CHistoryItem">
+                      DataType="base:CHistoryItem">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -219,7 +247,6 @@
                                                                  Glyph="&#57710;" />
                                                 </RadioButton>
                                             </StackPanel>
-
                                         </Border>
                                     </ui:Flyout>
                                 </ui:FlyoutBase.AttachedFlyout>
@@ -233,25 +260,28 @@
                             <Button Click="CaseSettingsBt_Click">
                                 <ui:FlyoutBase.AttachedFlyout>
                                     <ui:Flyout Placement="Bottom">
-                                        <StackPanel Name="SettingsCase"
-                                                    Orientation="Horizontal">
-                                            <RadioButton GroupName="SettingsCase"
-                                                         Click="FilterSettingChanged"
-                                                         IsChecked="false"
-                                                         Tag="1"
-                                                         ToolTip="Case sensitive">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57800;" />
-                                            </RadioButton>
-                                            <RadioButton GroupName="SettingsCase"
-                                                         Click="FilterSettingChanged"
-                                                         IsChecked="false"
-                                                         Tag="2"
-                                                         ToolTip="Case insensitive">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57799;" />
-                                            </RadioButton>
-                                        </StackPanel>
+                                        <Border>
+                                            <StackPanel Name="SettingsCase"
+                                                        Orientation="Horizontal">
+                                                <RadioButton GroupName="SettingsCase"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="false"
+                                                             Tag="1"
+                                                             ToolTip="Case sensitive">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57800;" />
+                                                </RadioButton>
+                                                <RadioButton GroupName="SettingsCase"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="false"
+                                                             Tag="2"
+                                                             ToolTip="Case insensitive">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57799;" />
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                        </Border>
                                     </ui:Flyout>
                                 </ui:FlyoutBase.AttachedFlyout>
                                 <ui:FontIcon Name="CaseSettingsIc"
@@ -264,18 +294,27 @@
             </ui:ThemeShadowChrome>
 
 
-            <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
+            <ui:ThemeShadowChrome Name="FilterPanel"
+                                  IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
                 <Border>
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
-
-                        <Button ToolTip="List of available commands">
+                        <Button Click="ShowCommandList"
+                                ToolTip="List of available commands">
                             <ui:FlyoutBase.AttachedFlyout>
                                 <ui:Flyout Placement="Bottom">
                                     <Border>
-                                        <StackPanel Orientation="Horizontal">
-
+                                        <StackPanel Orientation="Vertical"
+                                                    Margin="8">
+                                            <TextBlock Text="List of available commands"
+                                                       FontWeight="Bold" />
+                                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                                       Margin="0, 8" />
+                                            <ListView Name="CommandList"
+                                                      SelectionMode="Single"
+                                                      ItemTemplate="{StaticResource CommandTemplate}"
+                                                      PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp" />
                                         </StackPanel>
                                     </Border>
                                 </ui:Flyout>
@@ -306,12 +345,22 @@
                                             Visibility="Collapsed" />
                         </StackPanel>
 
-                        <Button ToolTip="History of compiled commands">
+                        <Button Click="ShowHistoryList"
+                                ToolTip="History of compiled commands">
                             <ui:FlyoutBase.AttachedFlyout>
                                 <ui:Flyout Placement="Bottom">
                                     <Border>
-                                        <StackPanel Orientation="Horizontal">
-
+                                        <StackPanel Orientation="Vertical"
+                                                    Margin="8">
+                                            <TextBlock Text="Command history"
+                                                       FontWeight="Bold" />
+                                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                                       Margin="0, 8" />
+                                            <ListView Name="HistoryList"
+                                                      SelectionMode="Single"
+                                                      MaxHeight="160"
+                                                      ItemTemplate="{StaticResource HistoryTemplate}"
+                                                      PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
                                         </StackPanel>
                                     </Border>
                                 </ui:Flyout>
@@ -352,135 +401,117 @@
         </StackPanel>
 
 
+        <!-- Row #2 -->
+        <!-- ItemsListView + List Controls -->
+        <ui:ThemeShadowChrome Name="ItemsPanel"
+                              Visibility="Visible"
+                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
+                              Depth="{StaticResource ShadowDepth}"
+                              Width="{Binding Path=Width, ElementName=FilterPanel}"
+                              Opacity="0.98">
+            <Border>
+                <StackPanel Orientation="Vertical"
+                            Margin="{StaticResource RowMargins}">
+                    <ListView Name="ItemsList"
+                              SelectionMode="Single"
+                              HorizontalContentAlignment="Stretch"
+                              MaxHeight="400"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ItemTemplate="{StaticResource PidlItemTemplate}"
+                              PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
+                              PreviewMouseMove="ItemsList_PreviewMouseMove">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Delete Item"
+                                          Name="PidlCtx_Delete"
+                                          Click="PidlCtx_Delete_Click">
+                                    <MenuItem.Icon>
+                                        <ui:FontIcon Glyph="&#57607;" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="Copy Item"
+                                          Name="PidlCtx_CpyItem"
+                                          Click="PidlCtx_CpyItem_Click">
+                                    <MenuItem.Icon>
+                                        <ui:FontIcon Glyph="&#57711;" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Copy Item Path"
+                                          Name="PidlCtx_CpyPath"
+                                          Click="PidlCtx_CpyPath_Click">
+                                    <MenuItem.Icon>
+                                        <ui:FontIcon Glyph="&#57711;" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                    </ListView>
 
 
+                    <WrapPanel VerticalAlignment="Center"
+                               Margin="10,4,0,0">
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    ToolTip="How many items where selcted"
+                                    Margin="0,0,4,0">
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57811;"
+                                         Margin="0,0,8,0" />
+                            <TextBlock FontSize="14"
+                                       Name="FolCountTb"
+                                       Text="0/0" />
+                        </StackPanel>
+                        <Button Name="BrowseBackBt"
+                                Click="BrowseBackBt_Click"
+                                ToolTip="Go back to spawn folder">
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57616;" />
+                        </Button>
+                        <ComboBox Name="SaveListSettings_Format"
+                                  VerticalAlignment="Top"
+                                  ui:ControlHelper.PlaceholderText="Select dump format"
+                                  Margin="0"
+                                  BorderThickness="0">
+                            <ComboBoxItem Tag="1">Export as CSV</ComboBoxItem>
+                            <ComboBoxItem Tag="2">Export as JSON</ComboBoxItem>
+                            <ComboBoxItem Tag="3">Export as XML</ComboBoxItem>
+                            <ComboBoxItem Tag="4">Export as C Array</ComboBoxItem>
+                        </ComboBox>
+                        <Button>
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         ToolTip="Saving options"
+                                         Glyph="&#57694;" />
+                            <ui:FlyoutService.Flyout>
+                                <ui:MenuFlyout>
+                                    <MenuItem Name="SaveListSettings_Path"
+                                              Header="Include path"
+                                              IsCheckable="True"
+                                              IsChecked="True" />
+                                    <MenuItem Name="SaveListSettings_Ext"
+                                              Header="Include extension"
+                                              IsChecked="True"
+                                              IsCheckable="True" />
+                                </ui:MenuFlyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
+                        <Button Name="SaveListBt"
+                                Click="SaveListBt_Click"
+                                ToolTip="Save this list as">
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57605;" />
+                        </Button>
+                        <Button Name="LikeBt"
+                                Click="LikeBt_Click"
+                                ToolTip="Like or sponsor this project">
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57759;" />
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </ui:ThemeShadowChrome>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-
-
-            <!-- Row #2 -->
-            <!-- ItemsListView + List Controls -->
-            <ui:ThemeShadowChrome Name="ItemsPanel"
-                                  Visibility="Visible"
-                                  IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                                  Depth="{StaticResource ShadowDepth}"
-                                  Grid.Row="1"
-                                  Grid.Column="0">
-                <Border>
-                    <StackPanel Orientation="Vertical"
-                                Margin="{StaticResource RowMargins}">
-                        <ListView Name="ItemsList"
-                                  SelectionMode="Single"
-                                  HorizontalContentAlignment="Stretch"
-                                  MaxHeight="400"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                  ItemTemplate="{StaticResource PidlItemTemplate}"
-                                  PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
-                                  PreviewMouseMove="ItemsList_PreviewMouseMove">
-                            <ListView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="Delete Item"
-                                              Name="PidlCtx_Delete"
-                                              Click="PidlCtx_Delete_Click">
-                                        <MenuItem.Icon>
-                                            <ui:FontIcon Glyph="&#57607;" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <Separator />
-                                    <MenuItem Header="Copy Item"
-                                              Name="PidlCtx_CpyItem"
-                                              Click="PidlCtx_CpyItem_Click">
-                                        <MenuItem.Icon>
-                                            <ui:FontIcon Glyph="&#57711;" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="Copy Item Path"
-                                              Name="PidlCtx_CpyPath"
-                                              Click="PidlCtx_CpyPath_Click">
-                                        <MenuItem.Icon>
-                                            <ui:FontIcon Glyph="&#57711;" />
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </ListView.ContextMenu>
-                        </ListView>
-
-
-                        <WrapPanel VerticalAlignment="Center"
-                                   Margin="10,4,0,0">
-                            <StackPanel Orientation="Horizontal"
-                                        VerticalAlignment="Center"
-                                        ToolTip="How many items where selcted"
-                                        Margin="0,0,4,0">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57811;"
-                                             Margin="0,0,8,0" />
-                                <TextBlock FontSize="14"
-                                           Name="FolCountTb"
-                                           Text="0/0" />
-                            </StackPanel>
-                            <Button Name="BrowseBackBt"
-                                    Click="BrowseBackBt_Click"
-                                    ToolTip="Go back to spawn folder">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57616;" />
-                            </Button>
-                            <Button Name="ClearListBt"
-                                    Click="ClearListBt_Click"
-                                    ToolTip="Clear the list">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57607;" />
-                            </Button>
-                            <ComboBox Name="SaveListSettings_Format"
-                                      VerticalAlignment="Top"
-                                      ui:ControlHelper.PlaceholderText="Select dump format"
-                                      Margin="0"
-                                      BorderThickness="0">
-                                <ComboBoxItem Tag="1">Export as CSV</ComboBoxItem>
-                                <ComboBoxItem Tag="2">Export as JSON</ComboBoxItem>
-                                <ComboBoxItem Tag="3">Export as XML</ComboBoxItem>
-                                <ComboBoxItem Tag="4">Export as C Array</ComboBoxItem>
-                            </ComboBox>
-                            <Button>
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             ToolTip="Saving options"
-                                             Glyph="&#57694;" />
-                                <ui:FlyoutService.Flyout>
-                                    <ui:MenuFlyout>
-                                        <MenuItem Name="SaveListSettings_Path"
-                                                  Header="Include path"
-                                                  IsCheckable="True"
-                                                  IsChecked="True" />
-                                        <MenuItem Name="SaveListSettings_Ext"
-                                                  Header="Include extension"
-                                                  IsChecked="True"
-                                                  IsCheckable="True" />
-                                    </ui:MenuFlyout>
-                                </ui:FlyoutService.Flyout>
-                            </Button>
-                            <Button Name="SaveListBt"
-                                    Click="SaveListBt_Click"
-                                    ToolTip="Save this list as">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57605;" />
-                            </Button>
-                            <Button Name="LikeBt"
-                                    Click="LikeBt_Click"
-                                    ToolTip="Like or sponsor this project">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57759;" />
-                            </Button>
-                        </WrapPanel>
-                    </StackPanel>
-                </Border>
-            </ui:ThemeShadowChrome>
-
-        </Grid>
 
         <!-- Row #1 -->
         <!-- Settings menu -->
@@ -573,55 +604,6 @@
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>
-
-
-        <!-- Row #3 -->
-        <!-- HistoryListView -->
-        <ui:ThemeShadowChrome Name="HistoryPanel"
-                              Visibility="Collapsed"
-                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}"
-                              Margin="4,0">
-            <Border>
-                <StackPanel Orientation="Vertical"
-                            Margin="12">
-                    <TextBlock Text="Command history"
-                               FontWeight="Bold" />
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                               Margin="0, 8" />
-                    <ListView Name="HistoryList"
-                              SelectionMode="Single"
-                              MaxHeight="160"
-                              ItemTemplate="{StaticResource HistoryTemplate}"
-                              PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
-                </StackPanel>
-            </Border>
-        </ui:ThemeShadowChrome>
-
-
-        <!-- Row #4 -->
-        <!-- Command Panel -->
-        <ui:ThemeShadowChrome Name="CommandPanel"
-                              Visibility="Collapsed"
-                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}"
-                              Margin="4,0">
-            <Border>
-                <StackPanel Orientation="Vertical"
-                            Margin="12">
-                    <TextBlock Text="List of available commands"
-                               FontWeight="Bold" />
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                               Margin="0, 8" />
-                    <ListView Name="CommandList"
-                              SelectionMode="Single"
-                              ItemTemplate="{StaticResource CommandTemplate}"
-                              PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp" />
-                </StackPanel>
-            </Border>
-        </ui:ThemeShadowChrome>
-
-
 
 
     </StackPanel>

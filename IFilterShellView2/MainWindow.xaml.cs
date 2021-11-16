@@ -281,11 +281,9 @@ namespace IFilterShellView2
                 FilterTb.Text = "";
             }
 
-            HistoryPanel.Visibility = Visibility.Collapsed;
             AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
             InfoPanel.Visibility = Visibility.Collapsed;
             ItemsPanel.Visibility = Visibility.Collapsed;
-            CommandPanel.Visibility = Visibility.Collapsed;
         }
 
 
@@ -320,11 +318,6 @@ namespace IFilterShellView2
                 {
                     TempListOfHistoryItems.ForEach(HItem => ListOfHistoryItems.Add(HItem));
                     TempListOfHistoryItems.Clear();
-
-                    if (HistoryPanel.Visibility == Visibility.Collapsed)
-                    {
-                        HistoryPanel.Visibility = Visibility.Visible;
-                    }
                 }
             }
 
@@ -450,9 +443,6 @@ namespace IFilterShellView2
                         // Show a notification
                         InfoClass.Message = "You are about to issue a command. Press [Enter] to compile and run it. If you want to abort then press [Backspace] or [Escape].";
                         FlagExtendedFilterModNoticeShown = true;
-
-                        // Also show the command history list
-                        if (ListOfHistoryItems.Count != 0) HistoryPanel.Visibility = Visibility.Visible;
                     }
                     ShellContext.FlagRunInBackgroundWorker = true;
 
@@ -460,7 +450,6 @@ namespace IFilterShellView2
                 }
                 else
                 {
-                    HistoryPanel.Visibility = Visibility.Collapsed;
                     FlagExtendedFilterModNoticeShown = false;
                 }
 
@@ -876,10 +865,6 @@ namespace IFilterShellView2
 
 
         #region Toolbar Right Settings
-        private void ShowCommandBt_Click(object sender, RoutedEventArgs e)
-        {
-            CommandPanel.Visibility = CommandPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
-        }
         private void LikeBt_Click(object sender, RoutedEventArgs e)
         {
             Process myProcess = new Process();
@@ -960,11 +945,6 @@ namespace IFilterShellView2
             {
                 // TODO: log this event
             }
-        }
-        private void ClearListBt_Click(object sender, RoutedEventArgs e)
-        {
-            ListOfPidlData.Clear();
-            ItemsPanel.Visibility = Visibility.Collapsed;
         }
         private void SaveListBt_Click(object sender, RoutedEventArgs e)
         {
@@ -1262,6 +1242,16 @@ namespace IFilterShellView2
         }
 
         private void CaseSettingsBt_Click(object sender, RoutedEventArgs e)
+        {
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+        }
+
+
+        private void ShowCommandList(object sender, RoutedEventArgs e)
+        {
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+        }
+        private void ShowHistoryList(object sender, RoutedEventArgs e)
         {
             FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
