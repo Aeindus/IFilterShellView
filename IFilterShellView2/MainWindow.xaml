@@ -10,9 +10,8 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         Topmost="True"
-        Width="Auto"
         Height="Auto"
-        SizeToContent="WidthAndHeight"
+        SizeToContent="Height"
         Closing="Window_Closing"
         Deactivated="Window_Deactivated"
         ui:WindowHelper.UseModernWindowStyle="false"
@@ -71,7 +70,9 @@
             <Setter Property="CornerRadius"
                     Value="4,4,4,4" />
             <Setter Property="Margin"
-                    Value="0,3,0,3" />
+                    Value="1" />
+            <Setter Property="Padding"
+                    Value="1" />
         </Style>
 
 
@@ -170,81 +171,82 @@
     </Window.Background>
 
     <StackPanel Orientation="Vertical"
-                Margin="0">
-
-
+                HorizontalAlignment="Center"
+                Margin="12">
         <StackPanel Orientation="Horizontal">
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
                 <Border>
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
-                        <!-- Toolbar with settings -->
                         <StackPanel Orientation="Horizontal">
-                            <Button x:Name="XML_PlacementSettingsBt"
-                                    Click="XML_PlacementSettingsBt_Click">
+                            <Button Click="PlacementSettingsBt_Click">
                                 <ui:FlyoutBase.AttachedFlyout>
                                     <ui:Flyout Placement="Bottom">
-                                        <StackPanel Orientation="Horizontal">
-                                            <!-- Toolbar settings -->
-                                            <RadioButton GroupName="Placement"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
-                                                         IsChecked="True"
-                                                         Tag="1"
-                                                         ToolTip="Starts with">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57762;" />
-                                            </RadioButton>
-                                            <RadioButton GroupName="Placement"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
-                                                         IsChecked="false"
-                                                         Tag="2"
-                                                         ToolTip="Contains">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57761;" />
-                                            </RadioButton>
-                                            <RadioButton GroupName="Placement"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
-                                                         IsChecked="false"
-                                                         Tag="4"
-                                                         ToolTip="Ends with">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57760;" />
-                                            </RadioButton>
-                                            <RadioButton GroupName="Placement"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
-                                                         IsChecked="false"
-                                                         Tag="8"
-                                                         ToolTip="Regex expression">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57710;" />
-                                            </RadioButton>
-                                        </StackPanel>
+                                        <Border>
+                                            <StackPanel Name="SettingsPlacement"
+                                                        Orientation="Horizontal">
+                                                <RadioButton GroupName="SettingsPlacement"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="True"
+                                                             Tag="1"
+                                                             ToolTip="Starts with">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57762;" />
+                                                </RadioButton>
+                                                <RadioButton GroupName="SettingsPlacement"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="false"
+                                                             Tag="2"
+                                                             ToolTip="Contains">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57761;" />
+                                                </RadioButton>
+                                                <RadioButton GroupName="SettingsPlacement"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="false"
+                                                             Tag="4"
+                                                             ToolTip="Ends with">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57760;" />
+                                                </RadioButton>
+                                                <RadioButton GroupName="SettingsPlacement"
+                                                             Click="FilterSettingChanged"
+                                                             IsChecked="false"
+                                                             Tag="8"
+                                                             ToolTip="Regex expression">
+                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                 Glyph="&#57710;" />
+                                                </RadioButton>
+                                            </StackPanel>
+
+                                        </Border>
                                     </ui:Flyout>
                                 </ui:FlyoutBase.AttachedFlyout>
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                <ui:FontIcon Name="PlacementSettingsIc"
+                                             FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57762;" />
                             </Button>
 
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
 
-                            <Button x:Name="XML_CaseSettingsBt"
-                                    Click="XML_PlacementSettingsBt_Click">
+                            <Button Click="CaseSettingsBt_Click">
                                 <ui:FlyoutBase.AttachedFlyout>
                                     <ui:Flyout Placement="Bottom">
-                                        <StackPanel Orientation="Horizontal">
-                                            <RadioButton GroupName="FilterCase"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
+                                        <StackPanel Name="SettingsCase"
+                                                    Orientation="Horizontal">
+                                            <RadioButton GroupName="SettingsCase"
+                                                         Click="FilterSettingChanged"
                                                          IsChecked="false"
-                                                         Tag="16"
+                                                         Tag="1"
                                                          ToolTip="Case sensitive">
                                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                                              Glyph="&#57800;" />
                                             </RadioButton>
-                                            <RadioButton GroupName="FilterCase"
-                                                         Click="XML_ToolbarLeft_Setting_Changed"
+                                            <RadioButton GroupName="SettingsCase"
+                                                         Click="FilterSettingChanged"
                                                          IsChecked="false"
-                                                         Tag="32"
+                                                         Tag="2"
                                                          ToolTip="Case insensitive">
                                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                                              Glyph="&#57799;" />
@@ -252,7 +254,8 @@
                                         </StackPanel>
                                     </ui:Flyout>
                                 </ui:FlyoutBase.AttachedFlyout>
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                <ui:FontIcon Name="CaseSettingsIc"
+                                             FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57800;" />
                             </Button>
                         </StackPanel>
@@ -266,25 +269,56 @@
                 <Border>
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
-                        <StackPanel Name="XML_FilterColumn"
-                                    Orientation="Vertical"
-                                    MinWidth="300">
 
+                        <Button ToolTip="List of available commands">
+                            <ui:FlyoutBase.AttachedFlyout>
+                                <ui:Flyout Placement="Bottom">
+                                    <Border>
+                                        <StackPanel Orientation="Horizontal">
+
+                                        </StackPanel>
+                                    </Border>
+                                </ui:Flyout>
+                            </ui:FlyoutBase.AttachedFlyout>
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57803;" />
+                        </Button>
+
+                        <StackPanel Name="FilterColumn"
+                                    Orientation="Vertical"
+                                    MinWidth="400">
                             <!-- Filter text -->
-                            <TextBox Name="XML_FilterTb"
+                            <TextBox Name="FilterTb"
                                      ui:ControlHelper.PlaceholderText="Filter shell by expression (⊙.⊙)"
                                      BorderThickness="0"
+                                     BorderBrush="#00000000"
+                                     FocusVisualStyle="{x:Null}"
                                      HorizontalAlignment="Stretch"
                                      FontSize="15"
                                      Focusable="True"
-                                     KeyDown="XML_FilterTb_KeyDown"
-                                     KeyUp="XML_FilterTb_KeyUp"
-                                     TextChanged="XML_FilterTb_TextChanged" />
+                                     KeyDown="FilterTb_KeyDown"
+                                     KeyUp="FilterTb_KeyUp"
+                                     TextChanged="FilterTb_TextChanged">
+                            </TextBox>
 
-                            <ui:ProgressBar x:Name="XML_ProgressPb"
+                            <ui:ProgressBar x:Name="ProgressPb"
                                             IsIndeterminate="True"
                                             Visibility="Collapsed" />
                         </StackPanel>
+
+                        <Button ToolTip="History of compiled commands">
+                            <ui:FlyoutBase.AttachedFlyout>
+                                <ui:Flyout Placement="Bottom">
+                                    <Border>
+                                        <StackPanel Orientation="Horizontal">
+
+                                        </StackPanel>
+                                    </Border>
+                                </ui:Flyout>
+                            </ui:FlyoutBase.AttachedFlyout>
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57656;" />
+                        </Button>
                     </StackPanel>
                 </Border>
             </ui:ThemeShadowChrome>
@@ -297,16 +331,16 @@
                                 Margin="{StaticResource RowMargins}">
                         <StackPanel Orientation="Horizontal">
                             <!--<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />-->
-                            <Button Name="XML_SettingsBt"
+                            <Button Name="SettingsBt"
                                     ToolTip="Settings"
                                     Grid.Column="1"
                                     HorizontalAlignment="Right"
-                                    Click="XML_SettingsBt_Click">
+                                    Click="SettingsBt_Click">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57621;" />
                             </Button>
-                            <Button Name="XML_ExitBt"
-                                    Click="XML_ExitBt_Click"
+                            <Button Name="ExitBt"
+                                    Click="ExitBt_Click"
                                     ToolTip="Completely close this application">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57610;" />
@@ -331,7 +365,7 @@
 
             <!-- Row #2 -->
             <!-- ItemsListView + List Controls -->
-            <ui:ThemeShadowChrome Name="XML_ItemsPanel"
+            <ui:ThemeShadowChrome Name="ItemsPanel"
                                   Visibility="Visible"
                                   IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}"
@@ -340,34 +374,34 @@
                 <Border>
                     <StackPanel Orientation="Vertical"
                                 Margin="{StaticResource RowMargins}">
-                        <ListView Name="XML_ItemsList"
+                        <ListView Name="ItemsList"
                                   SelectionMode="Single"
                                   HorizontalContentAlignment="Stretch"
                                   MaxHeight="400"
                                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                   ItemTemplate="{StaticResource PidlItemTemplate}"
-                                  PreviewMouseLeftButtonUp="XML_ItemsList_PreviewMouseLeftButtonUp"
-                                  PreviewMouseMove="XML_ItemsList_PreviewMouseMove">
+                                  PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
+                                  PreviewMouseMove="ItemsList_PreviewMouseMove">
                             <ListView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Delete Item"
-                                              Name="XML_PidlCtx_Delete"
-                                              Click="XML_PidlCtx_Delete_Click">
+                                              Name="PidlCtx_Delete"
+                                              Click="PidlCtx_Delete_Click">
                                         <MenuItem.Icon>
                                             <ui:FontIcon Glyph="&#57607;" />
                                         </MenuItem.Icon>
                                     </MenuItem>
                                     <Separator />
                                     <MenuItem Header="Copy Item"
-                                              Name="XML_PidlCtx_CpyItem"
-                                              Click="XML_PidlCtx_CpyItem_Click">
+                                              Name="PidlCtx_CpyItem"
+                                              Click="PidlCtx_CpyItem_Click">
                                         <MenuItem.Icon>
                                             <ui:FontIcon Glyph="&#57711;" />
                                         </MenuItem.Icon>
                                     </MenuItem>
                                     <MenuItem Header="Copy Item Path"
-                                              Name="XML_PidlCtx_CpyPath"
-                                              Click="XML_PidlCtx_CpyPath_Click">
+                                              Name="PidlCtx_CpyPath"
+                                              Click="PidlCtx_CpyPath_Click">
                                         <MenuItem.Icon>
                                             <ui:FontIcon Glyph="&#57711;" />
                                         </MenuItem.Icon>
@@ -387,22 +421,22 @@
                                              Glyph="&#57811;"
                                              Margin="0,0,8,0" />
                                 <TextBlock FontSize="14"
-                                           Name="XML_FolCountTb"
+                                           Name="FolCountTb"
                                            Text="0/0" />
                             </StackPanel>
-                            <Button Name="XML_BrowseBackBt"
-                                    Click="XML_BrowseBackBt_Click"
+                            <Button Name="BrowseBackBt"
+                                    Click="BrowseBackBt_Click"
                                     ToolTip="Go back to spawn folder">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57616;" />
                             </Button>
-                            <Button Name="XML_ClearListBt"
-                                    Click="XML_ClearListBt_Click"
+                            <Button Name="ClearListBt"
+                                    Click="ClearListBt_Click"
                                     ToolTip="Clear the list">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57607;" />
                             </Button>
-                            <ComboBox Name="XML_SaveListSettings_Format"
+                            <ComboBox Name="SaveListSettings_Format"
                                       VerticalAlignment="Top"
                                       ui:ControlHelper.PlaceholderText="Select dump format"
                                       Margin="0"
@@ -418,25 +452,25 @@
                                              Glyph="&#57694;" />
                                 <ui:FlyoutService.Flyout>
                                     <ui:MenuFlyout>
-                                        <MenuItem Name="XML_SaveListSettings_Path"
+                                        <MenuItem Name="SaveListSettings_Path"
                                                   Header="Include path"
                                                   IsCheckable="True"
                                                   IsChecked="True" />
-                                        <MenuItem Name="XML_SaveListSettings_Ext"
+                                        <MenuItem Name="SaveListSettings_Ext"
                                                   Header="Include extension"
                                                   IsChecked="True"
                                                   IsCheckable="True" />
                                     </ui:MenuFlyout>
                                 </ui:FlyoutService.Flyout>
                             </Button>
-                            <Button Name="XML_SaveListBt"
-                                    Click="XML_SaveListBt_Click"
+                            <Button Name="SaveListBt"
+                                    Click="SaveListBt_Click"
                                     ToolTip="Save this list as">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57605;" />
                             </Button>
-                            <Button Name="XML_LikeBt"
-                                    Click="XML_LikeBt_Click"
+                            <Button Name="LikeBt"
+                                    Click="LikeBt_Click"
                                     ToolTip="Like or sponsor this project">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57759;" />
@@ -450,7 +484,7 @@
 
         <!-- Row #1 -->
         <!-- Settings menu -->
-        <ui:ThemeShadowChrome Name="XML_AdvancedSettingsPanel"
+        <ui:ThemeShadowChrome Name="AdvancedSettingsPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
@@ -471,40 +505,40 @@
 
                         <StackPanel Grid.Column="0"
                                     Orientation="Vertical">
-                            <ui:NumberBox x:Name="XML_MaxFolderPidlCount_Deepscan"
+                            <ui:NumberBox x:Name="MaxFolderPidlCount_Deepscan"
                                           Header="Deep scan after"
                                           ToolTip="If folder item count is bigger than this, then filtering will be done via a deep scan"
-                                          LostFocus="XML_MaxFolderPidlCount_Deepscan_LostFocus"
+                                          LostFocus="MaxFolderPidlCount_Deepscan_LostFocus"
                                           Text="250" />
-                            <ui:NumberBox x:Name="XML_MaxNumberFilterUpTo"
+                            <ui:NumberBox x:Name="MaxNumberFilterUpTo"
                                           Header="Filter up to"
                                           ToolTip="Will stop scanning once reached this number. If less than 0 then ignore this field and scan all"
-                                          LostFocus="XML_MaxNumberFilterUpTo_LostFocus"
+                                          LostFocus="MaxNumberFilterUpTo_LostFocus"
                                           Text="-1" />
-                            <TextBox x:Name="XML_DateFilterFormat"
+                            <TextBox x:Name="DateFilterFormat"
                                      ui:ControlHelper.Header="Date format"
                                      ToolTip="Set the date format. Commands and filter views will bind to this settings"
-                                     LostFocus="XML_DateFilterFormat_LostFocus"
+                                     LostFocus="DateFilterFormat_LostFocus"
                                      Text="dd/MM/yyyy" />
                         </StackPanel>
                         <StackPanel Grid.Column="1"
                                     Orientation="Vertical"
                                     HorizontalAlignment="Right"
                                     Margin="8,0,8,0">
-                            <ui:NumberBox x:Name="XML_MaxHistory"
+                            <ui:NumberBox x:Name="MaxHistory"
                                           Header="Max history items"
                                           ToolTip="How many entries will be saved in the history"
-                                          LostFocus="XML_MaxHistory_LostFocus"
+                                          LostFocus="MaxHistory_LostFocus"
                                           Text="15" />
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                        Margin="0,8" />
 
-                            <CheckBox Name="XML_RunStartupCb"
+                            <CheckBox Name="RunStartupCb"
                                       Content="Run when the computer starts up"
-                                      Click="XML_RunStartupCb_Click" />
-                            <CheckBox Name="XML_KeepFilterText"
+                                      Click="RunStartupCb_Click" />
+                            <CheckBox Name="KeepFilterText"
                                       Content="Keep previous filter text"
-                                      Click="XML_KeepFilterText_Click" />
+                                      Click="KeepFilterText_Click" />
                         </StackPanel>
                     </Grid>
 
@@ -522,7 +556,7 @@
 
         <!-- Row #2 -->
         <!-- Notification menu -->
-        <ui:ThemeShadowChrome Name="XML_InfoPanel"
+        <ui:ThemeShadowChrome Name="InfoPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
@@ -534,7 +568,7 @@
                                FontWeight="Bold" />
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                Margin="0, 8" />
-                    <TextBlock Name="XML_InfoText"
+                    <TextBlock Name="InfoText"
                                TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
@@ -543,7 +577,7 @@
 
         <!-- Row #3 -->
         <!-- HistoryListView -->
-        <ui:ThemeShadowChrome Name="XML_HistoryPanel"
+        <ui:ThemeShadowChrome Name="HistoryPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
@@ -555,11 +589,11 @@
                                FontWeight="Bold" />
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                Margin="0, 8" />
-                    <ListView Name="XML_HistoryList"
+                    <ListView Name="HistoryList"
                               SelectionMode="Single"
                               MaxHeight="160"
                               ItemTemplate="{StaticResource HistoryTemplate}"
-                              PreviewMouseLeftButtonUp="XML_HistoryList_PreviewMouseLeftButtonUp" />
+                              PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>
@@ -567,7 +601,7 @@
 
         <!-- Row #4 -->
         <!-- Command Panel -->
-        <ui:ThemeShadowChrome Name="XML_CommandPanel"
+        <ui:ThemeShadowChrome Name="CommandPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
@@ -579,10 +613,10 @@
                                FontWeight="Bold" />
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                Margin="0, 8" />
-                    <ListView Name="XML_CommandList"
+                    <ListView Name="CommandList"
                               SelectionMode="Single"
                               ItemTemplate="{StaticResource CommandTemplate}"
-                              PreviewMouseLeftButtonUp="XML_CommandList_PreviewMouseLeftButtonUp" />
+                              PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp" />
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>

@@ -21,6 +21,7 @@ using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
 using IFilterShellView2.ShellContext;
 using Microsoft.Win32;
+using ModernWpf.Controls;
 using ModernWpf.Controls.Primitives;
 using SHDocVw;
 using System;
@@ -38,6 +39,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
@@ -97,9 +99,7 @@ namespace IFilterShellView2
             F_STARTSWITH = 1U,
             F_CONTAINS = 2U,
             F_ENDSWITH = 4U,
-            F_REGEX = 8U,
-            F_CASESENS = 16U,
-            F_CASEINSENS = 32U
+            F_REGEX = 8U
         }
         private Dictionary<FilterSettingsFlags, Func<string, string, bool>> SettingsActionMap = new Dictionary<FilterSettingsFlags, Func<string, string, bool>>
         {
@@ -109,7 +109,6 @@ namespace IFilterShellView2
             { FilterSettingsFlags.F_REGEX, (pidl_name, input) => RegexFilterCallback(pidl_name, input)}
         };
         private static (string Input, Regex CompiledRegex) FilterRegexContainer = ("", null);
-        private uint FilterSettings;
         #endregion Data related to filtering and partial settings
 
 
@@ -126,6 +125,8 @@ namespace IFilterShellView2
 
             ThisWindowRef = this;
 
+            Application.Current.Resources["TextControlBorderThemeThickness"] = 0;
+
             // Initialize application settings
             LoadApplicationSettings();
 
@@ -140,19 +141,19 @@ namespace IFilterShellView2
             WorkerObject_SelectionProc.WorkerReportsProgress = true;
             WorkerObject_SelectionProc.WorkerSupportsCancellation = true;
 
-            XML_ItemsList.ItemsSource = ListOfPidlData;
+            ItemsList.ItemsSource = ListOfPidlData;
             CompileCommandDataList();
-            XML_CommandList.ItemsSource = ListOfAvailableCommands;
+            CommandList.ItemsSource = ListOfAvailableCommands;
 
             ListOfHistoryItems = new ObservableCollection<CHistoryItem>(
                 SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
 
-            XML_HistoryList.ItemsSource = ListOfHistoryItems;
+            HistoryList.ItemsSource = ListOfHistoryItems;
 
 
             // Add focus to the search bar
-            XML_FilterTb.Focus();
-            Keyboard.Focus(XML_FilterTb);
+            FilterTb.Focus();
+            Keyboard.Focus(FilterTb);
 
             try
             {
@@ -187,47 +188,6 @@ namespace IFilterShellView2
 
 
 
-
-        private void LoadApplicationSettings()
-        {
-            // Load this setting and update UI
-            FilterSettings = Properties.Settings.Default.FilterSettings;
-            IEnumerable<ToggleButton> lorbtns = XML_ToolbarSettings.Children.OfType<RadioButton>();
-            foreach (RadioButton rb in lorbtns)
-            {
-                uint tag = Convert.ToUInt32(rb.Tag);
-                if ((FilterSettings & tag) == tag) rb.IsChecked = true;
-            }
-
-            // Other settings
-            XML_MaxFolderPidlCount_Deepscan.Text = Convert.ToString(Properties.Settings.Default.MaxFolderPidlCount_Deepscan);
-            XML_MaxNumberFilterUpTo.Text = Convert.ToString(Properties.Settings.Default.MaxNumberFilterUpTo);
-            XML_KeepFilterText.IsChecked = Properties.Settings.Default.KeepFilterText;
-            XML_DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
-            XML_MaxHistory.Text = Properties.Settings.Default.MaxHistory.ToString();
-
-
-            //
-            try
-            {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                XML_RunStartupCb.IsChecked = key.GetValue(AssemblyImageName) != null;
-            }
-            catch { }
-        }
-        private void SaveApplicationSettings()
-        {
-            List<CHistoryItem> HistoryListFromIObs = ListOfHistoryItems.ToList();
-            if (ListOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
-            {
-                HistoryListFromIObs.RemoveRange(0, Properties.Settings.Default.MaxHistory / 2);
-            }
-
-            Properties.Settings.Default.HistoryListSerialized =
-                SerializeExtensions.SerializeGenericClassList(HistoryListFromIObs);
-
-            Properties.Settings.Default.Save();
-        }
 
 
 
@@ -318,14 +278,14 @@ namespace IFilterShellView2
 
             if (!Properties.Settings.Default.KeepFilterText && GoesIntoHidingMode)
             {
-                XML_FilterTb.Text = "";
+                FilterTb.Text = "";
             }
 
-            XML_HistoryPanel.Visibility = Visibility.Collapsed;
-            XML_AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
-            XML_InfoPanel.Visibility = Visibility.Collapsed;
-            XML_ItemsPanel.Visibility = Visibility.Collapsed;
-            XML_CommandPanel.Visibility = Visibility.Collapsed;
+            HistoryPanel.Visibility = Visibility.Collapsed;
+            AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
+            InfoPanel.Visibility = Visibility.Collapsed;
+            ItemsPanel.Visibility = Visibility.Collapsed;
+            CommandPanel.Visibility = Visibility.Collapsed;
         }
 
 
@@ -337,14 +297,13 @@ namespace IFilterShellView2
         {
             ResetInterfaceData();
 
-            XML_ItemsPanel.Visibility = Visibility.Visible;
+            ItemsPanel.Visibility = Visibility.Visible;
 
             if (GoesInDeepProcessing)
             {
-                XML_ProgressPb.Visibility = Visibility.Visible;
-                XML_ToolbarSettings.IsEnabled = false;
-                XML_ItemsPanel.IsEnabled = false;
-                XML_FilterTb.IsReadOnly = true;
+                ProgressPb.Visibility = Visibility.Visible;
+                ItemsPanel.IsEnabled = false;
+                FilterTb.IsReadOnly = true;
             }
         }
         private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
@@ -353,26 +312,25 @@ namespace IFilterShellView2
 
             if (ReturnedFromDeepProcessing)
             {
-                XML_ProgressPb.Visibility = Visibility.Collapsed;
-                XML_ToolbarSettings.IsEnabled = true;
-                XML_ItemsPanel.IsEnabled = true;
-                XML_FilterTb.IsReadOnly = false;
+                ProgressPb.Visibility = Visibility.Collapsed;
+                ItemsPanel.IsEnabled = true;
+                FilterTb.IsReadOnly = false;
 
                 if (TempListOfHistoryItems.Count != 0)
                 {
                     TempListOfHistoryItems.ForEach(HItem => ListOfHistoryItems.Add(HItem));
                     TempListOfHistoryItems.Clear();
 
-                    if (XML_HistoryPanel.Visibility == Visibility.Collapsed)
+                    if (HistoryPanel.Visibility == Visibility.Collapsed)
                     {
-                        XML_HistoryPanel.Visibility = Visibility.Visible;
+                        HistoryPanel.Visibility = Visibility.Visible;
                     }
                 }
             }
 
             if (ShellContext.FilterCount == 0)
             {
-                XML_ItemsPanel.Visibility = Visibility.Collapsed;
+                ItemsPanel.Visibility = Visibility.Collapsed;
             }
         }
         private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
@@ -427,23 +385,24 @@ namespace IFilterShellView2
                 // WindowExtensions.ActivateWindow(ThisWindowRef);
 
                 // Add focus to the search bar
-                XML_FilterTb.Focus();
-                Keyboard.Focus(XML_FilterTb);
+                FilterTb.Focus();
+                Keyboard.Focus(FilterTb);
 
                 // Set new window properties
-                // System.Windows.SystemParameters.PrimaryScreenWidth take current screen width into consideration
-                int ShellWidth = ShellContext.ShellViewRect.Right - ShellContext.ShellViewRect.Left;
-                int x = ShellContext.ShellViewRect.Left + ShellWidth / 2 - (int)ThisWindowRef.Width / 2;
-                int y = ShellContext.ShellViewRect.Top;
+                Window MainWindow = Application.Current.MainWindow;
+                PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(MainWindow);
+                Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
+                double thisDpiWidthFactor = m.M11;
+                double thisDpiHeightFactor = m.M22;
 
-                // ThisWindowRef.Left = x;
-                // ThisWindowRef.Top = y;
-                
 
-                IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
-                NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, x, y, (int)ThisWindowRef.Width, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
+                // double ShellWidth = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
+                //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
+                //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
 
-                // ThisWindowRef.Width = ShrinkedWidth;
+                ThisWindowRef.Width = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
+                ThisWindowRef.Left = 0;
+                ThisWindowRef.Top = 0;
 
                 // Subscribe to the shell's message pump and filter close messages
                 ShellContext.EventManager.ResubscribeToExtCloseEvent(ShellContext.PrevShellWindowHwnd, Callback_OnShellWindowCloseEvent);
@@ -471,7 +430,7 @@ namespace IFilterShellView2
             if (ShellContext.pIFolderView2 == null || ShellContext.pIShellFolder == null || ShellContext.pIShellView == null)
                 return;
 
-            if (!XML_FilterTb.IsFocused || ShellContext.FilterText.Equals(ShellContext.PrevFilterText) /*|| ShellContext.FilterText.Length == 0*/)
+            if (!FilterTb.IsFocused || ShellContext.FilterText.Equals(ShellContext.PrevFilterText) /*|| ShellContext.FilterText.Length == 0*/)
                 return;
 
             string ErrorString = "";
@@ -493,7 +452,7 @@ namespace IFilterShellView2
                         FlagExtendedFilterModNoticeShown = true;
 
                         // Also show the command history list
-                        if (ListOfHistoryItems.Count != 0) XML_HistoryPanel.Visibility = Visibility.Visible;
+                        if (ListOfHistoryItems.Count != 0) HistoryPanel.Visibility = Visibility.Visible;
                     }
                     ShellContext.FlagRunInBackgroundWorker = true;
 
@@ -501,7 +460,7 @@ namespace IFilterShellView2
                 }
                 else
                 {
-                    XML_HistoryPanel.Visibility = Visibility.Collapsed;
+                    HistoryPanel.Visibility = Visibility.Collapsed;
                     FlagExtendedFilterModNoticeShown = false;
                 }
 
@@ -772,25 +731,75 @@ namespace IFilterShellView2
          * Event handlers
          */
 
-        #region Toolbar Left Settings
-        private void XML_ToolbarLeft_Setting_Changed(object sender, RoutedEventArgs e)
+        #region Settings
+
+        private void LoadApplicationSettings()
         {
-            RadioButton crbtn = sender as RadioButton;
-            uint tag = Convert.ToUInt32(crbtn.Tag);
-
-            IEnumerable<ToggleButton> SameGroup = XML_ToolbarSettings.Children.OfType<RadioButton>()
-                          .Where(c => crbtn.GroupName.Equals(c.GroupName));
-
-            // Clear that bit in every filter in the same group
-            foreach (RadioButton rb in SameGroup)
+            Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
             {
-                FilterSettings &= ~Convert.ToUInt32(rb.Tag);
+                foreach (RadioButton RButton in SButtons)
+                {
+                    int tag = Convert.ToInt32(RButton.Tag);
+                    if (Setting != tag) continue;
+                    RButton.IsChecked = true;
+                    HandleSettingChangedUniv(RButton, false);
+                    break;
+                }
+            };
+
+            ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
+            ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
+
+            // Other settings
+            MaxFolderPidlCount_Deepscan.Text = Convert.ToString(Properties.Settings.Default.MaxFolderPidlCount_Deepscan);
+            MaxNumberFilterUpTo.Text = Convert.ToString(Properties.Settings.Default.MaxNumberFilterUpTo);
+            KeepFilterText.IsChecked = Properties.Settings.Default.KeepFilterText;
+            DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
+            MaxHistory.Text = Properties.Settings.Default.MaxHistory.ToString();
+
+            try
+            {
+                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                RunStartupCb.IsChecked = key.GetValue(AssemblyImageName) != null;
+            }
+            catch { }
+        }
+        private void SaveApplicationSettings()
+        {
+            List<CHistoryItem> HistoryListFromIObs = ListOfHistoryItems.ToList();
+            if (ListOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
+            {
+                HistoryListFromIObs.RemoveRange(0, Properties.Settings.Default.MaxHistory / 2);
             }
 
-            // Set the bit
-            FilterSettings |= tag;
+            Properties.Settings.Default.HistoryListSerialized =
+                SerializeExtensions.SerializeGenericClassList(HistoryListFromIObs);
 
-            Properties.Settings.Default.FilterSettings = FilterSettings;
+            Properties.Settings.Default.Save();
+        }
+
+        private void FilterSettingChanged(object sender, RoutedEventArgs e)
+        {
+            HandleSettingChangedUniv(sender, true);
+        }
+        private void HandleSettingChangedUniv(object sender, bool SaveSetting = false)
+        {
+            RadioButton crbtn = sender as RadioButton;
+            uint SettingId = Convert.ToUInt32(crbtn.Tag);
+
+            switch (crbtn.GroupName)
+            {
+                case "SettingsPlacement":
+                    if (SaveSetting) Properties.Settings.Default.SettingsPlacementId = SettingId;
+
+                    PlacementSettingsIc.Glyph = ((FontIcon)crbtn.Content).Glyph;
+                    break;
+                case "SettingsCase":
+                    if (SaveSetting) Properties.Settings.Default.SettingsCaseId = SettingId;
+
+                    CaseSettingsIc.Glyph = ((FontIcon)crbtn.Content).Glyph;
+                    break;
+            }
         }
         #endregion
 
@@ -798,9 +807,9 @@ namespace IFilterShellView2
 
 
         #region Filter input handlers
-        private void XML_FilterTb_TextChanged(object sender, TextChangedEventArgs e)
+        private void FilterTb_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string FilterText = XML_FilterTb.Text.TrimStart();
+            string FilterText = FilterTb.Text.TrimStart();
             ShellContext.FilterText = FilterText;
 
             /* NOTE: consider the following scenario: we start filtering A's items and click on a subitem B.
@@ -816,7 +825,7 @@ namespace IFilterShellView2
             LastTimeTextChanged = DateTime.Now;
             FlagStringReadyToProcess = true;
         }
-        private void XML_FilterTb_KeyDown(object sender, KeyEventArgs e)
+        private void FilterTb_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -844,7 +853,7 @@ namespace IFilterShellView2
                 default: break;
             }
         }
-        private void XML_FilterTb_KeyUp(object sender, KeyEventArgs e)
+        private void FilterTb_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -867,11 +876,11 @@ namespace IFilterShellView2
 
 
         #region Toolbar Right Settings
-        private void XML_ShowCommandBt_Click(object sender, RoutedEventArgs e)
+        private void ShowCommandBt_Click(object sender, RoutedEventArgs e)
         {
-            XML_CommandPanel.Visibility = XML_CommandPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
+            CommandPanel.Visibility = CommandPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
         }
-        private void XML_LikeBt_Click(object sender, RoutedEventArgs e)
+        private void LikeBt_Click(object sender, RoutedEventArgs e)
         {
             Process myProcess = new Process();
 
@@ -886,11 +895,11 @@ namespace IFilterShellView2
                 // TODO: log this exception
             }
         }
-        private void XML_SettingsBt_Click(object sender, RoutedEventArgs e)
+        private void SettingsBt_Click(object sender, RoutedEventArgs e)
         {
-            XML_AdvancedSettingsPanel.Visibility = XML_AdvancedSettingsPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
+            AdvancedSettingsPanel.Visibility = AdvancedSettingsPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
         }
-        private void XML_ExitBt_Click(object sender, RoutedEventArgs e)
+        private void ExitBt_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
@@ -901,7 +910,7 @@ namespace IFilterShellView2
 
 
         #region Item List Viewer - Folders and files
-        private void XML_ItemsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void ItemsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
 
@@ -929,7 +938,7 @@ namespace IFilterShellView2
                 }
             }
         }
-        private void XML_ItemsList_PreviewMouseMove(object sender, MouseEventArgs e)
+        private void ItemsList_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
@@ -943,7 +952,7 @@ namespace IFilterShellView2
                 }
             }
         }
-        private void XML_BrowseBackBt_Click(object sender, RoutedEventArgs e)
+        private void BrowseBackBt_Click(object sender, RoutedEventArgs e)
         {
             if (ShellContext.LocationUrlBeforeBrowse == ShellContext.LocationUrl) return;
 
@@ -952,17 +961,17 @@ namespace IFilterShellView2
                 // TODO: log this event
             }
         }
-        private void XML_ClearListBt_Click(object sender, RoutedEventArgs e)
+        private void ClearListBt_Click(object sender, RoutedEventArgs e)
         {
             ListOfPidlData.Clear();
-            XML_ItemsPanel.Visibility = Visibility.Collapsed;
+            ItemsPanel.Visibility = Visibility.Collapsed;
         }
-        private void XML_SaveListBt_Click(object sender, RoutedEventArgs e)
+        private void SaveListBt_Click(object sender, RoutedEventArgs e)
         {
-            bool IncludePath = XML_SaveListSettings_Path.IsChecked;
-            bool IncludeExtension = XML_SaveListSettings_Ext.IsChecked;
+            bool IncludePath = SaveListSettings_Path.IsChecked;
+            bool IncludeExtension = SaveListSettings_Ext.IsChecked;
 
-            ComboBoxItem cbi = (ComboBoxItem)XML_SaveListSettings_Format.SelectedItem;
+            ComboBoxItem cbi = (ComboBoxItem)SaveListSettings_Format.SelectedItem;
             int itag = Convert.ToInt32(cbi.Tag);
             ExportManger.FORMAT fmt = (ExportManger.FORMAT)itag;
             // TODO: it expects a list of strings
@@ -992,17 +1001,17 @@ namespace IFilterShellView2
 
 
         #region Advanced settings panel
-        private void XML_MaxFolderPidlCount_Deepscan_LostFocus(object sender, RoutedEventArgs e)
+        private void MaxFolderPidlCount_Deepscan_LostFocus(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.MaxFolderPidlCount_Deepscan = Convert.ToInt32(XML_MaxFolderPidlCount_Deepscan.Text);
+            Properties.Settings.Default.MaxFolderPidlCount_Deepscan = Convert.ToInt32(MaxFolderPidlCount_Deepscan.Text);
         }
-        private void XML_MaxNumberFilterUpTo_LostFocus(object sender, RoutedEventArgs e)
+        private void MaxNumberFilterUpTo_LostFocus(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.MaxNumberFilterUpTo = Convert.ToInt32(XML_MaxNumberFilterUpTo.Text);
+            Properties.Settings.Default.MaxNumberFilterUpTo = Convert.ToInt32(MaxNumberFilterUpTo.Text);
         }
-        private void XML_DateFilterFormat_LostFocus(object sender, RoutedEventArgs e)
+        private void DateFilterFormat_LostFocus(object sender, RoutedEventArgs e)
         {
-            string NewDateFormat = XML_DateFilterFormat.Text.Trim();
+            string NewDateFormat = DateFilterFormat.Text.Trim();
 
             if (DateTimeExtensions.ValidateDateTimeFormatString(NewDateFormat))
             {
@@ -1010,47 +1019,47 @@ namespace IFilterShellView2
             }
             else
             {
-                XML_DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
+                DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
             }
         }
-        private void XML_MaxHistory_LostFocus(object sender, RoutedEventArgs e)
+        private void MaxHistory_LostFocus(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.MaxHistory = Convert.ToInt32(XML_MaxHistory.Text);
+            Properties.Settings.Default.MaxHistory = Convert.ToInt32(MaxHistory.Text);
         }
-        private void XML_RunStartupCb_Click(object sender, RoutedEventArgs e)
+        private void RunStartupCb_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-                if (XML_RunStartupCb.IsChecked == true)
+                if (RunStartupCb.IsChecked == true)
                     key.SetValue(AssemblyImageName, AssemblyImageLocation);
                 else
                     key.DeleteValue(AssemblyImageName);
             }
             catch { }
         }
-        private void XML_KeepFilterText_Click(object sender, RoutedEventArgs e)
+        private void KeepFilterText_Click(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.KeepFilterText = (bool)XML_KeepFilterText.IsChecked;
+            Properties.Settings.Default.KeepFilterText = (bool)KeepFilterText.IsChecked;
         }
         #endregion
 
 
 
         #region PidlListView Context Menu - Event Handlers
-        private void XML_PidlCtx_Delete_Click(object sender, RoutedEventArgs e)
+        private void PidlCtx_Delete_Click(object sender, RoutedEventArgs e)
         {
             if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
 
             if (DeletePidlFromSystem(SelectedPidlData))
             {
-                int SelectedIndex = XML_ItemsList.SelectedIndex;
+                int SelectedIndex = ItemsList.SelectedIndex;
                 if (SelectedIndex >= 0)
                     ListOfPidlData.RemoveAt(SelectedIndex);
             }
         }
-        private void XML_PidlCtx_CpyItem_Click(object sender, RoutedEventArgs e)
+        private void PidlCtx_CpyItem_Click(object sender, RoutedEventArgs e)
         {
             if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
 
@@ -1060,7 +1069,7 @@ namespace IFilterShellView2
             ClpDataObject.SetData(DataFormats.FileDrop, ClpFileArray, true);
             Clipboard.SetDataObject(ClpDataObject, true);
         }
-        private void XML_PidlCtx_CpyPath_Click(object sender, RoutedEventArgs e)
+        private void PidlCtx_CpyPath_Click(object sender, RoutedEventArgs e)
         {
             if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
 
@@ -1072,22 +1081,22 @@ namespace IFilterShellView2
 
 
         #region History List
-        private void XML_HistoryList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void HistoryList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (XML_HistoryList.SelectedIndex < 0) return;
+            if (HistoryList.SelectedIndex < 0) return;
 
-            XML_FilterTb.Text = ListOfHistoryItems[XML_HistoryList.SelectedIndex].Command;
+            FilterTb.Text = ListOfHistoryItems[HistoryList.SelectedIndex].Command;
         }
         #endregion
 
 
 
         #region Command List
-        private void XML_CommandList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void CommandList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (XML_CommandList.SelectedIndex < 0) return;
+            if (CommandList.SelectedIndex < 0) return;
 
-            XML_FilterTb.Text = "? " + ListOfAvailableCommands[XML_CommandList.SelectedIndex].Name;
+            FilterTb.Text = "? " + ListOfAvailableCommands[CommandList.SelectedIndex].Name;
         }
         #endregion
 
@@ -1100,18 +1109,21 @@ namespace IFilterShellView2
 
         private bool FilterBasedOnSettings(CPidlData PidlData, string input)
         {
-            if ((FilterSettings & (uint)FilterSettingsFlags.F_CASEINSENS) == (uint)FilterSettingsFlags.F_CASEINSENS)
+            uint SettingsPlacementId = Properties.Settings.Default.SettingsPlacementId;
+            uint SettingsCaseId = Properties.Settings.Default.SettingsCaseId;
+            string PidlName = PidlData.PidlName;
+
+            // Case insensitive
+            if (SettingsCaseId == 2)
             {
-                PidlData.PidlName = PidlData.PidlName.ToLower();
+                PidlName = PidlData.PidlName.ToLower();
                 input = input.ToLower();
             }
 
             // Find applicable actions
-            var actions = SettingsActionMap.Where(kvp => (FilterSettings & (uint)kvp.Key) == (uint)kvp.Key)
-                                       .Select(kvp => kvp.Value);
+            var action = SettingsActionMap[(FilterSettingsFlags)SettingsPlacementId];
 
-            foreach (var action in actions)
-                if (!action(PidlData.PidlName, input)) return false;
+            if (!action(PidlName, input)) return false;
 
             return true;
         }
@@ -1154,11 +1166,11 @@ namespace IFilterShellView2
         }
         private void UpdateSelectionStatusBarInfo(int? FilterCount = null, int? PidlCount = null)
         {
-            XML_FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? ShellContext.FilterCount, PidlCount ?? ShellContext.PidlCount);
+            FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? ShellContext.FilterCount, PidlCount ?? ShellContext.PidlCount);
         }
         private bool GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
-            int SelectedIndex = XML_ItemsList.SelectedIndex;
+            int SelectedIndex = ItemsList.SelectedIndex;
             SelectedPidlData = null;
             FullyQuallifiedItemName = "";
 
@@ -1227,24 +1239,29 @@ namespace IFilterShellView2
 
             public string Message
             {
-                get => Window.XML_InfoText.Text;
+                get => Window.InfoText.Text;
                 set
                 {
                     if (value == null || value.Length == 0)
                     {
-                        if (Window.XML_InfoPanel.Visibility != Visibility.Collapsed)
-                            Window.XML_InfoPanel.Visibility = Visibility.Collapsed;
+                        if (Window.InfoPanel.Visibility != Visibility.Collapsed)
+                            Window.InfoPanel.Visibility = Visibility.Collapsed;
                     }
                     else
                     {
-                        Window.XML_InfoPanel.Visibility = Visibility.Visible;
-                        Window.XML_InfoText.Text = value;
+                        Window.InfoPanel.Visibility = Visibility.Visible;
+                        Window.InfoText.Text = value;
                     }
                 }
             }
         }
 
-        private void XML_PlacementSettingsBt_Click(object sender, RoutedEventArgs e)
+        private void PlacementSettingsBt_Click(object sender, RoutedEventArgs e)
+        {
+            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+        }
+
+        private void CaseSettingsBt_Click(object sender, RoutedEventArgs e)
         {
             FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }

@@ -1,12 +1,7 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="IFilterShellView2.Properties" GeneratedClassName="Settings">
+  <Profiles />
   <Settings>
-    <Setting Name="FilterSettings" Type="System.UInt32" Scope="User">
-      <Value Profile="(Default)">33</Value>
-    </Setting>
     <Setting Name="MaxFolderPidlCount_Deepscan" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">150</Value>
     </Setting>
@@ -25,5 +20,11 @@
     <Setting Name="MaxHistory" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">15</Value>
     </Setting>
-  </Settings>	
+    <Setting Name="SettingsPlacementId" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="SettingsCaseId" Type="System.UInt32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
