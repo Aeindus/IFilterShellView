@@ -90,7 +90,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Source="{Binding IconBitmapImage, Mode=OneTime}"
+                <Image Source="{Binding IconBitmapSource, Mode=OneTime}"
                        Grid.Column="0"
                        Width="28"
                        Height="28" />
@@ -114,21 +114,21 @@
                                      Glyph="&#57767;"
                                      FontSize="14" />
                     </Button>
-                    <!-- Copy -->
+                     <!--Copy--> 
                     <Button Background="Transparent"
                             ToolTip="Copy file">
                         <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                      Glyph="&#57711;"
                                      FontSize="14" />
                     </Button>
-                    <!-- Invoke Properties -->
+                     <!--Invoke Properties--> 
                     <Button Background="Transparent"
                             ToolTip="Invoke properties menu">
                         <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                      Glyph="&#57694;"
                                      FontSize="14" />
                     </Button>
-                    <!-- Delete -->
+                     <!--Delete--> 
                     <Button Background="Transparent"
                             ToolTip="Delete file">
                         <ui:FontIcon FontFamily="Segoe MDL2 Assets"
@@ -418,6 +418,8 @@
                               MaxHeight="400"
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                               ItemTemplate="{StaticResource PidlItemTemplate}"
+                              VirtualizingStackPanel.IsVirtualizing="True"
+                              VirtualizingStackPanel.VirtualizationMode="Recycling"
                               PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
                               PreviewMouseMove="ItemsList_PreviewMouseMove">
                     </ListView>

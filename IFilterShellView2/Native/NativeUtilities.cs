@@ -10,7 +10,7 @@ namespace IFilterShellView2.Native
 {
     public static class NativeUtilities
     {
-        public static BitmapImage GetIconBitmapSource(string strPath, bool bSmall)
+        public static BitmapSource GetIconBitmapSource(string strPath, bool bSmall)
         {
             NativeWin32.SHFILEINFO fileInfo;
             fileInfo.hIcon = IntPtr.Zero;
@@ -33,30 +33,32 @@ namespace IFilterShellView2.Native
                         Int32Rect.Empty,
                         BitmapSizeOptions.FromEmptyOptions());
             NativeWin32.DestroyIcon(fileInfo.hIcon);
-
+            bitmapSource.Freeze();
 
             // JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            PngBitmapEncoder encoder = new PngBitmapEncoder();
-            MemoryStream memoryStream = new MemoryStream();
-            BitmapImage bitmapImage = new BitmapImage();
+            //PngBitmapEncoder encoder = new PngBitmapEncoder();
+            //MemoryStream memoryStream = new MemoryStream();
+            //BitmapImage bitmapImage = new BitmapImage();
 
-            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-            encoder.Save(memoryStream);
-            memoryStream.Position = 0;
+            //encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            //encoder.Save(memoryStream);
+            //memoryStream.Position = 0;
 
-            bitmapImage.BeginInit();
-            //bitmapImage.DecodePixelWidth = 250;
-            //bitmapImage.DecodePixelHeight = 250;
-            bitmapImage.CacheOption = BitmapCacheOption.None;
-            bitmapImage.StreamSource = new MemoryStream(memoryStream.ToArray());
-            bitmapImage.EndInit();
+            //bitmapImage.BeginInit();
+            ////bitmapImage.DecodePixelWidth = 250;
+            ////bitmapImage.DecodePixelHeight = 250;
+            //bitmapImage.CacheOption = BitmapCacheOption.None;
+            //bitmapImage.StreamSource = new MemoryStream(memoryStream.ToArray());
+            //bitmapImage.EndInit();
 
-            memoryStream.Close();
-            
-            // Prevent leaks and optimize for thread calls
-            bitmapImage.Freeze();
+            //memoryStream.Close();
 
-            return bitmapImage;
+            //// Prevent leaks and optimize for thread calls
+            //bitmapImage.Freeze
+            //return bitmapImage;
+
+            return bitmapSource;
+
         }
 
         public static bool IsAttributeOfFolder(uint dwFileAttributes)

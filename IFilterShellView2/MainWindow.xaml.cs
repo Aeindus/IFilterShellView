@@ -77,7 +77,7 @@ namespace IFilterShellView2
         private MainWindow ThisWindowRef;
 
 
-        private Dictionary<string, BitmapImage> ExtensionIconDictionary = new Dictionary<string, BitmapImage>();
+        private Dictionary<string, BitmapSource> ExtensionIconDictionary = new Dictionary<string, BitmapSource>();
         private List<BitmapImage> LocalBitmapImageList = new List<BitmapImage>()
         {
             ResourceExtensions.LoadBitmapFromResource("ic_folder.ico"),
@@ -653,20 +653,20 @@ namespace IFilterShellView2
 
                     if (NativeUtilities.IsAttributeOfFolder(PidlData.dwFileAttributes))
                     {
-                        PidlData.IconBitmapImage = LocalBitmapImageList[0];
+                        PidlData.IconBitmapSource = LocalBitmapImageList[0];
                     }
                     else
                     {
-                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapImage IconBitmapImage))
+                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
                         {
                             string FilePath = Path.Combine(ShellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
-                            IconBitmapImage = NativeUtilities.GetIconBitmapSource(FilePath, false);
-                            ExtensionIconDictionary[Extension] = IconBitmapImage;
-                            PidlData.IconBitmapImage = IconBitmapImage;
+                            IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
+                            ExtensionIconDictionary[Extension] = IconBitmapSource;
+                            PidlData.IconBitmapSource = IconBitmapSource;
                         }
                         else
                         {
-                            PidlData.IconBitmapImage = IconBitmapImage;
+                            PidlData.IconBitmapSource = IconBitmapSource;
                         }
                     }
 
