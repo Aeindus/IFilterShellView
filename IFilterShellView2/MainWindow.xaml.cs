@@ -22,15 +22,12 @@ using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
 using IFilterShellView2.ShellContext;
 using Microsoft.Win32;
-using ModernWpf.Controls;
-using ModernWpf.Controls.Primitives;
 using SHDocVw;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -38,7 +35,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -801,12 +797,12 @@ namespace IFilterShellView2
                 case "SettingsPlacement":
                     if (SaveSetting) Properties.Settings.Default.SettingsPlacementId = SettingId;
 
-                    PlacementSettingsIc.Glyph = ((FontIcon)crbtn.Content).Glyph;
+                    PlacementSettingsIc.Glyph = ((ModernWpf.Controls.FontIcon)crbtn.Content).Glyph;
                     break;
                 case "SettingsCase":
                     if (SaveSetting) Properties.Settings.Default.SettingsCaseId = SettingId;
 
-                    CaseSettingsIc.Glyph = ((FontIcon)crbtn.Content).Glyph;
+                    CaseSettingsIc.Glyph = ((ModernWpf.Controls.FontIcon)crbtn.Content).Glyph;
                     break;
             }
         }
@@ -955,6 +951,17 @@ namespace IFilterShellView2
                     dragObj.SetFileDropList(new System.Collections.Specialized.StringCollection() { FullyQuallifiedItemName });
                     DragDrop.DoDragDrop((System.Windows.Controls.ListView)e.Source, dragObj, DragDropEffects.Copy);
                 }
+            } 
+            else
+            {
+                ListViewItem listViewItem = ItemsList.GetItemAt(e.GetPosition(ItemsList));
+
+                if (listViewItem == null || listViewItem.Content == null) return;
+
+                Rect listViewItemRect = ItemsList.GetListViewItemRect(listViewItem);
+                var newMargins = FilterItemsControlBox.Margin;
+                newMargins.Top = listViewItemRect.Top - ItemsPanel.Margin.Top;
+                FilterItemsControlBox.Margin = newMargins;
             }
         }
         private void BrowseBackBt_Click(object sender, RoutedEventArgs e)
@@ -1254,22 +1261,23 @@ namespace IFilterShellView2
 
         private void PlacementSettingsBt_Click(object sender, RoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
 
         private void CaseSettingsBt_Click(object sender, RoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
 
 
         private void ShowCommandList(object sender, RoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
         private void ShowHistoryList(object sender, RoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
+
     }
 }

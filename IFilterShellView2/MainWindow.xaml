@@ -21,6 +21,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         ui:ThemeManager.IsThemeAware="True"
+        Background="Transparent"
         ShowActivated="True"
         Focusable="False"
         UseLayoutRounding="True">
@@ -161,9 +162,6 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Window.Background>
-        <SolidColorBrush Opacity="0" />
-    </Window.Background>
 
     <StackPanel Orientation="Vertical"
                 HorizontalAlignment="Center"
@@ -290,27 +288,20 @@
                                          Glyph="&#57803;" />
                         </Button>
 
-                        <StackPanel Name="FilterColumn"
-                                    Orientation="Vertical"
-                                    MinWidth="400">
-                            <!-- Filter text -->
-                            <TextBox Name="FilterTb"
-                                     ui:ControlHelper.PlaceholderText="Filter shell by expression (⊙.⊙)"
-                                     BorderThickness="0"
-                                     BorderBrush="#00000000"
-                                     FocusVisualStyle="{x:Null}"
-                                     HorizontalAlignment="Stretch"
-                                     FontSize="15"
-                                     Focusable="True"
-                                     KeyDown="FilterTb_KeyDown"
-                                     KeyUp="FilterTb_KeyUp"
-                                     TextChanged="FilterTb_TextChanged">
-                            </TextBox>
-
-                            <ui:ProgressBar x:Name="ProgressPb"
-                                            IsIndeterminate="True"
-                                            Visibility="Collapsed" />
-                        </StackPanel>
+                        <!-- Filter text -->
+                        <TextBox Name="FilterTb"
+                                 MinWidth="400"
+                                 ui:ControlHelper.PlaceholderText="Filter shell by expression (⊙.⊙)"
+                                 BorderThickness="0"
+                                 BorderBrush="#00000000"
+                                 FocusVisualStyle="{x:Null}"
+                                 HorizontalAlignment="Stretch"
+                                 FontSize="15"
+                                 Focusable="True"
+                                 KeyDown="FilterTb_KeyDown"
+                                 KeyUp="FilterTb_KeyUp"
+                                 TextChanged="FilterTb_TextChanged">
+                        </TextBox>
 
                         <Button Click="ShowHistoryList"
                                 ToolTip="History of compiled commands">
@@ -379,103 +370,60 @@
             <Border>
                 <StackPanel Orientation="Vertical"
                             Margin="{StaticResource RowMargins}">
-                    <ListView Name="ItemsList"
-                              SelectionMode="Single"
-                              HorizontalContentAlignment="Stretch"
-                              MaxHeight="400"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                              ItemTemplate="{StaticResource PidlItemTemplate}"
-                              VirtualizingStackPanel.IsVirtualizing="True"
-                              VirtualizingStackPanel.VirtualizationMode="Recycling"
-                              PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
-                              PreviewMouseMove="ItemsList_PreviewMouseMove">
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="{x:Type ListViewItem}">
-                                <Setter Property="SnapsToDevicePixels"
-                                        Value="true" />
-                                <Setter Property="OverridesDefaultStyle"
-                                        Value="true" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListViewItem">
-                                            <Border Name="ItemBorder"
-                                                    HorizontalAlignment="Stretch"
-                                                    Margin="4,0">
-                                                <Grid>
-                                                    <ContentPresenter Content="{TemplateBinding Content}"
-                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                                    <StackPanel Orientation="Horizontal"
-                                                                HorizontalAlignment="Right"
-                                                                Background="Transparent">
-                                                        <!-- Run file -->
-                                                        <Button Background="Transparent"
-                                                                ToolTip="Run file">
-                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                         Glyph="&#57767;"
-                                                                         FontSize="14" />
-                                                        </Button>
-                                                        <!--Copy-->
-                                                        <Button Background="Transparent"
-                                                                ToolTip="Copy file">
-                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                         Glyph="&#57711;"
-                                                                         FontSize="14" />
-                                                        </Button>
-                                                        <!--Invoke Properties-->
-                                                        <Button Background="Transparent"
-                                                                ToolTip="Invoke properties menu">
-                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                         Glyph="&#57694;"
-                                                                         FontSize="14" />
-                                                        </Button>
-                                                        <!--Delete-->
-                                                        <Button Background="Transparent"
-                                                                ToolTip="Delete file">
-                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                         Glyph="&#57607;"
-                                                                         FontSize="14" />
-                                                        </Button>
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver"
-                                                         Value="True">
-                                                    <Setter TargetName="ItemBorder"
-                                                            Property="Background"
-                                                            Value="#eeeeee" />
-                                                    <!--<Setter TargetName="ContentPresenter"
-                                                            Property="TextElement.Foreground"
-                                                            Value="{DynamicResource ListViewItemForegroundPointerOver}" />-->
-                                                </Trigger>
-                                                <Trigger Property="IsSelected"
-                                                         Value="True">
-                                                    <Setter TargetName="ItemBorder"
-                                                            Property="BorderBrush"
-                                                            Value="#000" />
-                                                </Trigger>
-                                                <MultiTrigger>
-                                                    <MultiTrigger.Conditions>
-                                                        <Condition Property="IsSelected"
-                                                                   Value="True" />
-                                                        <Condition Property="IsMouseOver"
-                                                                   Value="True" />
-                                                    </MultiTrigger.Conditions>
-                                                    <Setter TargetName="ItemBorder"
-                                                            Property="BorderBrush"
-                                                            Value="#000" />
-                                                    <Setter TargetName="ItemBorder"
-                                                            Property="Background"
-                                                            Value="#eeeeee" />
-                                                </MultiTrigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                    </ListView>
+                    <ui:ProgressBar x:Name="ProgressPb"
+                                    IsIndeterminate="True"
+                                    Visibility="Collapsed" />
+                    <!-- The grid inside grid is a neat hack to create the overlay effect.-->
+                    <Grid>
+                        <Grid Panel.ZIndex="1000"
+                              Visibility="Visible"
+                              HorizontalAlignment="Right">
+                            <!-- Overlay controls here -->
+                            <StackPanel Name="FilterItemsControlBox" Orientation="Horizontal">
+                                <!-- Run file -->
+                                <Button Background="Transparent"
+                                        ToolTip="Run file">
+                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                 Glyph="&#57767;"
+                                                 FontSize="14" />
+                                </Button>
+                                <!--Copy-->
+                                <Button Background="Transparent"
+                                        ToolTip="Copy file">
+                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                 Glyph="&#57711;"
+                                                 FontSize="14" />
+                                </Button>
+                                <!--Invoke Properties-->
+                                <Button Background="Transparent"
+                                        ToolTip="Invoke properties menu">
+                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                 Glyph="&#57694;"
+                                                 FontSize="14" />
+                                </Button>
+                                <!--Delete-->
+                                <Button Background="Transparent"
+                                        ToolTip="Delete file">
+                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                 Glyph="&#57607;"
+                                                 FontSize="14" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
 
+                        <!-- Use whatever layout you need -->
+                        <ListView Name="ItemsList"
+                                  SelectionMode="Single"
+                                  HorizontalContentAlignment="Stretch"
+                                  MaxHeight="400"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  ItemTemplate="{StaticResource PidlItemTemplate}"
+                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                  PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
+                                  PreviewMouseMove="ItemsList_PreviewMouseMove">
+                        </ListView>
+                    </Grid>
 
                     <WrapPanel VerticalAlignment="Center"
                                Margin="10,4,0,0">
@@ -546,8 +494,7 @@
         <ui:ThemeShadowChrome Name="AdvancedSettingsPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}"
-                              Margin="4,0">
+                              Depth="{StaticResource ShadowDepth}">
             <Border>
                 <StackPanel Orientation="Vertical"
                             Margin="12">
@@ -618,8 +565,7 @@
         <ui:ThemeShadowChrome Name="InfoPanel"
                               Visibility="Collapsed"
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}"
-                              Margin="4,0">
+                              Depth="{StaticResource ShadowDepth}">
             <Border>
                 <StackPanel Orientation="Vertical"
                             Margin="12">
