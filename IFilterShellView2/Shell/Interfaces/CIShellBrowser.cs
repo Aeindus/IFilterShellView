@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using static IFilterShellView2.NativeWin32;
+using static IFilterShellView2.Native.NativeWin32;
 
 namespace IFilterShellView2.Shell.Interfaces
 {

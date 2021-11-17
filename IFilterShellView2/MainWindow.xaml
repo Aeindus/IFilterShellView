@@ -90,7 +90,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Source="{Binding BmpImage}"
+                <Image Source="{Binding IconBitmapSource}"
                        Grid.Column="0"
                        Width="28"
                        Height="28" />
@@ -200,7 +200,7 @@
 
     <StackPanel Orientation="Vertical"
                 HorizontalAlignment="Center"
-                Margin="12">
+                Margin="12,0,12,12">
         <StackPanel Orientation="Horizontal">
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
@@ -408,7 +408,7 @@
                               IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
                               Width="{Binding Path=Width, ElementName=FilterPanel}"
-                              Opacity="0.98">
+                              Opacity="0.96">
             <Border>
                 <StackPanel Orientation="Vertical"
                             Margin="{StaticResource RowMargins}">

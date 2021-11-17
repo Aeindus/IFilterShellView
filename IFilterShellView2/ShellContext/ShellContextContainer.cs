@@ -14,6 +14,7 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using IFilterShellView2.Native;
 using IFilterShellView2.Shell.Interfaces;
 using System;
 using System.Runtime.InteropServices;

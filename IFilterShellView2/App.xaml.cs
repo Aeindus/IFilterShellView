@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using IFilterShellView2.Native;
+using System.Threading;
 using System.Windows;
 
 namespace IFilterShellView2

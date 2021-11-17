@@ -17,6 +17,7 @@
 using IFilterShellView2.Exceptions;
 using IFilterShellView2.Export;
 using IFilterShellView2.Extensions;
+using IFilterShellView2.Native;
 using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
 using IFilterShellView2.ShellContext;
@@ -510,6 +511,7 @@ namespace IFilterShellView2
         #endregion Worker registered events
 
 
+        private Dictionary<string, BitmapSource> ExtensionIconDictionary = new Dictionary<string, BitmapSource>();
 
 
         #region The actual processing unit - handles both filtering and exception handling
@@ -642,13 +644,31 @@ namespace IFilterShellView2
                         PidlData.PidlName = ShellContext.MarshalPIDLNativeDataHolder.BUFFER.ToString();
                         PidlData.AttributesSet = false;
                     }
-
+                        
+                    // Get extension icon
+                    string Extension = Path.GetExtension(PidlData.PidlName);
 
                     if (IsPidlDataFolder(PidlData))
-                        PidlData.BmpImage = PidlImageList[0];
+                    {
+                        PidlData.IconBitmapSource = PidlImageList[0];
+                    }
                     else
-                        PidlData.BmpImage = PidlImageList[1];
+                    {
+                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
+                        {
+                            string FilePath = Path.Combine(ShellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
+                            IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, true);
+                            ExtensionIconDictionary[Extension] = IconBitmapSource;
+                            PidlData.IconBitmapSource = IconBitmapSource;
 
+                            Debug.WriteLine(string.Format("[+] Loaded another new image resource for extension '{0}'.", Extension));
+                        }
+                        else
+                        {
+                            PidlData.IconBitmapSource = IconBitmapSource;
+                            Debug.WriteLine(string.Format("[+] Used dictionary resource for extension '{0}'.", Extension));
+                        }
+                    }
 
                     if (ShellContext.FlagExtendedFilterMod)
                     {
