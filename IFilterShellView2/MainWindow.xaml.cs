@@ -648,7 +648,7 @@ namespace IFilterShellView2
                     // Get extension icon
                     string Extension = Path.GetExtension(PidlData.PidlName);
 
-                    if (IsPidlDataFolder(PidlData))
+                    if (NativeUtilities.IsAttributeOfFolder(PidlData.dwFileAttributes))
                     {
                         PidlData.IconBitmapSource = PidlImageList[0];
                     }
@@ -657,7 +657,7 @@ namespace IFilterShellView2
                         if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
                         {
                             string FilePath = Path.Combine(ShellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
-                            IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, true);
+                            IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
                             ExtensionIconDictionary[Extension] = IconBitmapSource;
                             PidlData.IconBitmapSource = IconBitmapSource;
 
@@ -920,7 +920,7 @@ namespace IFilterShellView2
             if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
 
             // Open eplorer at selected folder
-            if (IsPidlDataFolder(SelectedPidlData))
+            if (NativeUtilities.IsAttributeOfFolder(SelectedPidlData.dwFileAttributes))
             {
                 if (!BrowseToFolderByDisplayName(FullyQuallifiedItemName))
                 {
@@ -1160,10 +1160,6 @@ namespace IFilterShellView2
             // When we browse a new folder some of the data changes
             return FlagResult && GatherShellInterfacesLinkedToShell(ShellContext.PrevShellWindowHwnd);
         }
-        private bool IsPidlDataFolder(CPidlData PidlData)
-        {
-            return PidlData.dwFileAttributes == 0x10;
-        }
         private void UpdateSelectionStatusBarInfo(int? FilterCount = null, int? PidlCount = null)
         {
             FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? ShellContext.FilterCount, PidlCount ?? ShellContext.PidlCount);
@@ -1189,7 +1185,7 @@ namespace IFilterShellView2
             GetPidlFullPath(SelectedPidlData, out string FullyQuallifiedItemName);
             try
             {
-                if (IsPidlDataFolder(SelectedPidlData))
+                if (NativeUtilities.IsAttributeOfFolder(SelectedPidlData.dwFileAttributes))
                 {
                     Directory.Delete(FullyQuallifiedItemName);
                 }

@@ -38,5 +38,10 @@ namespace IFilterShellView2.Native
             NativeWin32.DestroyIcon(iconHandle);
             return img;
         }
+
+        public static bool IsAttributeOfFolder(uint dwFileAttributes)
+        {
+            return (dwFileAttributes & NativeWin32.FILE_ATTRIBUTE_DIRECTORY) == NativeWin32.FILE_ATTRIBUTE_DIRECTORY;
+        }
     }
 }
