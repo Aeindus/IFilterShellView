@@ -90,7 +90,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Source="{Binding IconBitmapSource}"
+                <Image Source="{Binding IconBitmapImage, Mode=OneTime}"
                        Grid.Column="0"
                        Width="28"
                        Height="28" />
@@ -420,32 +420,6 @@
                               ItemTemplate="{StaticResource PidlItemTemplate}"
                               PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
                               PreviewMouseMove="ItemsList_PreviewMouseMove">
-                        <ListView.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Delete Item"
-                                          Name="PidlCtx_Delete"
-                                          Click="PidlCtx_Delete_Click">
-                                    <MenuItem.Icon>
-                                        <ui:FontIcon Glyph="&#57607;" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <Separator />
-                                <MenuItem Header="Copy Item"
-                                          Name="PidlCtx_CpyItem"
-                                          Click="PidlCtx_CpyItem_Click">
-                                    <MenuItem.Icon>
-                                        <ui:FontIcon Glyph="&#57711;" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Copy Item Path"
-                                          Name="PidlCtx_CpyPath"
-                                          Click="PidlCtx_CpyPath_Click">
-                                    <MenuItem.Icon>
-                                        <ui:FontIcon Glyph="&#57711;" />
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </ListView.ContextMenu>
                     </ListView>
 
 

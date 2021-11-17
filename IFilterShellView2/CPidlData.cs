@@ -28,7 +28,7 @@ namespace IFilterShellView2
         //public System.Runtime.InteropServices.ComTypes.FILETIME ftLastAccessTime { get; set; }
         //public System.Runtime.InteropServices.ComTypes.FILETIME ftLastWriteTime { get; set; }
 
-        public BitmapSource IconBitmapSource { get; set; }
+        public BitmapImage IconBitmapImage { get; set; }
 
         public DateTime ftCreationTime { get; set; }
         public DateTime ftLastAccessTime { get; set; }

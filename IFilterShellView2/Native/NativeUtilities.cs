@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -9,34 +10,53 @@ namespace IFilterShellView2.Native
 {
     public static class NativeUtilities
     {
-        public static BitmapSource GetIconBitmapSource(string strPath, bool bSmall)
+        public static BitmapImage GetIconBitmapSource(string strPath, bool bSmall)
         {
-            NativeWin32.SHFILEINFO info;
-            info.hIcon = IntPtr.Zero;
-            info.iIcon = 0;
-            info.dwAttributes = 0;
-            info.szDisplayName = "";
-            info.szTypeName = "";
+            NativeWin32.SHFILEINFO fileInfo;
+            fileInfo.hIcon = IntPtr.Zero;
+            fileInfo.iIcon = 0;
+            fileInfo.dwAttributes = 0;
+            fileInfo.szDisplayName = "";
+            fileInfo.szTypeName = "";
 
-            int cbFileInfo = Marshal.SizeOf(info);
-            uint flags;
+            int sizeOfFileInfo = Marshal.SizeOf(fileInfo);
+            uint flags = NativeWin32.SHGFI_ICON | NativeWin32.SHGFI_USEFILEATTRIBUTES;
 
             if (bSmall)
-                flags = NativeWin32.SHGFI_ICON | NativeWin32.SHGFI_SMALLICON | NativeWin32.SHGFI_USEFILEATTRIBUTES;
+                flags |= NativeWin32.SHGFI_SMALLICON;
             else
-                flags = NativeWin32.SHGFI_ICON | NativeWin32.SHGFI_LARGEICON | NativeWin32.SHGFI_USEFILEATTRIBUTES;
+                flags |= NativeWin32.SHGFI_LARGEICON;
 
-            NativeWin32.SHGetFileInfo(strPath, 256, out info, (uint)cbFileInfo, flags);
-
-            IntPtr iconHandle = info.hIcon;
-            
-            BitmapSource img = Imaging.CreateBitmapSourceFromHIcon(
-                        iconHandle,
+            NativeWin32.SHGetFileInfo(strPath, 256, out fileInfo, (uint)sizeOfFileInfo, flags);
+            BitmapSource bitmapSource = Imaging.CreateBitmapSourceFromHIcon(
+                        fileInfo.hIcon,
                         Int32Rect.Empty,
                         BitmapSizeOptions.FromEmptyOptions());
+            NativeWin32.DestroyIcon(fileInfo.hIcon);
 
-            NativeWin32.DestroyIcon(iconHandle);
-            return img;
+
+            // JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+            MemoryStream memoryStream = new MemoryStream();
+            BitmapImage bitmapImage = new BitmapImage();
+
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            encoder.Save(memoryStream);
+            memoryStream.Position = 0;
+
+            bitmapImage.BeginInit();
+            //bitmapImage.DecodePixelWidth = 250;
+            //bitmapImage.DecodePixelHeight = 250;
+            bitmapImage.CacheOption = BitmapCacheOption.None;
+            bitmapImage.StreamSource = new MemoryStream(memoryStream.ToArray());
+            bitmapImage.EndInit();
+
+            memoryStream.Close();
+            
+            // Prevent leaks and optimize for thread calls
+            bitmapImage.Freeze();
+
+            return bitmapImage;
         }
 
         public static bool IsAttributeOfFolder(uint dwFileAttributes)

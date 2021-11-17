@@ -76,7 +76,9 @@ namespace IFilterShellView2
         private DispatcherTimer DispatcherInputFilter;
         private MainWindow ThisWindowRef;
 
-        private List<BitmapImage> PidlImageList = new List<BitmapImage>()
+
+        private Dictionary<string, BitmapImage> ExtensionIconDictionary = new Dictionary<string, BitmapImage>();
+        private List<BitmapImage> LocalBitmapImageList = new List<BitmapImage>()
         {
             ResourceExtensions.LoadBitmapFromResource("ic_folder.ico"),
             ResourceExtensions.LoadBitmapFromResource("ic_file.ico"),
@@ -274,7 +276,11 @@ namespace IFilterShellView2
         }
         private void ResetInterfaceData(bool GoesIntoHidingMode = false)
         {
+            ItemsList.ItemsSource = null;
             ListOfPidlData.Clear();
+            ItemsList.ItemsSource = ListOfPidlData;
+            GC.Collect();
+
             UpdateSelectionStatusBarInfo(0);
 
             if (!Properties.Settings.Default.KeepFilterText && GoesIntoHidingMode)
@@ -286,8 +292,6 @@ namespace IFilterShellView2
             InfoPanel.Visibility = Visibility.Collapsed;
             ItemsPanel.Visibility = Visibility.Collapsed;
         }
-
-
 
 
 
@@ -511,7 +515,6 @@ namespace IFilterShellView2
         #endregion Worker registered events
 
 
-        private Dictionary<string, BitmapSource> ExtensionIconDictionary = new Dictionary<string, BitmapSource>();
 
 
         #region The actual processing unit - handles both filtering and exception handling
@@ -650,23 +653,20 @@ namespace IFilterShellView2
 
                     if (NativeUtilities.IsAttributeOfFolder(PidlData.dwFileAttributes))
                     {
-                        PidlData.IconBitmapSource = PidlImageList[0];
+                        PidlData.IconBitmapImage = LocalBitmapImageList[0];
                     }
                     else
                     {
-                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
+                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapImage IconBitmapImage))
                         {
                             string FilePath = Path.Combine(ShellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
-                            IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
-                            ExtensionIconDictionary[Extension] = IconBitmapSource;
-                            PidlData.IconBitmapSource = IconBitmapSource;
-
-                            Debug.WriteLine(string.Format("[+] Loaded another new image resource for extension '{0}'.", Extension));
+                            IconBitmapImage = NativeUtilities.GetIconBitmapSource(FilePath, false);
+                            ExtensionIconDictionary[Extension] = IconBitmapImage;
+                            PidlData.IconBitmapImage = IconBitmapImage;
                         }
                         else
                         {
-                            PidlData.IconBitmapSource = IconBitmapSource;
-                            Debug.WriteLine(string.Format("[+] Used dictionary resource for extension '{0}'.", Extension));
+                            PidlData.IconBitmapImage = IconBitmapImage;
                         }
                     }
 
