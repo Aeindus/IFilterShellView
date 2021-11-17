@@ -89,7 +89,7 @@ namespace IFilterShellView2
         private readonly int FilterAfterDelay = 120;
         private bool FlagStringReadyToProcess = false;
         private DateTime LastTimeTextChanged;
-
+        private int PrevListViewItemPidlHovered = -1;
 
 
         #region Data related to filtering and partial settings
@@ -923,21 +923,6 @@ namespace IFilterShellView2
                     // TODO: log this event
                 }
             }
-            else
-            {
-                try
-                {
-                    ProcessStartInfo psi = new ProcessStartInfo(FullyQuallifiedItemName)
-                    {
-                        UseShellExecute = true
-                    };
-                    Process.Start(psi);
-                }
-                catch (Exception)
-                {
-                    // TODO: log this exception
-                }
-            }
         }
         private void ItemsList_PreviewMouseMove(object sender, MouseEventArgs e)
         {
@@ -949,7 +934,7 @@ namespace IFilterShellView2
 
                     DataObject dragObj = new DataObject();
                     dragObj.SetFileDropList(new System.Collections.Specialized.StringCollection() { FullyQuallifiedItemName });
-                    DragDrop.DoDragDrop((System.Windows.Controls.ListView)e.Source, dragObj, DragDropEffects.Copy);
+                    DragDrop.DoDragDrop((ListView)e.Source, dragObj, DragDropEffects.Copy);
                 }
             } 
             else
@@ -958,10 +943,80 @@ namespace IFilterShellView2
 
                 if (listViewItem == null || listViewItem.Content == null) return;
 
+                string PidlName = (listViewItem.Content as CPidlData).PidlName;
+                var SearchResult = ListOfPidlData.Select((Pidl, Index) => (Pidl, Index))
+                    .FirstOrDefault( Item => Item.Pidl.PidlName == PidlName);
+                PrevListViewItemPidlHovered = (SearchResult.Pidl == null) ? -1 : SearchResult.Index;
+
                 Rect listViewItemRect = ItemsList.GetListViewItemRect(listViewItem);
+                
                 var newMargins = FilterItemsControlBox.Margin;
-                newMargins.Top = listViewItemRect.Top - ItemsPanel.Margin.Top;
+                newMargins.Top = listViewItemRect.Top + listViewItemRect.Height /2 - FilterItemsControlBox.ActualHeight/2;
+                
+                if (NativeUtilities.IsAttributeOfFolder(SearchResult.Pidl.dwFileAttributes))
+                {
+                    Cmd_RunFile.Visibility = Visibility.Collapsed;
+                    Cmd_CopyFile.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    Cmd_RunFile.Visibility = Visibility.Visible;
+                    Cmd_CopyFile.Visibility = Visibility.Visible;
+                }
+
                 FilterItemsControlBox.Margin = newMargins;
+            }
+        }
+        private void ItemsPanelGrid_MouseEnter(object sender, MouseEventArgs e)
+        {
+            FilterItemsControlBox.Visibility = Visibility.Visible;
+        }
+        private void ItemsPanelGrid_MouseLeave(object sender, MouseEventArgs e)
+        {
+            FilterItemsControlBox.Visibility = Visibility.Collapsed;
+        }
+        private void Cmd_RunFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(FullyQuallifiedItemName)
+                {
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception)
+            {
+                // TODO: log this exception
+            }
+        }
+        private void Cmd_CopyFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+
+            DataObject ClpDataObject = new DataObject();
+            string[] ClpFileArray = new string[1];
+            ClpFileArray[0] = FullyQuallifiedItemName;
+            ClpDataObject.SetData(DataFormats.FileDrop, ClpFileArray, true);
+            Clipboard.SetDataObject(ClpDataObject, true);
+        }
+        private void Cmd_InvokeProperty_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+
+            NativeUtilities.ShowFileProperties(FullyQuallifiedItemName);
+        }
+        private void Cmd_DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+
+            if (DeletePidlFromSystem(SelectedPidlData))
+            {
+                int SelectedIndex = ItemsList.SelectedIndex;
+                if (SelectedIndex >= 0)
+                    ListOfPidlData.RemoveAt(SelectedIndex);
             }
         }
         private void BrowseBackBt_Click(object sender, RoutedEventArgs e)
@@ -1054,37 +1109,6 @@ namespace IFilterShellView2
 
 
 
-        #region PidlListView Context Menu - Event Handlers
-        private void PidlCtx_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
-
-            if (DeletePidlFromSystem(SelectedPidlData))
-            {
-                int SelectedIndex = ItemsList.SelectedIndex;
-                if (SelectedIndex >= 0)
-                    ListOfPidlData.RemoveAt(SelectedIndex);
-            }
-        }
-        private void PidlCtx_CpyItem_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
-
-            DataObject ClpDataObject = new DataObject();
-            string[] ClpFileArray = new string[1];
-            ClpFileArray[0] = FullyQuallifiedItemName;
-            ClpDataObject.SetData(DataFormats.FileDrop, ClpFileArray, true);
-            Clipboard.SetDataObject(ClpDataObject, true);
-        }
-        private void PidlCtx_CpyPath_Click(object sender, RoutedEventArgs e)
-        {
-            if (!GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
-
-            Clipboard.SetText(FullyQuallifiedItemName);
-        }
-        #endregion
-
-
 
 
         #region History List
@@ -1171,17 +1195,25 @@ namespace IFilterShellView2
         {
             FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? ShellContext.FilterCount, PidlCount ?? ShellContext.PidlCount);
         }
-        private bool GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
+
+        private bool GetPidlAndFullPath(int Index, out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
-            int SelectedIndex = ItemsList.SelectedIndex;
             SelectedPidlData = null;
             FullyQuallifiedItemName = "";
 
-            if (SelectedIndex < 0) return false;
+            if (Index < 0 || Index >= ListOfPidlData.Count) return false;
 
-            SelectedPidlData = ListOfPidlData[SelectedIndex];
+            SelectedPidlData = ListOfPidlData[Index];
             GetPidlFullPath(SelectedPidlData, out FullyQuallifiedItemName);
             return true;
+        }
+        private bool GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
+        {
+            return GetPidlAndFullPath(PrevListViewItemPidlHovered, out SelectedPidlData, out FullyQuallifiedItemName);
+        }
+        private bool GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
+        {
+            return GetPidlAndFullPath(ItemsList.SelectedIndex, out SelectedPidlData, out FullyQuallifiedItemName);
         }
         private void GetPidlFullPath(CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {

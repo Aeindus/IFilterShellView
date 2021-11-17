@@ -308,18 +308,11 @@
                             <ui:FlyoutBase.AttachedFlyout>
                                 <ui:Flyout Placement="Bottom">
                                     <Border>
-                                        <StackPanel Orientation="Vertical"
-                                                    Margin="8">
-                                            <TextBlock Text="Command history"
-                                                       FontWeight="Bold" />
-                                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                                       Margin="0, 8" />
-                                            <ListView Name="HistoryList"
-                                                      SelectionMode="Single"
-                                                      MaxHeight="160"
-                                                      ItemTemplate="{StaticResource HistoryTemplate}"
-                                                      PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
-                                        </StackPanel>
+                                        <ListView Name="HistoryList"
+                                                  SelectionMode="Single"
+                                                  MaxHeight="160"
+                                                  ItemTemplate="{StaticResource HistoryTemplate}"
+                                                  PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
                                     </Border>
                                 </ui:Flyout>
                             </ui:FlyoutBase.AttachedFlyout>
@@ -373,41 +366,56 @@
                     <ui:ProgressBar x:Name="ProgressPb"
                                     IsIndeterminate="True"
                                     Visibility="Collapsed" />
+
                     <!-- The grid inside grid is a neat hack to create the overlay effect.-->
-                    <Grid>
-                        <Grid Panel.ZIndex="1000"
-                              Visibility="Visible"
+                    <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
+                          MouseLeave="ItemsPanelGrid_MouseLeave">
+                        <Grid Visibility="Visible"
+                              Panel.ZIndex="1000"
                               HorizontalAlignment="Right">
                             <!-- Overlay controls here -->
-                            <StackPanel Name="FilterItemsControlBox" Orientation="Horizontal">
-                                <!-- Run file -->
-                                <Button Background="Transparent"
-                                        ToolTip="Run file">
-                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                 Glyph="&#57767;"
-                                                 FontSize="14" />
-                                </Button>
-                                <!--Copy-->
-                                <Button Background="Transparent"
-                                        ToolTip="Copy file">
-                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                 Glyph="&#57711;"
-                                                 FontSize="14" />
-                                </Button>
-                                <!--Invoke Properties-->
-                                <Button Background="Transparent"
-                                        ToolTip="Invoke properties menu">
-                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                 Glyph="&#57694;"
-                                                 FontSize="14" />
-                                </Button>
-                                <!--Delete-->
-                                <Button Background="Transparent"
-                                        ToolTip="Delete file">
-                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                 Glyph="&#57607;"
-                                                 FontSize="14" />
-                                </Button>
+                            <StackPanel>
+                                <StackPanel Name="FilterItemsControlBox"
+                                            Visibility="Collapsed"
+                                            Orientation="Horizontal"
+                                            Margin="0,0,12,0">
+                                    <!-- Run file -->
+                                    <Button Name="Cmd_RunFile"
+                                            Click="Cmd_RunFile_Click"
+                                            Background="Transparent"
+                                            ToolTip="Run file">
+                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                     Glyph="&#57767;"
+                                                     FontSize="14" />
+                                    </Button>
+                                    <!--Copy-->
+                                    <Button Name="Cmd_CopyFile"
+                                            Click="Cmd_CopyFile_Click"
+                                            Background="Transparent"
+                                            ToolTip="Copy file">
+                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                     Glyph="&#57711;"
+                                                     FontSize="14" />
+                                    </Button>
+                                    <!--Invoke Properties-->
+                                    <Button Name="Cmd_InvokeProperty"
+                                            Click="Cmd_InvokeProperty_Click"
+                                            Background="Transparent"
+                                            ToolTip="Invoke properties menu">
+                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                     Glyph="&#57694;"
+                                                     FontSize="14" />
+                                    </Button>
+                                    <!--Delete-->
+                                    <Button Name="Cmd_DeleteItem"
+                                            Click="Cmd_DeleteItem_Click"
+                                            Background="Transparent"
+                                            ToolTip="Delete item">
+                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                     Glyph="&#57607;"
+                                                     FontSize="14" />
+                                    </Button>
+                                </StackPanel>
                             </StackPanel>
                         </Grid>
 

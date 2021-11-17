@@ -35,30 +35,18 @@ namespace IFilterShellView2.Native
             NativeWin32.DestroyIcon(fileInfo.hIcon);
             bitmapSource.Freeze();
 
-            // JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            //PngBitmapEncoder encoder = new PngBitmapEncoder();
-            //MemoryStream memoryStream = new MemoryStream();
-            //BitmapImage bitmapImage = new BitmapImage();
-
-            //encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-            //encoder.Save(memoryStream);
-            //memoryStream.Position = 0;
-
-            //bitmapImage.BeginInit();
-            ////bitmapImage.DecodePixelWidth = 250;
-            ////bitmapImage.DecodePixelHeight = 250;
-            //bitmapImage.CacheOption = BitmapCacheOption.None;
-            //bitmapImage.StreamSource = new MemoryStream(memoryStream.ToArray());
-            //bitmapImage.EndInit();
-
-            //memoryStream.Close();
-
-            //// Prevent leaks and optimize for thread calls
-            //bitmapImage.Freeze
-            //return bitmapImage;
-
             return bitmapSource;
+        }
 
+        public static void ShowFileProperties(string Filename)
+        {
+            NativeWin32.SHELLEXECUTEINFO info = new NativeWin32.SHELLEXECUTEINFO();
+            info.cbSize = Marshal.SizeOf(info);
+            info.lpVerb = "properties";
+            info.lpFile = Filename;
+            info.nShow = (int)NativeWin32.ShowCommands.SW_SHOW;
+            info.fMask = (int)NativeWin32.ShellExecuteMaskFlags.SEE_MASK_INVOKEIDLIST;
+            NativeWin32.ShellExecuteEx(ref info);
         }
 
         public static bool IsAttributeOfFolder(uint dwFileAttributes)
