@@ -87,58 +87,26 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Image Source="{Binding IconBitmapSource, Mode=OneTime}"
                        Grid.Column="0"
+                       Margin="4,0,0,0"
                        Width="28"
                        Height="28" />
                 <StackPanel Orientation="Vertical"
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            HorizontalAlignment="Left"
+                            HorizontalAlignment="Stretch"
                             ToolTip="{Binding Path=dwFileAttributes, Converter={StaticResource ItemTooltipAttributeConverter}}"
-                            Margin="12,6,0,6">
+                            Margin="12,3,0,3">
                     <TextBlock Text="{Binding PidlName}"
                                TextWrapping="Wrap" />
                     <TextBlock FontSize="12"
                                Text="{Binding Path=ftCreationTime, Converter={StaticResource ItemSubtitleConverter}}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal"
-                            Grid.Column="2">
-                    <!-- Run file -->
-                    <Button Background="Transparent"
-                            ToolTip="Run file">
-                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                     Glyph="&#57767;"
-                                     FontSize="14" />
-                    </Button>
-                     <!--Copy--> 
-                    <Button Background="Transparent"
-                            ToolTip="Copy file">
-                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                     Glyph="&#57711;"
-                                     FontSize="14" />
-                    </Button>
-                     <!--Invoke Properties--> 
-                    <Button Background="Transparent"
-                            ToolTip="Invoke properties menu">
-                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                     Glyph="&#57694;"
-                                     FontSize="14" />
-                    </Button>
-                     <!--Delete--> 
-                    <Button Background="Transparent"
-                            ToolTip="Delete file">
-                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                     Glyph="&#57607;"
-                                     FontSize="14" />
-                    </Button>
-                </StackPanel>
             </Grid>
         </DataTemplate>
-
 
         <!-- A template view for the command listview -->
         <DataTemplate x:Key="CommandTemplate"
@@ -169,7 +137,6 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
-
 
         <!-- A template view for the history listview -->
         <DataTemplate x:Key="HistoryTemplate"
@@ -422,6 +389,91 @@
                               VirtualizingStackPanel.VirtualizationMode="Recycling"
                               PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
                               PreviewMouseMove="ItemsList_PreviewMouseMove">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="SnapsToDevicePixels"
+                                        Value="true" />
+                                <Setter Property="OverridesDefaultStyle"
+                                        Value="true" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border Name="ItemBorder"
+                                                    HorizontalAlignment="Stretch"
+                                                    Margin="4,0">
+                                                <Grid>
+                                                    <ContentPresenter Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                    <StackPanel Orientation="Horizontal"
+                                                                HorizontalAlignment="Right"
+                                                                Background="Transparent">
+                                                        <!-- Run file -->
+                                                        <Button Background="Transparent"
+                                                                ToolTip="Run file">
+                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                         Glyph="&#57767;"
+                                                                         FontSize="14" />
+                                                        </Button>
+                                                        <!--Copy-->
+                                                        <Button Background="Transparent"
+                                                                ToolTip="Copy file">
+                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                         Glyph="&#57711;"
+                                                                         FontSize="14" />
+                                                        </Button>
+                                                        <!--Invoke Properties-->
+                                                        <Button Background="Transparent"
+                                                                ToolTip="Invoke properties menu">
+                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                         Glyph="&#57694;"
+                                                                         FontSize="14" />
+                                                        </Button>
+                                                        <!--Delete-->
+                                                        <Button Background="Transparent"
+                                                                ToolTip="Delete file">
+                                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                                         Glyph="&#57607;"
+                                                                         FontSize="14" />
+                                                        </Button>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver"
+                                                         Value="True">
+                                                    <Setter TargetName="ItemBorder"
+                                                            Property="Background"
+                                                            Value="#eeeeee" />
+                                                    <!--<Setter TargetName="ContentPresenter"
+                                                            Property="TextElement.Foreground"
+                                                            Value="{DynamicResource ListViewItemForegroundPointerOver}" />-->
+                                                </Trigger>
+                                                <Trigger Property="IsSelected"
+                                                         Value="True">
+                                                    <Setter TargetName="ItemBorder"
+                                                            Property="BorderBrush"
+                                                            Value="#000" />
+                                                </Trigger>
+                                                <MultiTrigger>
+                                                    <MultiTrigger.Conditions>
+                                                        <Condition Property="IsSelected"
+                                                                   Value="True" />
+                                                        <Condition Property="IsMouseOver"
+                                                                   Value="True" />
+                                                    </MultiTrigger.Conditions>
+                                                    <Setter TargetName="ItemBorder"
+                                                            Property="BorderBrush"
+                                                            Value="#000" />
+                                                    <Setter TargetName="ItemBorder"
+                                                            Property="Background"
+                                                            Value="#eeeeee" />
+                                                </MultiTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
                     </ListView>
 
 
