@@ -19,6 +19,7 @@ using IFilterShellView2.Export;
 using IFilterShellView2.Extensions;
 using IFilterShellView2.Filter;
 using IFilterShellView2.HelperClasses;
+using IFilterShellView2.Model;
 using IFilterShellView2.Native;
 using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
@@ -64,18 +65,12 @@ namespace IFilterShellView2
         private readonly ObservableCollection<CHistoryItem> listOfHistoryItems = new ObservableCollection<CHistoryItem>();
         private readonly List<CHistoryItem> tempListOfHistoryItems = new List<CHistoryItem>();
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
-        private readonly List<BitmapImage> localBitmapImageList = new List<BitmapImage>()
-        {
-            ResourceExtensions.LoadBitmapFromResource("ic_folder.ico"),
-            ResourceExtensions.LoadBitmapFromResource("ic_file.ico"),
-        };
         private readonly Dictionary<string, BitmapSource> extensionIconDictionary = new Dictionary<string, BitmapSource>();
 
 
         private readonly ListViewItemPidl prevListViewItemPidl = new ListViewItemPidl();
         private readonly GlobalKeyboardHook globalHookObject;
         private readonly ShellContextContainer shellContext;
-        private readonly CInfoClass infoClass;
         private readonly BackgroundWorker workerObject_SelectionProc;
         private readonly DispatcherTimer dispatcherInputFilter;
 
@@ -83,28 +78,34 @@ namespace IFilterShellView2
         private readonly string assemblyImageLocation;
         private const char keyModExtendedCommandMode = '?';
 
-        private bool flagExtendedFilterModNoticeShown = false;
         private readonly int filterAfterDelay = 120;
         private bool flagStringReadyToProcess = false;
         private DateTime lastTimeTextChanged;
 
 
 
+
+
+
+        public VisibilityModel SearchPageVisibilityModel = new VisibilityModel();
+
+        private void ShowSearchResultsPage(bool Visible)
+        {
+            SearchPageVisibilityModel.Visible = Visible;
+        }
+
+
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = SearchPageVisibilityModel;
 
             Assembly CurrentImageAssembly = Assembly.GetExecutingAssembly();
             assemblyImageName = CurrentImageAssembly.GetName().Name;
             assemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), assemblyImageName + ".exe");
 
-            Application.Current.Resources["TextControlBorderThemeThickness"] = 0;
-
             // Initialize application settings
             LoadApplicationSettings();
-
-            // Initialize regular data types
-            infoClass = new CInfoClass(this); // not an external reference so it is theoretically ok
 
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
@@ -236,8 +237,8 @@ namespace IFilterShellView2
             }
 
             AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
-            InfoPanel.Visibility = Visibility.Collapsed;
-            ItemsPanel.Visibility = Visibility.Collapsed;
+            //ItemsPanel.Visibility = Visibility.Collapsed;
+            ShowSearchResultsPage(false);
         }
 
 
@@ -248,23 +249,22 @@ namespace IFilterShellView2
         {
             ResetInterfaceData();
 
-            ItemsPanel.Visibility = Visibility.Visible;
+            // ItemsPanel.Visibility = Visibility.Visible;
+            ShowSearchResultsPage(true);
 
             if (GoesInDeepProcessing)
             {
                 ProgressPb.Visibility = Visibility.Visible;
-                ItemsPanel.IsEnabled = false;
+                //ItemsPanel.IsEnabled = false;
                 FilterTb.IsReadOnly = true;
             }
         }
         private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
         {
-            infoClass.Message = ErrorMessage;
-
             if (ReturnedFromDeepProcessing)
             {
                 ProgressPb.Visibility = Visibility.Collapsed;
-                ItemsPanel.IsEnabled = true;
+                // ItemsPanel.IsEnabled = true;
                 FilterTb.IsReadOnly = false;
 
                 if (tempListOfHistoryItems.Count != 0)
@@ -276,7 +276,8 @@ namespace IFilterShellView2
 
             if (shellContext.FilterCount == 0)
             {
-                ItemsPanel.Visibility = Visibility.Collapsed;
+                // ItemsPanel.Visibility = Visibility.Collapsed;
+                ShowSearchResultsPage(false);
             }
         }
         private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
@@ -298,11 +299,11 @@ namespace IFilterShellView2
 
             ResetInterfaceData(true);
 
-            // Save settings here as a precaution
-            SaveApplicationSettings();
-
             if (ApplicationIsExiting)
             {
+                // Save settings here as a precaution
+                SaveApplicationSettings();
+
                 dispatcherInputFilter.Stop();
                 globalHookObject.Dispose();
                 shellContext.Dispose();
@@ -334,8 +335,6 @@ namespace IFilterShellView2
                 FilterTb.Focus();
                 Keyboard.Focus(FilterTb);
 
-
-                // double ShellWidth = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
                 //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
                 UpdateWindowPositionToFixedPin();
@@ -381,19 +380,9 @@ namespace IFilterShellView2
                 // If I want to enter a command
                 if (shellContext.FlagExtendedFilterMod)
                 {
-                    if (!flagExtendedFilterModNoticeShown)
-                    {
-                        // Show a notification
-                        infoClass.Message = "You are about to issue a command. Press [Enter] to compile and run it. If you want to abort then press [Backspace] or [Escape].";
-                        flagExtendedFilterModNoticeShown = true;
-                    }
                     shellContext.FlagRunInBackgroundWorker = true;
 
                     return;
-                }
-                else
-                {
-                    flagExtendedFilterModNoticeShown = false;
                 }
 
                 Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), shellContext.FilterText));
@@ -403,7 +392,6 @@ namespace IFilterShellView2
                 // Check if the number of items in folder is greate than the maximum accepted
                 if (shellContext.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan)
                 {
-                    infoClass.Message = "Too many items in this folder. Press [Enter] to start a heavy iteration. If you want to abort then press [Backspace] or [Escape].";
                     shellContext.FlagRunInBackgroundWorker = true;
                     return;
                 }
@@ -591,7 +579,7 @@ namespace IFilterShellView2
 
                     if (NativeUtilities.IsAttributeOfFolder(PidlData.dwFileAttributes))
                     {
-                        PidlData.IconBitmapSource = localBitmapImageList[0];
+                        PidlData.IconBitmapSource = StaticImageFactory.ImageList[0];
                     }
                     else
                     {
@@ -989,7 +977,6 @@ namespace IFilterShellView2
             }
             catch (Exception)
             {
-                infoClass.Message = "Failed exporting the specified data to a file. Try again";
                 throw;
             }
         }
@@ -1197,12 +1184,11 @@ namespace IFilterShellView2
                     }
 
                     CmdWrapperUI = new CCommandItem();
-                    CmdWrapperUI.Name = CommandEntry.Key;
-                    CmdWrapperUI.Description = ": " + XPressCommands.ComIndexDescription[CommandEntry.Value];
-                    CmdWrapperUI.CmdAlias = "/" + CommandEntry.Key + "/";
+                    CmdWrapperUI.Name = String.Format("{0} - {1}", CommandEntry.Key, XPressCommands.ComIndexDescription[CommandEntry.Value]);
+                    CmdWrapperUI.CmdAlias = "Alias - ";
                     LastComIndex = (int)CommandEntry.Value;
                 }
-                else CmdWrapperUI.CmdAlias += CommandEntry.Key + "/";
+                else CmdWrapperUI.CmdAlias += CommandEntry.Key + " | ";
             }
         }
         public void UpdateWindowPositionToFixedPin()
@@ -1220,32 +1206,6 @@ namespace IFilterShellView2
             this.Width = ScreenWidth * widthDPIFactor;
             this.Left = 0;
             this.Top = 0;
-        }
-
-
-
-        private class CInfoClass
-        {
-            private MainWindow Window;
-            public CInfoClass(MainWindow window) => Window = window;
-
-            public string Message
-            {
-                get => Window.InfoText.Text;
-                set
-                {
-                    if (value == null || value.Length == 0)
-                    {
-                        if (Window.InfoPanel.Visibility != Visibility.Collapsed)
-                            Window.InfoPanel.Visibility = Visibility.Collapsed;
-                    }
-                    else
-                    {
-                        Window.InfoPanel.Visibility = Visibility.Visible;
-                        Window.InfoText.Text = value;
-                    }
-                }
-            }
         }
     }
 }

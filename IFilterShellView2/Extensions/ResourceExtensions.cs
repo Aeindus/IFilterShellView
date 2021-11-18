@@ -27,7 +27,7 @@ namespace IFilterShellView2.Extensions
             BitmapResource.BeginInit();
             BitmapResource.UriSource = new Uri(string.Format("pack://application:,,/Resources/{0}", rsrc));
             BitmapResource.EndInit();
-
+            BitmapResource.Freeze();
             return BitmapResource;
         }
     }

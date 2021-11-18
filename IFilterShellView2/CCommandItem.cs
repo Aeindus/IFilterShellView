@@ -14,13 +14,15 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using IFilterShellView2.HelperClasses;
+using System.Windows.Media.Imaging;
+
 namespace IFilterShellView2
 {
     public class CCommandItem
     {
+        public BitmapImage IconBitmap => StaticImageFactory.ImageList[2];
         public string Name { get; set; }
-        public string Description { get; set; }
-
         public string CmdAlias { get; set; }
     }
 }

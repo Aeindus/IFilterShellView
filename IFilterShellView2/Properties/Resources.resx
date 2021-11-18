@@ -118,6 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ICommandIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ICommandIcon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ic_file" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ic_file.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -129,5 +132,8 @@
   </data>
   <data name="IFilterIcon1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\IFilterIcon.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IHistoryIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\IHistoryIcon.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

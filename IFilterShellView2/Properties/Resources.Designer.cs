@@ -19,7 +19,7 @@ namespace IFilterShellView2.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Resources {
@@ -83,6 +83,16 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] ICommandIcon {
+            get {
+                object obj = ResourceManager.GetObject("ICommandIcon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] IFilterIcon {
             get {
                 object obj = ResourceManager.GetObject("IFilterIcon", resourceCulture);
@@ -96,6 +106,16 @@ namespace IFilterShellView2.Properties {
         public static byte[] IFilterIcon1 {
             get {
                 object obj = ResourceManager.GetObject("IFilterIcon1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] IHistoryIcon {
+            get {
+                object obj = ResourceManager.GetObject("IHistoryIcon", resourceCulture);
                 return ((byte[])(obj));
             }
         }

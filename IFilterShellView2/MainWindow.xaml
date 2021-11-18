@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:base="clr-namespace:IFilterShellView2"
         xmlns:cvrtr="clr-namespace:IFilterShellView2.Converter"
+        xmlns:tz="http://schemas.abtsoftware.co.uk/transitionz"
         mc:Ignorable="d"
         Title="FilterWindow"
         xmlns:ui="http://schemas.modernwpf.com/2019"
@@ -38,7 +39,8 @@
         <cvrtr:ItemDatesConverter x:Key="ItemDatesConverter" />
         <cvrtr:ItemTooltipAttributeConverter x:Key="ItemTooltipAttributeConverter" />
         <cvrtr:ItemSubtitleConverter x:Key="ItemSubtitleConverter" />
-
+        <cvrtr:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
 
 
         <Style TargetType="{x:Type Button}"
@@ -118,22 +120,19 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <ui:FontIcon Grid.Column="0"
-                             FontFamily="Segoe MDL2 Assets"
-                             Glyph="&#57668;" />
+                <Image Grid.Column="0"
+                       Source="{Binding IconBitmap, Mode=OneTime}"
+                       Width="28"
+                       Height="28" />
 
                 <StackPanel Grid.Column="1"
                             Orientation="Vertical"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Stretch"
                             Margin="12,3,0,3">
-                    <WrapPanel Orientation="Horizontal"
-                               HorizontalAlignment="Stretch">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="{Binding Description}"
-                                   TextWrapping="Wrap" />
-                    </WrapPanel>
+                    <TextBlock Text="{Binding Name}" TextWrapping="WrapWithOverflow"/>
                     <TextBlock Text="{Binding CmdAlias}"
+                               FontWeight="Light"
                                TextWrapping="Wrap" />
                 </StackPanel>
             </Grid>
@@ -142,23 +141,17 @@
         <!-- A template view for the history listview -->
         <DataTemplate x:Key="HistoryTemplate"
                       DataType="base:CHistoryItem">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <Image Source="{Binding IconBitmap, Mode=OneTime}"
+                       Margin="4,0,12,0"
+                       Width="28"
+                       Height="28" />
 
-                <ui:FontIcon Grid.Column="0"
-                             FontFamily="Segoe MDL2 Assets"
-                             Glyph="&#57802;" />
-                <TextBlock Grid.Column="1"
-                           Text="{Binding Command}"
+                <TextBlock Text="{Binding Command}"
                            TextWrapping="Wrap"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Stretch"
-                           Margin="12,2,0,2" />
-
-            </Grid>
+                           VerticalAlignment="Center" />
+            </StackPanel>
         </DataTemplate>
     </Window.Resources>
 
@@ -166,7 +159,8 @@
     <StackPanel Orientation="Vertical"
                 HorizontalAlignment="Center"
                 Margin="12,0,12,12">
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Name="Toolbar" Orientation="Horizontal"
+                    Margin="0,0,0,4">
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
                 <Border>
@@ -261,32 +255,11 @@
 
             <ui:ThemeShadowChrome Name="FilterPanel"
                                   IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                                  Depth="{StaticResource ShadowDepth}">
+                                  Depth="{StaticResource ShadowDepth}"
+                                  Margin="4,0">
                 <Border>
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
-                        <Button Click="ShowCommandList"
-                                ToolTip="List of available commands">
-                            <ui:FlyoutBase.AttachedFlyout>
-                                <ui:Flyout Placement="Bottom">
-                                    <Border>
-                                        <StackPanel Orientation="Vertical"
-                                                    Margin="8">
-                                            <TextBlock Text="List of available commands"
-                                                       FontWeight="Bold" />
-                                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                                       Margin="0, 8" />
-                                            <ListView Name="CommandList"
-                                                      SelectionMode="Single"
-                                                      ItemTemplate="{StaticResource CommandTemplate}"
-                                                      PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp" />
-                                        </StackPanel>
-                                    </Border>
-                                </ui:Flyout>
-                            </ui:FlyoutBase.AttachedFlyout>
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57803;" />
-                        </Button>
 
                         <!-- Filter text -->
                         <TextBox Name="FilterTb"
@@ -303,22 +276,6 @@
                                  TextChanged="FilterTb_TextChanged">
                         </TextBox>
 
-                        <Button Click="ShowHistoryList"
-                                ToolTip="History of compiled commands">
-                            <ui:FlyoutBase.AttachedFlyout>
-                                <ui:Flyout Placement="Bottom">
-                                    <Border>
-                                        <ListView Name="HistoryList"
-                                                  SelectionMode="Single"
-                                                  MaxHeight="160"
-                                                  ItemTemplate="{StaticResource HistoryTemplate}"
-                                                  PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp" />
-                                    </Border>
-                                </ui:Flyout>
-                            </ui:FlyoutBase.AttachedFlyout>
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57656;" />
-                        </Button>
                     </StackPanel>
                 </Border>
             </ui:ThemeShadowChrome>
@@ -354,144 +311,206 @@
 
         <!-- Row #2 -->
         <!-- ItemsListView + List Controls -->
-        <ui:ThemeShadowChrome Name="ItemsPanel"
-                              Visibility="Visible"
-                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
+        <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                               Depth="{StaticResource ShadowDepth}"
-                              Width="{Binding Path=Width, ElementName=FilterPanel}"
-                              Opacity="0.96">
+                              MaxWidth="{Binding ElementName=Toolbar,Path=ActualWidth}">
             <Border>
                 <StackPanel Orientation="Vertical"
                             Margin="{StaticResource RowMargins}">
-                    <ui:ProgressBar x:Name="ProgressPb"
-                                    IsIndeterminate="True"
-                                    Visibility="Collapsed" />
 
-                    <!-- The grid inside grid is a neat hack to create the overlay effect.-->
-                    <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
-                          MouseLeave="ItemsPanelGrid_MouseLeave">
-                        <Grid Visibility="Visible"
-                              Panel.ZIndex="1000"
-                              HorizontalAlignment="Right">
-                            <!-- Overlay controls here -->
-                            <StackPanel>
-                                <StackPanel Name="FilterItemsControlBox"
-                                            Visibility="Collapsed"
-                                            Orientation="Horizontal"
-                                            Margin="0,0,12,0">
-                                    <!-- Run file -->
-                                    <Button Name="Cmd_RunFile"
-                                            Click="Cmd_RunFile_Click"
-                                            Background="Transparent"
-                                            ToolTip="Run file">
-                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                     Glyph="&#57767;"
-                                                     FontSize="14" />
-                                    </Button>
-                                    <!--Copy-->
-                                    <Button Name="Cmd_CopyFile"
-                                            Click="Cmd_CopyFile_Click"
-                                            Background="Transparent"
-                                            ToolTip="Copy file">
-                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                     Glyph="&#57711;"
-                                                     FontSize="14" />
-                                    </Button>
-                                    <!--Invoke Properties-->
-                                    <Button Name="Cmd_InvokeProperty"
-                                            Click="Cmd_InvokeProperty_Click"
-                                            Background="Transparent"
-                                            ToolTip="Invoke properties menu">
-                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                     Glyph="&#57694;"
-                                                     FontSize="14" />
-                                    </Button>
-                                    <!--Delete-->
-                                    <Button Name="Cmd_DeleteItem"
-                                            Click="Cmd_DeleteItem_Click"
-                                            Background="Transparent"
-                                            ToolTip="Delete item">
-                                        <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                     Glyph="&#57607;"
-                                                     FontSize="14" />
-                                    </Button>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
+                    <!-- Page 1 -->
+                    <Grid HorizontalAlignment="Stretch"
+                          Visibility="{Binding Path=Visible, Converter={StaticResource ReverseBooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                        <!-- Use whatever layout you need -->
-                        <ListView Name="ItemsList"
-                                  SelectionMode="Single"
-                                  HorizontalContentAlignment="Stretch"
-                                  MaxHeight="400"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                  ItemTemplate="{StaticResource PidlItemTemplate}"
-                                  VirtualizingStackPanel.IsVirtualizing="True"
-                                  VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                  PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
-                                  PreviewMouseMove="ItemsList_PreviewMouseMove">
-                        </ListView>
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Vertical"
+                                    Margin="8">
+                            <TextBlock Text="List of available commands"
+                                       FontWeight="Bold" />
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                       Margin="0, 8" />
+                            <ListView Name="CommandList"
+                                      SelectionMode="Single"
+                                      ItemTemplate="{StaticResource CommandTemplate}"
+                                      VirtualizingStackPanel.IsVirtualizing="True"
+                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Vertical"
+                                    Margin="8">
+                            <TextBlock Text="History"
+                                       FontWeight="Bold" />
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                       Margin="0, 8" />
+                            <ListView Name="HistoryList"
+                                      SelectionMode="Single"
+                                      ItemTemplate="{StaticResource HistoryTemplate}"
+                                      VirtualizingStackPanel.IsVirtualizing="True"
+                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem"
+                                           BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                        <Setter Property="HorizontalContentAlignment"
+                                                Value="Left" />
+                                        <Setter Property="VerticalContentAlignment"
+                                                Value="Center" />
+                                        <Setter Property="Margin"
+                                                Value="0,0,0,0" />
+                                        <Setter Property="Padding"
+                                                Value="0,2,8,2" />
+                                        <Setter Property="MinHeight"
+                                                Value="20" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                            </ListView>
+                        </StackPanel>
                     </Grid>
 
-                    <WrapPanel VerticalAlignment="Center"
-                               Margin="10,4,0,0">
-                        <StackPanel Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    ToolTip="How many items where selcted"
-                                    Margin="0,0,4,0">
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57811;"
-                                         Margin="0,0,8,0" />
-                            <TextBlock FontSize="14"
-                                       Name="FolCountTb"
-                                       Text="0/0" />
-                        </StackPanel>
-                        <Button Name="BrowseBackBt"
-                                Click="BrowseBackBt_Click"
-                                ToolTip="Go back to spawn folder">
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57616;" />
-                        </Button>
-                        <ComboBox Name="SaveListSettings_Format"
-                                  VerticalAlignment="Top"
-                                  ui:ControlHelper.PlaceholderText="Select dump format"
-                                  Margin="0"
-                                  BorderThickness="0">
-                            <ComboBoxItem Tag="1">Export as CSV</ComboBoxItem>
-                            <ComboBoxItem Tag="2">Export as JSON</ComboBoxItem>
-                            <ComboBoxItem Tag="3">Export as XML</ComboBoxItem>
-                            <ComboBoxItem Tag="4">Export as C Array</ComboBoxItem>
-                        </ComboBox>
-                        <Button>
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         ToolTip="Saving options"
-                                         Glyph="&#57694;" />
-                            <ui:FlyoutService.Flyout>
-                                <ui:MenuFlyout>
-                                    <MenuItem Name="SaveListSettings_Path"
-                                              Header="Include path"
-                                              IsCheckable="True"
-                                              IsChecked="True" />
-                                    <MenuItem Name="SaveListSettings_Ext"
-                                              Header="Include extension"
-                                              IsChecked="True"
-                                              IsCheckable="True" />
-                                </ui:MenuFlyout>
-                            </ui:FlyoutService.Flyout>
-                        </Button>
-                        <Button Name="SaveListBt"
-                                Click="SaveListBt_Click"
-                                ToolTip="Save this list as">
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57605;" />
-                        </Button>
-                        <Button Name="LikeBt"
-                                Click="LikeBt_Click"
-                                ToolTip="Like or sponsor this project">
-                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                         Glyph="&#57759;" />
-                        </Button>
-                    </WrapPanel>
+
+                    <!-- Page 2 -->
+                    <StackPanel Orientation="Vertical"
+                                Visibility="Collapsed"
+                                tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=120, TransitionOn=Visibility}"
+                                tz:Transitionz.Translate="{tz:TranslateParams From='0,10', To='0,0', Duration=120, TransitionOn=Visibility}"
+                                tz:Transitionz.Visibility="{Binding Path=Visible, Converter={StaticResource b2vc}}">
+                        <ui:ProgressBar x:Name="ProgressPb"
+                                        IsIndeterminate="True"
+                                        Visibility="Collapsed" />
+
+                        <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
+                              MouseLeave="ItemsPanelGrid_MouseLeave">
+                            <Grid Visibility="Visible"
+                                  Panel.ZIndex="1000"
+                                  HorizontalAlignment="Right">
+                                <!-- Overlay controls here -->
+                                <StackPanel>
+                                    <StackPanel Name="FilterItemsControlBox"
+                                                Visibility="Collapsed"
+                                                Orientation="Horizontal"
+                                                Margin="0,0,12,0">
+                                        <!-- Run file -->
+                                        <Button Name="Cmd_RunFile"
+                                                Click="Cmd_RunFile_Click"
+                                                Background="Transparent"
+                                                ToolTip="Run file">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57767;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Copy-->
+                                        <Button Name="Cmd_CopyFile"
+                                                Click="Cmd_CopyFile_Click"
+                                                Background="Transparent"
+                                                ToolTip="Copy file">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57711;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Invoke Properties-->
+                                        <Button Name="Cmd_InvokeProperty"
+                                                Click="Cmd_InvokeProperty_Click"
+                                                Background="Transparent"
+                                                ToolTip="Invoke properties menu">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57694;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Delete-->
+                                        <Button Name="Cmd_DeleteItem"
+                                                Click="Cmd_DeleteItem_Click"
+                                                Background="Transparent"
+                                                ToolTip="Delete item">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57607;"
+                                                         FontSize="14" />
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Use whatever layout you need -->
+                            <ListView Name="ItemsList"
+                                      SelectionMode="Single"
+                                      HorizontalContentAlignment="Stretch"
+                                      MaxHeight="400"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ItemTemplate="{StaticResource PidlItemTemplate}"
+                                      VirtualizingStackPanel.IsVirtualizing="True"
+                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
+                                      PreviewMouseMove="ItemsList_PreviewMouseMove">
+                            </ListView>
+                        </Grid>
+
+                        <WrapPanel VerticalAlignment="Center"
+                                   Margin="10,4,0,0">
+                            <StackPanel Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        ToolTip="How many items where selcted"
+                                        Margin="0,0,4,0">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57811;"
+                                             Margin="0,0,8,0" />
+                                <TextBlock FontSize="14"
+                                           Name="FolCountTb"
+                                           Text="0/0" />
+                            </StackPanel>
+                            <Button Name="BrowseBackBt"
+                                    Click="BrowseBackBt_Click"
+                                    ToolTip="Go back to spawn folder">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57616;" />
+                            </Button>
+                            <ComboBox Name="SaveListSettings_Format"
+                                      VerticalAlignment="Top"
+                                      ui:ControlHelper.PlaceholderText="Select dump format"
+                                      Margin="0"
+                                      BorderThickness="0">
+                                <ComboBoxItem Tag="1">Export as CSV</ComboBoxItem>
+                                <ComboBoxItem Tag="2">Export as JSON</ComboBoxItem>
+                                <ComboBoxItem Tag="3">Export as XML</ComboBoxItem>
+                                <ComboBoxItem Tag="4">Export as C Array</ComboBoxItem>
+                            </ComboBox>
+                            <Button>
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             ToolTip="Saving options"
+                                             Glyph="&#57694;" />
+                                <ui:FlyoutService.Flyout>
+                                    <ui:MenuFlyout>
+                                        <MenuItem Name="SaveListSettings_Path"
+                                                  Header="Include path"
+                                                  IsCheckable="True"
+                                                  IsChecked="True" />
+                                        <MenuItem Name="SaveListSettings_Ext"
+                                                  Header="Include extension"
+                                                  IsChecked="True"
+                                                  IsCheckable="True" />
+                                    </ui:MenuFlyout>
+                                </ui:FlyoutService.Flyout>
+                            </Button>
+                            <Button Name="SaveListBt"
+                                    Click="SaveListBt_Click"
+                                    ToolTip="Save this list as">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57605;" />
+                            </Button>
+                            <Button Name="LikeBt"
+                                    Click="LikeBt_Click"
+                                    ToolTip="Like or sponsor this project">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57759;" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+
+
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>
@@ -566,27 +585,6 @@
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>
-
-
-        <!-- Row #2 -->
-        <!-- Notification menu -->
-        <ui:ThemeShadowChrome Name="InfoPanel"
-                              Visibility="Collapsed"
-                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}">
-            <Border>
-                <StackPanel Orientation="Vertical"
-                            Margin="12">
-                    <TextBlock Text="Notification from the engine"
-                               FontWeight="Bold" />
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                               Margin="0, 8" />
-                    <TextBlock Name="InfoText"
-                               TextWrapping="Wrap" />
-                </StackPanel>
-            </Border>
-        </ui:ThemeShadowChrome>
-
 
     </StackPanel>
 
