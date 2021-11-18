@@ -17,6 +17,8 @@
 using IFilterShellView2.Exceptions;
 using IFilterShellView2.Export;
 using IFilterShellView2.Extensions;
+using IFilterShellView2.Filter;
+using IFilterShellView2.HelperClasses;
 using IFilterShellView2.Native;
 using IFilterShellView2.Parser;
 using IFilterShellView2.Shell.Interfaces;
@@ -57,60 +59,34 @@ namespace IFilterShellView2
          * - When I press CTRL+F while in the same folder I want the filtering to continue from where I left.
          */
 
-        private static readonly List<Key> Keys = new List<Key> { Key.LeftCtrl, Key.F };
-        private ObservableCollection<CPidlData> ListOfPidlData = new ObservableCollection<CPidlData>();
-        private ObservableCollection<CCommandItem> ListOfAvailableCommands = new ObservableCollection<CCommandItem>();
-        private ObservableCollection<CHistoryItem> ListOfHistoryItems = new ObservableCollection<CHistoryItem>();
-        private List<CHistoryItem> TempListOfHistoryItems = new List<CHistoryItem>();
-
-
-        private readonly GlobalKeyboardHook GlobalHookObject;
-        private readonly ShellContextContainer ShellContext;
-        private readonly CInfoClass InfoClass;
-
-        private BackgroundWorker WorkerObject_SelectionProc;
-        private DispatcherTimer DispatcherInputFilter;
-        private MainWindow ThisWindowRef;
-
-
-        private Dictionary<string, BitmapSource> ExtensionIconDictionary = new Dictionary<string, BitmapSource>();
-        private List<BitmapImage> LocalBitmapImageList = new List<BitmapImage>()
+        private readonly ObservableCollection<CPidlData> listOfPidlData = new ObservableCollection<CPidlData>();
+        private readonly ObservableCollection<CCommandItem> listOfAvailableCommands = new ObservableCollection<CCommandItem>();
+        private readonly ObservableCollection<CHistoryItem> listOfHistoryItems = new ObservableCollection<CHistoryItem>();
+        private readonly List<CHistoryItem> tempListOfHistoryItems = new List<CHistoryItem>();
+        private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
+        private readonly List<BitmapImage> localBitmapImageList = new List<BitmapImage>()
         {
             ResourceExtensions.LoadBitmapFromResource("ic_folder.ico"),
             ResourceExtensions.LoadBitmapFromResource("ic_file.ico"),
         };
+        private readonly Dictionary<string, BitmapSource> extensionIconDictionary = new Dictionary<string, BitmapSource>();
 
 
-        private readonly string AssemblyImageName;
-        private readonly string AssemblyImageLocation;
-        private const char KeyModExtendedCommandMode = '?';
+        private readonly ListViewItemPidl prevListViewItemPidl = new ListViewItemPidl();
+        private readonly GlobalKeyboardHook globalHookObject;
+        private readonly ShellContextContainer shellContext;
+        private readonly CInfoClass infoClass;
+        private readonly BackgroundWorker workerObject_SelectionProc;
+        private readonly DispatcherTimer dispatcherInputFilter;
 
-        private bool FlagExtendedFilterModNoticeShown = false;
-        private readonly int FilterAfterDelay = 120;
-        private bool FlagStringReadyToProcess = false;
-        private DateTime LastTimeTextChanged;
-        private int PrevListViewItemPidlHovered = -1;
+        private readonly string assemblyImageName;
+        private readonly string assemblyImageLocation;
+        private const char keyModExtendedCommandMode = '?';
 
-
-        #region Data related to filtering and partial settings
-        private enum FilterSettingsFlags : uint
-        {
-            F_STARTSWITH = 1U,
-            F_CONTAINS = 2U,
-            F_ENDSWITH = 4U,
-            F_REGEX = 8U
-        }
-        private Dictionary<FilterSettingsFlags, Func<string, string, bool>> SettingsActionMap = new Dictionary<FilterSettingsFlags, Func<string, string, bool>>
-        {
-            { FilterSettingsFlags.F_STARTSWITH, (pidl_name, input) => pidl_name.StartsWith(input)},
-            { FilterSettingsFlags.F_CONTAINS, (pidl_name, input) => pidl_name.Contains(input)},
-            { FilterSettingsFlags.F_ENDSWITH, (pidl_name, input) => pidl_name.EndsWith(input)},
-            { FilterSettingsFlags.F_REGEX, (pidl_name, input) => RegexFilterCallback(pidl_name, input)}
-        };
-        private static (string Input, Regex CompiledRegex) FilterRegexContainer = ("", null);
-        #endregion Data related to filtering and partial settings
-
-
+        private bool flagExtendedFilterModNoticeShown = false;
+        private readonly int filterAfterDelay = 120;
+        private bool flagStringReadyToProcess = false;
+        private DateTime lastTimeTextChanged;
 
 
 
@@ -119,10 +95,8 @@ namespace IFilterShellView2
             InitializeComponent();
 
             Assembly CurrentImageAssembly = Assembly.GetExecutingAssembly();
-            AssemblyImageName = CurrentImageAssembly.GetName().Name;
-            AssemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), AssemblyImageName + ".exe");
-
-            ThisWindowRef = this;
+            assemblyImageName = CurrentImageAssembly.GetName().Name;
+            assemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), assemblyImageName + ".exe");
 
             Application.Current.Resources["TextControlBorderThemeThickness"] = 0;
 
@@ -130,24 +104,24 @@ namespace IFilterShellView2
             LoadApplicationSettings();
 
             // Initialize regular data types
-            InfoClass = new CInfoClass(this); // not an external reference so it is theoretically ok
+            infoClass = new CInfoClass(this); // not an external reference so it is theoretically ok
 
             // Initialize a background worker responsible for the heavy selection task
-            WorkerObject_SelectionProc = new BackgroundWorker();
-            WorkerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
-            WorkerObject_SelectionProc.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkerCallback_SelectionProc_Completed);
-            WorkerObject_SelectionProc.ProgressChanged += new ProgressChangedEventHandler(WorkerCallback_SelectionProc_Progress);
-            WorkerObject_SelectionProc.WorkerReportsProgress = true;
-            WorkerObject_SelectionProc.WorkerSupportsCancellation = true;
+            workerObject_SelectionProc = new BackgroundWorker();
+            workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
+            workerObject_SelectionProc.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkerCallback_SelectionProc_Completed);
+            workerObject_SelectionProc.ProgressChanged += new ProgressChangedEventHandler(WorkerCallback_SelectionProc_Progress);
+            workerObject_SelectionProc.WorkerReportsProgress = true;
+            workerObject_SelectionProc.WorkerSupportsCancellation = true;
 
-            ItemsList.ItemsSource = ListOfPidlData;
+            ItemsList.ItemsSource = listOfPidlData;
             CompileCommandDataList();
-            CommandList.ItemsSource = ListOfAvailableCommands;
+            CommandList.ItemsSource = listOfAvailableCommands;
 
-            ListOfHistoryItems = new ObservableCollection<CHistoryItem>(
+            listOfHistoryItems = new ObservableCollection<CHistoryItem>(
                 SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
 
-            HistoryList.ItemsSource = ListOfHistoryItems;
+            HistoryList.ItemsSource = listOfHistoryItems;
 
 
             // Add focus to the search bar
@@ -157,9 +131,9 @@ namespace IFilterShellView2
             try
             {
                 // This can throw - it handles unmanaged resources and it's a critical component
-                ShellContext = new ShellContextContainer();
-                GlobalHookObject = new GlobalKeyboardHook();
-                GlobalHookObject.AddHotkeys(Keys, Callback_GlobalKeyboardHookSafeSta);
+                shellContext = new ShellContextContainer();
+                globalHookObject = new GlobalKeyboardHook();
+                globalHookObject.AddHotkeys(listOfHotkeys, Callback_GlobalKeyboardHookSafeSta);
             }
             catch (Exception)
             {
@@ -167,9 +141,9 @@ namespace IFilterShellView2
                 throw;
             }
 
-            DispatcherInputFilter = new DispatcherTimer();
-            DispatcherInputFilter.Tick += Callback_TimerPulse;
-            DispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
+            dispatcherInputFilter = new DispatcherTimer();
+            dispatcherInputFilter.Tick += Callback_TimerPulse;
+            dispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
         }
         private void Window_Deactivated(object sender, EventArgs e)
         {
@@ -179,14 +153,6 @@ namespace IFilterShellView2
         {
             Callback_OnWindowCancellOrExit(true);
         }
-
-
-
-
-
-
-
-
 
 
 
@@ -250,20 +216,20 @@ namespace IFilterShellView2
                 NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
                 MonitorInfo.Init();
                 NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-                ShellContext.ShellViewRect = MonitorInfo.Monitor;
+                shellContext.ShellViewRect = MonitorInfo.Monitor;
 
 
                 // Set the rest of the ShellContext class
-                ShellContext.pIShellBrowser = pIShellBrowser;
-                ShellContext.pIFolderView2 = pIFolderView2;
-                ShellContext.pIShellFolder = pIShellFolder;
-                ShellContext.pIShellView = pIShellView;
+                shellContext.pIShellBrowser = pIShellBrowser;
+                shellContext.pIFolderView2 = pIFolderView2;
+                shellContext.pIShellFolder = pIShellFolder;
+                shellContext.pIShellView = pIShellView;
 
                 // This can occur if the focused shell window is presenting a virtual namespace
                 if (pIWebBrowserApp.LocationURL == null || pIWebBrowserApp.LocationURL.Length == 0)
                     return false;
 
-                ShellContext.LocationUrl = new Uri(pIWebBrowserApp.LocationURL).LocalPath;
+                shellContext.LocationUrl = new Uri(pIWebBrowserApp.LocationURL).LocalPath;
 
                 return true;
             }
@@ -272,10 +238,10 @@ namespace IFilterShellView2
         }
         private void ResetInterfaceData(bool GoesIntoHidingMode = false)
         {
-            ItemsList.ItemsSource = null;
-            ListOfPidlData.Clear();
-            ItemsList.ItemsSource = ListOfPidlData;
-            GC.Collect();
+            //ItemsList.ItemsSource = null;
+            listOfPidlData.Clear();
+            //ItemsList.ItemsSource = listOfPidlData;
+            //GC.Collect();
 
             UpdateSelectionStatusBarInfo(0);
 
@@ -288,6 +254,7 @@ namespace IFilterShellView2
             InfoPanel.Visibility = Visibility.Collapsed;
             ItemsPanel.Visibility = Visibility.Collapsed;
         }
+
 
 
 
@@ -307,7 +274,7 @@ namespace IFilterShellView2
         }
         private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
         {
-            InfoClass.Message = ErrorMessage;
+            infoClass.Message = ErrorMessage;
 
             if (ReturnedFromDeepProcessing)
             {
@@ -315,21 +282,21 @@ namespace IFilterShellView2
                 ItemsPanel.IsEnabled = true;
                 FilterTb.IsReadOnly = false;
 
-                if (TempListOfHistoryItems.Count != 0)
+                if (tempListOfHistoryItems.Count != 0)
                 {
-                    TempListOfHistoryItems.ForEach(HItem => ListOfHistoryItems.Add(HItem));
-                    TempListOfHistoryItems.Clear();
+                    tempListOfHistoryItems.ForEach(HItem => listOfHistoryItems.Add(HItem));
+                    tempListOfHistoryItems.Clear();
                 }
             }
 
-            if (ShellContext.FilterCount == 0)
+            if (shellContext.FilterCount == 0)
             {
                 ItemsPanel.Visibility = Visibility.Collapsed;
             }
         }
         private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
         {
-            ListOfSelections.ForEach(pidl_data => ListOfPidlData.Add(pidl_data));
+            ListOfSelections.ForEach(pidl_data => listOfPidlData.Add(pidl_data));
             UpdateSelectionStatusBarInfo();
         }
         #endregion
@@ -339,10 +306,10 @@ namespace IFilterShellView2
         #region General callbacks that handle the filtering process
         private void Callback_OnWindowCancellOrExit(bool ApplicationIsExiting)
         {
-            if (WorkerObject_SelectionProc.IsBusy) WorkerObject_SelectionProc.CancelAsync();
+            if (workerObject_SelectionProc.IsBusy) workerObject_SelectionProc.CancelAsync();
 
-            DispatcherInputFilter.Stop();
-            ShellContext.Reset();
+            dispatcherInputFilter.Stop();
+            shellContext.Reset();
 
             ResetInterfaceData(true);
 
@@ -351,9 +318,9 @@ namespace IFilterShellView2
 
             if (ApplicationIsExiting)
             {
-                DispatcherInputFilter.Stop();
-                GlobalHookObject.Dispose();
-                ShellContext.Dispose();
+                dispatcherInputFilter.Stop();
+                globalHookObject.Dispose();
+                shellContext.Dispose();
             }
             else
             {
@@ -366,14 +333,14 @@ namespace IFilterShellView2
         }
         private void Callback_GlobalKeyboardHookSafeSta()
         {
-            ShellContext.PrevShellWindowHwnd = NativeWin32.GetForegroundWindow();
+            shellContext.PrevShellWindowHwnd = NativeWin32.GetForegroundWindow();
 
-            if (GatherShellInterfacesLinkedToShell(ShellContext.PrevShellWindowHwnd))
+            if (GatherShellInterfacesLinkedToShell(shellContext.PrevShellWindowHwnd))
             {
                 // Show the window and make it visible
-                ThisWindowRef.Show();
-                ThisWindowRef.Activate(); // must be set before ?
-                ThisWindowRef.Focus();
+                this.Show();
+                this.Activate(); // must be set before ?
+                this.Focus();
 
                 // Make sure that the window is active using native calls
                 // WindowExtensions.ActivateWindow(ThisWindowRef);
@@ -394,75 +361,75 @@ namespace IFilterShellView2
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
                 //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
 
-                ThisWindowRef.Width = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
-                ThisWindowRef.Left = 0;
-                ThisWindowRef.Top = 0;
+                this.Width = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
+                this.Left = 0;
+                this.Top = 0;
 
                 // Subscribe to the shell's message pump and filter close messages
-                ShellContext.EventManager.ResubscribeToExtCloseEvent(ShellContext.PrevShellWindowHwnd, Callback_OnShellWindowCloseEvent);
+                shellContext.EventManager.ResubscribeToExtCloseEvent(shellContext.PrevShellWindowHwnd, Callback_OnShellWindowCloseEvent);
 
                 /* Note: Do not move this line. We will create a copy of the current location url and store it inside LocationUrlBefore browse
                  * because we will need a copy when we click on a filtered item. When we click we call GatherShellInterfacesLinkedToShell 
                  * which resets LocationUrl. 
                  */
-                ShellContext.LocationUrlBeforeBrowse = ShellContext.LocationUrl;
+                shellContext.LocationUrlBeforeBrowse = shellContext.LocationUrl;
 
                 // Enable dispatcher timer
-                DispatcherInputFilter.Start();
+                dispatcherInputFilter.Start();
             }
         }
         private void Callback_TimerPulse(object sender, EventArgs e)
         {
-            TimeSpan DeltaTime = DateTime.Now - LastTimeTextChanged;
+            TimeSpan DeltaTime = DateTime.Now - lastTimeTextChanged;
 
-            if (DeltaTime.TotalMilliseconds < FilterAfterDelay || !FlagStringReadyToProcess)
+            if (DeltaTime.TotalMilliseconds < filterAfterDelay || !flagStringReadyToProcess)
                 return;
 
-            FlagStringReadyToProcess = false;
+            flagStringReadyToProcess = false;
 
             // Handle ShellContext's exposed interfaces
-            if (ShellContext.pIFolderView2 == null || ShellContext.pIShellFolder == null || ShellContext.pIShellView == null)
+            if (shellContext.pIFolderView2 == null || shellContext.pIShellFolder == null || shellContext.pIShellView == null)
                 return;
 
-            if (!FilterTb.IsFocused || ShellContext.FilterText.Equals(ShellContext.PrevFilterText) /*|| ShellContext.FilterText.Length == 0*/)
+            if (!FilterTb.IsFocused || shellContext.FilterText.Equals(shellContext.PrevFilterText) /*|| ShellContext.FilterText.Length == 0*/)
                 return;
 
             string ErrorString = "";
-            ShellContext.PrevFilterText = ShellContext.FilterText;
-            ShellContext.FlagExtendedFilterMod = ShellContext.FilterText.StartsWith(KeyModExtendedCommandMode);
+            shellContext.PrevFilterText = shellContext.FilterText;
+            shellContext.FlagExtendedFilterMod = shellContext.FilterText.StartsWith(keyModExtendedCommandMode);
 
             try
             {
                 // Query the view for the number of items that are hosted
-                ShellContext.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out ShellContext.PidlCount);
+                shellContext.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out shellContext.PidlCount);
 
                 // If I want to enter a command
-                if (ShellContext.FlagExtendedFilterMod)
+                if (shellContext.FlagExtendedFilterMod)
                 {
-                    if (!FlagExtendedFilterModNoticeShown)
+                    if (!flagExtendedFilterModNoticeShown)
                     {
                         // Show a notification
-                        InfoClass.Message = "You are about to issue a command. Press [Enter] to compile and run it. If you want to abort then press [Backspace] or [Escape].";
-                        FlagExtendedFilterModNoticeShown = true;
+                        infoClass.Message = "You are about to issue a command. Press [Enter] to compile and run it. If you want to abort then press [Backspace] or [Escape].";
+                        flagExtendedFilterModNoticeShown = true;
                     }
-                    ShellContext.FlagRunInBackgroundWorker = true;
+                    shellContext.FlagRunInBackgroundWorker = true;
 
                     return;
                 }
                 else
                 {
-                    FlagExtendedFilterModNoticeShown = false;
+                    flagExtendedFilterModNoticeShown = false;
                 }
 
-                Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), ShellContext.FilterText));
+                Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), shellContext.FilterText));
 
                 Callback_UIOnBeforeFiltering();
 
                 // Check if the number of items in folder is greate than the maximum accepted
-                if (ShellContext.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan)
+                if (shellContext.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan)
                 {
-                    InfoClass.Message = "Too many items in this folder. Press [Enter] to start a heavy iteration. If you want to abort then press [Backspace] or [Escape].";
-                    ShellContext.FlagRunInBackgroundWorker = true;
+                    infoClass.Message = "Too many items in this folder. Press [Enter] to start a heavy iteration. If you want to abort then press [Backspace] or [Escape].";
+                    shellContext.FlagRunInBackgroundWorker = true;
                     return;
                 }
 
@@ -506,7 +473,7 @@ namespace IFilterShellView2
             }
             Callback_UIOnAfterFiltering(true, ErrorString);
 
-            ShellContext.FlagRunInBackgroundWorker = false;
+            shellContext.FlagRunInBackgroundWorker = false;
         }
         #endregion Worker registered events
 
@@ -524,8 +491,8 @@ namespace IFilterShellView2
 
             bool IsOnWorkerThread = worker != null;
             bool FlagFlushBuffer = true;
-            int NumberOfIntervals = Math.Min(10, ShellContext.PidlCount);
-            int NumberOfItemsPerInterval = Math.Min(ShellContext.PidlCount / NumberOfIntervals, NumberOfIntervals);
+            int NumberOfIntervals = Math.Min(10, shellContext.PidlCount);
+            int NumberOfItemsPerInterval = Math.Min(shellContext.PidlCount / NumberOfIntervals, NumberOfIntervals);
             int ReportPecentage = 0;
             int TempCounter = 0;
             int FailedAttempts = 0;
@@ -548,24 +515,24 @@ namespace IFilterShellView2
             };
 
             // Setting some variables
-            ShellContext.FilterReportCount = 0;
-            ShellContext.FilterCount = 0;
+            shellContext.FilterReportCount = 0;
+            shellContext.FilterCount = 0;
 
-            ShellContext.pIFolderView2.SetRedraw(false);
-            ShellContext.pIShellView.SelectItem(IntPtr.Zero, SVSI.SVSI_DESELECTOTHERS);
+            shellContext.pIFolderView2.SetRedraw(false);
+            shellContext.pIShellView.SelectItem(IntPtr.Zero, SVSI.SVSI_DESELECTOTHERS);
 
 
             // After deselecting all items check if the filter is empty
-            if (ShellContext.FilterText.Length == 0)
+            if (shellContext.FilterText.Length == 0)
             {
                 goto LabelRestoreState;
             }
 
 
             // Compile the predicate chain if needed
-            if (ShellContext.FlagExtendedFilterMod)
+            if (shellContext.FlagExtendedFilterMod)
             {
-                XPressParser XLanguageParser = new XPressParser(ShellContext.FilterText[1..]);
+                XPressParser XLanguageParser = new XPressParser(shellContext.FilterText[1..]);
                 ILLanguageFunct = XLanguageParser.Compile();
 
                 if (ILLanguageFunct == null)
@@ -574,25 +541,25 @@ namespace IFilterShellView2
                 }
 
                 // Save the command in the list
-                TempListOfHistoryItems.Add(new CHistoryItem(ShellContext.FilterText));
+                tempListOfHistoryItems.Add(new CHistoryItem(shellContext.FilterText));
             }
 
             try
             {
                 // Iterate through all the items inside the shell and start matching
-                for (int PidlIndex = 0; PidlIndex < ShellContext.PidlCount; PidlIndex++, TempCounter++)
+                for (int PidlIndex = 0; PidlIndex < shellContext.PidlCount; PidlIndex++, TempCounter++)
                 {
                     bool FilterMatched = false;
 
                     // If I want to return only a sepcific number of elements
                     if (Properties.Settings.Default.MaxNumberFilterUpTo > 0 &&
-                        Properties.Settings.Default.MaxNumberFilterUpTo <= ShellContext.FilterCount)
+                        Properties.Settings.Default.MaxNumberFilterUpTo <= shellContext.FilterCount)
                     {
                         break;
                     }
 
-                    ShellContext.pIFolderView2.Item(PidlIndex, out PidlPtrObj);
-                    ReportPecentage = (int)((float)PidlIndex / ShellContext.PidlCount * 100.0f);
+                    shellContext.pIFolderView2.Item(PidlIndex, out PidlPtrObj);
+                    ReportPecentage = (int)((float)PidlIndex / shellContext.PidlCount * 100.0f);
 
                     if (PidlPtrObj == IntPtr.Zero)
                     {
@@ -605,7 +572,7 @@ namespace IFilterShellView2
                     else FailedAttempts = 0;
 
                     NativeWin32.HResult hr = NativeWin32.SHGetDataFromIDListW(
-                        ShellContext.pIShellFolder,
+                        shellContext.pIShellFolder,
                         PidlPtrObj,
                         NativeWin32.SHGDFIL_FINDDATA,
                         out NativeWin32.WIN32_FIND_DATA Pidl_Win32_FindData,
@@ -617,7 +584,7 @@ namespace IFilterShellView2
                     {
                         PidlData.PidlName = Pidl_Win32_FindData.cFileName;
                         PidlData.dwFileAttributes = Pidl_Win32_FindData.dwFileAttributes;
-                        PidlData.FileSize = ((ulong)Pidl_Win32_FindData.nFileSizeHigh << 32) | Pidl_Win32_FindData.nFileSizeHigh;
+                        PidlData.FileSize = ((ulong)Pidl_Win32_FindData.nFileSizeHigh << 32) | Pidl_Win32_FindData.nFileSizeLow;
                         PidlData.ftCreationTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftCreationTime);
                         PidlData.ftLastAccessTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftLastAccessTime);
                         PidlData.ftLastWriteTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftLastWriteTime);
@@ -625,39 +592,39 @@ namespace IFilterShellView2
                     }
                     else
                     {
-                        ShellContext.pIShellFolder.GetDisplayNameOf
+                        shellContext.pIShellFolder.GetDisplayNameOf
                         (
                             PidlPtrObj,
                             SHGNO.INFOLDER | SHGNO.FORPARSING,
-                            ShellContext.MarshalPIDLNativeDataHolder.STRRET
+                            shellContext.MarshalPIDLNativeDataHolder.STRRET
                         );
 
                         NativeWin32.StrRetToBuf
                         (
-                            ShellContext.MarshalPIDLNativeDataHolder.STRRET,
+                            shellContext.MarshalPIDLNativeDataHolder.STRRET,
                             PidlPtrObj,
-                            ShellContext.MarshalPIDLNativeDataHolder.BUFFER,
-                            ShellContext.MarshalPIDLNativeDataHolder.MAX_PATH
+                            shellContext.MarshalPIDLNativeDataHolder.BUFFER,
+                            shellContext.MarshalPIDLNativeDataHolder.MAX_PATH
                         );
 
-                        PidlData.PidlName = ShellContext.MarshalPIDLNativeDataHolder.BUFFER.ToString();
+                        PidlData.PidlName = shellContext.MarshalPIDLNativeDataHolder.BUFFER.ToString();
                         PidlData.AttributesSet = false;
                     }
-                        
+
                     // Get extension icon
                     string Extension = Path.GetExtension(PidlData.PidlName);
 
                     if (NativeUtilities.IsAttributeOfFolder(PidlData.dwFileAttributes))
                     {
-                        PidlData.IconBitmapSource = LocalBitmapImageList[0];
+                        PidlData.IconBitmapSource = localBitmapImageList[0];
                     }
                     else
                     {
-                        if (!ExtensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
+                        if (!extensionIconDictionary.TryGetValue(Extension, out BitmapSource IconBitmapSource))
                         {
-                            string FilePath = Path.Combine(ShellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
+                            string FilePath = Path.Combine(shellContext.LocationUrlBeforeBrowse, PidlData.PidlName);
                             IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
-                            ExtensionIconDictionary[Extension] = IconBitmapSource;
+                            extensionIconDictionary[Extension] = IconBitmapSource;
                             PidlData.IconBitmapSource = IconBitmapSource;
                         }
                         else
@@ -666,7 +633,7 @@ namespace IFilterShellView2
                         }
                     }
 
-                    if (ShellContext.FlagExtendedFilterMod)
+                    if (shellContext.FlagExtendedFilterMod)
                     {
                         // Then all the matching will be done according to an expression tree
                         FilterMatched = ILLanguageFunct(PidlData);
@@ -674,15 +641,15 @@ namespace IFilterShellView2
                     else
                     {
                         // Then all the matching will be done according to settings enabled by the user
-                        FilterMatched = FilterBasedOnSettings(PidlData, ShellContext.FilterText);
+                        FilterMatched = FilterBasedOnSettings(PidlData, shellContext.FilterText);
                     }
 
                     // If there was a match then this pidl must be selected
                     if (FilterMatched)
                     {
                         LocalSelectionBuffer.Add(PidlData);
-                        ShellContext.pIShellView.SelectItem(PidlPtrObj, SVSI.SVSI_SELECT);
-                        ShellContext.FilterCount++;
+                        shellContext.pIShellView.SelectItem(PidlPtrObj, SVSI.SVSI_SELECT);
+                        shellContext.FilterCount++;
                     }
 
                     Marshal.FreeCoTaskMem(PidlPtrObj);
@@ -692,7 +659,7 @@ namespace IFilterShellView2
                     {
                         ReportAction();
                         TempCounter = 0;
-                        ShellContext.FilterReportCount++;
+                        shellContext.FilterReportCount++;
                     }
 
                     if (IsOnWorkerThread && worker.CancellationPending)
@@ -717,7 +684,7 @@ namespace IFilterShellView2
             if (FlagFlushBuffer && LocalSelectionBuffer.Count != 0)
                 ReportAction();
 
-            ShellContext.pIFolderView2.SetRedraw(true);
+            shellContext.pIFolderView2.SetRedraw(true);
 
             if (LastException != null) throw LastException;
         }
@@ -737,7 +704,6 @@ namespace IFilterShellView2
          */
 
         #region Settings
-
         private void LoadApplicationSettings()
         {
             Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
@@ -765,14 +731,14 @@ namespace IFilterShellView2
             try
             {
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                RunStartupCb.IsChecked = key.GetValue(AssemblyImageName) != null;
+                RunStartupCb.IsChecked = key.GetValue(assemblyImageName) != null;
             }
             catch { }
         }
         private void SaveApplicationSettings()
         {
-            List<CHistoryItem> HistoryListFromIObs = ListOfHistoryItems.ToList();
-            if (ListOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
+            List<CHistoryItem> HistoryListFromIObs = listOfHistoryItems.ToList();
+            if (listOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
             {
                 HistoryListFromIObs.RemoveRange(0, Properties.Settings.Default.MaxHistory / 2);
             }
@@ -815,7 +781,7 @@ namespace IFilterShellView2
         private void FilterTb_TextChanged(object sender, TextChangedEventArgs e)
         {
             string FilterText = FilterTb.Text.TrimStart();
-            ShellContext.FilterText = FilterText;
+            shellContext.FilterText = FilterText;
 
             /* NOTE: consider the following scenario: we start filtering A's items and click on a subitem B.
              * LocationUrlBeforeBrowse is set to the initial path and LocationUrl will be changed as we click any of A's subitems (i.e B,C, ...)
@@ -824,11 +790,11 @@ namespace IFilterShellView2
              * 
              * Edit: LocationUrlBeforeBrowse is important because browsing is done via it's value
              */
-            ShellContext.LocationUrlBeforeBrowse = ShellContext.LocationUrl;
+            shellContext.LocationUrlBeforeBrowse = shellContext.LocationUrl;
 
 
-            LastTimeTextChanged = DateTime.Now;
-            FlagStringReadyToProcess = true;
+            lastTimeTextChanged = DateTime.Now;
+            flagStringReadyToProcess = true;
         }
         private void FilterTb_KeyDown(object sender, KeyEventArgs e)
         {
@@ -836,23 +802,23 @@ namespace IFilterShellView2
             {
                 case Key.Enter:
                     {
-                        if (!ShellContext.FlagRunInBackgroundWorker || WorkerObject_SelectionProc.IsBusy)
+                        if (!shellContext.FlagRunInBackgroundWorker || workerObject_SelectionProc.IsBusy)
                             return;
 
                         // Start worker
                         Callback_UIOnBeforeFiltering(true);
-                        WorkerObject_SelectionProc.RunWorkerAsync();
+                        workerObject_SelectionProc.RunWorkerAsync();
                         break;
                     }
                 case Key.Escape:
                     {
-                        if (!WorkerObject_SelectionProc.IsBusy)
+                        if (!workerObject_SelectionProc.IsBusy)
                         {
                             Callback_OnWindowCancellOrExit(false);
                             return;
                         }
 
-                        WorkerObject_SelectionProc.CancelAsync();
+                        workerObject_SelectionProc.CancelAsync();
                         break;
                     }
                 default: break;
@@ -864,9 +830,9 @@ namespace IFilterShellView2
             {
                 case Key.Back:
                     {
-                        if (WorkerObject_SelectionProc.IsBusy)
+                        if (workerObject_SelectionProc.IsBusy)
                         {
-                            WorkerObject_SelectionProc.CancelAsync();
+                            workerObject_SelectionProc.CancelAsync();
                             e.Handled = true;
                             return;
                         }
@@ -880,22 +846,11 @@ namespace IFilterShellView2
 
 
 
-        #region Toolbar Right Settings
-        private void LikeBt_Click(object sender, RoutedEventArgs e)
-        {
-            Process myProcess = new Process();
-
-            try
-            {
-                myProcess.StartInfo.UseShellExecute = true;
-                myProcess.StartInfo.FileName = "https://github.com/ReznicencuBogdan/ExplorerFilterExtension";
-                myProcess.Start();
-            }
-            catch (Exception)
-            {
-                // TODO: log this exception
-            }
-        }
+        #region Toolbar Settings
+        private void PlacementSettingsBt_Click(object sender, RoutedEventArgs e) =>
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+        private void CaseSettingsBt_Click(object sender, RoutedEventArgs e) =>
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         private void SettingsBt_Click(object sender, RoutedEventArgs e)
         {
             AdvancedSettingsPanel.Visibility = AdvancedSettingsPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
@@ -905,6 +860,7 @@ namespace IFilterShellView2
             Application.Current.Shutdown();
         }
         #endregion
+
 
 
 
@@ -936,23 +892,29 @@ namespace IFilterShellView2
                     dragObj.SetFileDropList(new System.Collections.Specialized.StringCollection() { FullyQuallifiedItemName });
                     DragDrop.DoDragDrop((ListView)e.Source, dragObj, DragDropEffects.Copy);
                 }
-            } 
+            }
             else
             {
                 ListViewItem listViewItem = ItemsList.GetItemAt(e.GetPosition(ItemsList));
 
                 if (listViewItem == null || listViewItem.Content == null) return;
 
-                string PidlName = (listViewItem.Content as CPidlData).PidlName;
-                var SearchResult = ListOfPidlData.Select((Pidl, Index) => (Pidl, Index))
-                    .FirstOrDefault( Item => Item.Pidl.PidlName == PidlName);
-                PrevListViewItemPidlHovered = (SearchResult.Pidl == null) ? -1 : SearchResult.Index;
-
                 Rect listViewItemRect = ItemsList.GetListViewItemRect(listViewItem);
-                
+
+                if (prevListViewItemPidl.ItemRect.Equals(listViewItemRect)) return;
+
+                string PidlName = (listViewItem.Content as CPidlData).PidlName;
+                var SearchResult = listOfPidlData.Select((Pidl, Index) => (Pidl, Index))
+                    .FirstOrDefault(Item => Item.Pidl.PidlName == PidlName);
+
+                prevListViewItemPidl.Index = (SearchResult.Pidl == null) ? -1 : SearchResult.Index;
+                prevListViewItemPidl.ItemRect = listViewItemRect;
+
+                if (prevListViewItemPidl.Index == -1) return;
+
                 var newMargins = FilterItemsControlBox.Margin;
-                newMargins.Top = listViewItemRect.Top + listViewItemRect.Height /2 - FilterItemsControlBox.ActualHeight/2;
-                
+                newMargins.Top = listViewItemRect.Top + listViewItemRect.Height / 2 - FilterItemsControlBox.ActualHeight / 2;
+
                 if (NativeUtilities.IsAttributeOfFolder(SearchResult.Pidl.dwFileAttributes))
                 {
                     Cmd_RunFile.Visibility = Visibility.Collapsed;
@@ -1016,14 +978,14 @@ namespace IFilterShellView2
             {
                 int SelectedIndex = ItemsList.SelectedIndex;
                 if (SelectedIndex >= 0)
-                    ListOfPidlData.RemoveAt(SelectedIndex);
+                    listOfPidlData.RemoveAt(SelectedIndex);
             }
         }
         private void BrowseBackBt_Click(object sender, RoutedEventArgs e)
         {
-            if (ShellContext.LocationUrlBeforeBrowse == ShellContext.LocationUrl) return;
+            if (shellContext.LocationUrlBeforeBrowse == shellContext.LocationUrl) return;
 
-            if (!BrowseToFolderByDisplayName(ShellContext.LocationUrlBeforeBrowse))
+            if (!BrowseToFolderByDisplayName(shellContext.LocationUrlBeforeBrowse))
             {
                 // TODO: log this event
             }
@@ -1037,7 +999,7 @@ namespace IFilterShellView2
             int itag = Convert.ToInt32(cbi.Tag);
             ExportManger.FORMAT fmt = (ExportManger.FORMAT)itag;
             // TODO: it expects a list of strings
-            string ExportData = ExportManger.ExportData(fmt, ListOfPidlData.ToList(), IncludePath, IncludeExtension, ShellContext.LocationUrl);
+            string ExportData = ExportManger.ExportData(fmt, listOfPidlData.ToList(), IncludePath, IncludeExtension, shellContext.LocationUrl);
 
             SaveFileDialog SaveDialogWindow = new SaveFileDialog();
             SaveDialogWindow.Filter = "CSV files (*.csv)|*.csv|JSON files (*.json)|*.json|XML files (*.xml)|*.xml|C header (*.h;*.hpp;*.c;*.cpp;*.x)|*.h;*.hpp;*.c;*.cpp;*.x|Text files (*.txt)|*.txt|All files (*.*)|*.*";
@@ -1052,8 +1014,23 @@ namespace IFilterShellView2
             }
             catch (Exception)
             {
-                InfoClass.Message = "Failed exporting the specified data to a file. Try again";
+                infoClass.Message = "Failed exporting the specified data to a file. Try again";
                 throw;
+            }
+        }
+        private void LikeBt_Click(object sender, RoutedEventArgs e)
+        {
+            Process myProcess = new Process();
+
+            try
+            {
+                myProcess.StartInfo.UseShellExecute = true;
+                myProcess.StartInfo.FileName = "https://github.com/ReznicencuBogdan/ExplorerFilterExtension";
+                myProcess.Start();
+            }
+            catch (Exception)
+            {
+                // TODO: log this exception
             }
         }
         #endregion
@@ -1095,9 +1072,9 @@ namespace IFilterShellView2
                 RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
                 if (RunStartupCb.IsChecked == true)
-                    key.SetValue(AssemblyImageName, AssemblyImageLocation);
+                    key.SetValue(assemblyImageName, assemblyImageLocation);
                 else
-                    key.DeleteValue(AssemblyImageName);
+                    key.DeleteValue(assemblyImageName);
             }
             catch { }
         }
@@ -1116,8 +1093,11 @@ namespace IFilterShellView2
         {
             if (HistoryList.SelectedIndex < 0) return;
 
-            FilterTb.Text = ListOfHistoryItems[HistoryList.SelectedIndex].Command;
+            FilterTb.Text = listOfHistoryItems[HistoryList.SelectedIndex].Command;
         }
+        private void ShowHistoryList(object sender, RoutedEventArgs e) =>
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+
         #endregion
 
 
@@ -1127,8 +1107,11 @@ namespace IFilterShellView2
         {
             if (CommandList.SelectedIndex < 0) return;
 
-            FilterTb.Text = "? " + ListOfAvailableCommands[CommandList.SelectedIndex].Name;
+            FilterTb.Text = "? " + listOfAvailableCommands[CommandList.SelectedIndex].Name;
         }
+        private void ShowCommandList(object sender, RoutedEventArgs e) =>
+            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+
         #endregion
 
 
@@ -1152,23 +1135,9 @@ namespace IFilterShellView2
             }
 
             // Find applicable actions
-            var action = SettingsActionMap[(FilterSettingsFlags)SettingsPlacementId];
-
-            if (!action(PidlName, input)) return false;
-
-            return true;
+            var action = FitlerActions.SettingsActionMap[(FilterSettingsFlags)SettingsPlacementId];
+            return action(PidlName, input);
         }
-        private static bool RegexFilterCallback(string pidl_name, string input)
-        {
-            if (!FilterRegexContainer.Input.Equals(input))
-            {
-                FilterRegexContainer.CompiledRegex = new Regex(input, RegexOptions.Compiled);
-                FilterRegexContainer.Input = input;
-            }
-
-            return FilterRegexContainer.Item2.Match(pidl_name).Success;
-        }
-
         private bool BrowseToFolderByDisplayName(string FullyQuallifiedItemName)
         {
             // Parse display name to pidl
@@ -1178,7 +1147,7 @@ namespace IFilterShellView2
             if (PidlBrowse == IntPtr.Zero) return false;
 
             // Browse to selected folder
-            NativeWin32.HResult hr = ShellContext.pIShellBrowser.BrowseObject(
+            NativeWin32.HResult hr = shellContext.pIShellBrowser.BrowseObject(
                 PidlBrowse,
                 SBSP.SBSP_SAMEBROWSER | SBSP.SBSP_WRITENOHISTORY | SBSP.SBSP_NOTRANSFERHIST
             );
@@ -1189,27 +1158,26 @@ namespace IFilterShellView2
             Marshal.FreeCoTaskMem(PidlBrowse);
 
             // When we browse a new folder some of the data changes
-            return FlagResult && GatherShellInterfacesLinkedToShell(ShellContext.PrevShellWindowHwnd);
+            return FlagResult && GatherShellInterfacesLinkedToShell(shellContext.PrevShellWindowHwnd);
         }
         private void UpdateSelectionStatusBarInfo(int? FilterCount = null, int? PidlCount = null)
         {
-            FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? ShellContext.FilterCount, PidlCount ?? ShellContext.PidlCount);
+            FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? shellContext.FilterCount, PidlCount ?? shellContext.PidlCount);
         }
-
         private bool GetPidlAndFullPath(int Index, out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
             SelectedPidlData = null;
             FullyQuallifiedItemName = "";
 
-            if (Index < 0 || Index >= ListOfPidlData.Count) return false;
+            if (Index < 0 || Index >= listOfPidlData.Count) return false;
 
-            SelectedPidlData = ListOfPidlData[Index];
+            SelectedPidlData = listOfPidlData[Index];
             GetPidlFullPath(SelectedPidlData, out FullyQuallifiedItemName);
             return true;
         }
         private bool GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
-            return GetPidlAndFullPath(PrevListViewItemPidlHovered, out SelectedPidlData, out FullyQuallifiedItemName);
+            return GetPidlAndFullPath(prevListViewItemPidl.Index, out SelectedPidlData, out FullyQuallifiedItemName);
         }
         private bool GetSelectedPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
@@ -1217,7 +1185,7 @@ namespace IFilterShellView2
         }
         private void GetPidlFullPath(CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
-            FullyQuallifiedItemName = Path.Combine(ShellContext.LocationUrlBeforeBrowse, SelectedPidlData.PidlName);
+            FullyQuallifiedItemName = Path.Combine(shellContext.LocationUrlBeforeBrowse, SelectedPidlData.PidlName);
         }
         private bool DeletePidlFromSystem(CPidlData SelectedPidlData)
         {
@@ -1251,7 +1219,7 @@ namespace IFilterShellView2
                 {
                     if (CmdWrapperUI != null)
                     {
-                        ListOfAvailableCommands.Add(CmdWrapperUI);
+                        listOfAvailableCommands.Add(CmdWrapperUI);
                     }
 
                     CmdWrapperUI = new CCommandItem();
@@ -1290,26 +1258,5 @@ namespace IFilterShellView2
                 }
             }
         }
-
-        private void PlacementSettingsBt_Click(object sender, RoutedEventArgs e)
-        {
-            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-        }
-
-        private void CaseSettingsBt_Click(object sender, RoutedEventArgs e)
-        {
-            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-        }
-
-
-        private void ShowCommandList(object sender, RoutedEventArgs e)
-        {
-            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-        }
-        private void ShowHistoryList(object sender, RoutedEventArgs e)
-        {
-            ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-        }
-
     }
 }
