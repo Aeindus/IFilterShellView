@@ -123,11 +123,6 @@ namespace IFilterShellView2
 
             HistoryList.ItemsSource = listOfHistoryItems;
 
-
-            // Add focus to the search bar
-            FilterTb.Focus();
-            Keyboard.Focus(FilterTb);
-
             try
             {
                 // This can throw - it handles unmanaged resources and it's a critical component
@@ -203,20 +198,10 @@ namespace IFilterShellView2
                     return false;
                 }
 
-
                 // Old way of positioning the window - removed because of bug caused by KB5007186 
                 //NativeWin32.GetWindowRect(ForegroundWindow, out ShellContext.ShellViewRect);
                 //System.Drawing.Point point = new System.Drawing.Point(0, 0);
                 //NativeWin32.ClientToScreen(ForegroundWindow, ref point);
-
-                IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(ForegroundWindow, NativeWin32.MONITOR_DEFAULTTONEAREST);
-                // var primaryMonitor = NativeWin32.MonitorFromWindow(IntPtr.Zero, NativeWin32.MONITOR_DEFAULTTOPRIMARY);
-                // var isInPrimary = currentMonitor == primaryMonitor;
-
-                NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
-                MonitorInfo.Init();
-                NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-                shellContext.ShellViewRect = MonitorInfo.Monitor;
 
 
                 // Set the rest of the ShellContext class
@@ -349,21 +334,11 @@ namespace IFilterShellView2
                 FilterTb.Focus();
                 Keyboard.Focus(FilterTb);
 
-                // Set new window properties
-                Window MainWindow = Application.Current.MainWindow;
-                PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(MainWindow);
-                Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
-                double thisDpiWidthFactor = m.M11;
-                double thisDpiHeightFactor = m.M22;
-
 
                 // double ShellWidth = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
                 //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
-
-                this.Width = SystemParameters.PrimaryScreenWidth * thisDpiWidthFactor;
-                this.Left = 0;
-                this.Top = 0;
+                UpdateWindowPositionToFixedPin();
 
                 // Subscribe to the shell's message pump and filter close messages
                 shellContext.EventManager.ResubscribeToExtCloseEvent(shellContext.PrevShellWindowHwnd, Callback_OnShellWindowCloseEvent);
@@ -1097,7 +1072,6 @@ namespace IFilterShellView2
         }
         private void ShowHistoryList(object sender, RoutedEventArgs e) =>
             ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-
         #endregion
 
 
@@ -1231,7 +1205,22 @@ namespace IFilterShellView2
                 else CmdWrapperUI.CmdAlias += CommandEntry.Key + "/";
             }
         }
+        public void UpdateWindowPositionToFixedPin()
+        {
+            NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
+            MonitorInfo.Init();
 
+            IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
+            NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
+            NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+
+            double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
+            double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+
+            this.Width = ScreenWidth * widthDPIFactor;
+            this.Left = 0;
+            this.Top = 0;
+        }
 
 
 

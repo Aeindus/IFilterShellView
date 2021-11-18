@@ -1,19 +1,39 @@
-﻿using IFilterShellView2.Native;
+﻿using IFilterShellView2.HelperClasses;
+using IFilterShellView2.Native;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Media;
 
 namespace IFilterShellView2.Extensions
 {
     public static class WindowExtensions
     {
+
+        public static IntPtr GetHWND(this Window window)
+        {
+            return new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
+        }
+
+        public static WindowDPIFactor GetWindowDPIFactorClass(this Window window)
+        {
+            PresentationSource MainWindowPresentationSource = PresentationSource.FromVisual(window);
+            Matrix m = MainWindowPresentationSource.CompositionTarget.TransformToDevice;
+            
+            WindowDPIFactor windowDPIFactor;
+            windowDPIFactor.widthDPIFactor = m.M11;
+            windowDPIFactor.heightDPIFactor = m.M22;
+
+            return windowDPIFactor;
+        }
+
         /// <summary>
         /// Activates a WPF window even if the window is activated on a separate thread
         /// </summary>
         /// <param name="window"></param>
         public static void ActivateWindow(Window window)
         {
-            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
+            IntPtr hwnd = window.GetHWND();
 
             uint threadId1 = GetWindowThreadProcessId(NativeWin32.GetForegroundWindow(), IntPtr.Zero);
             uint threadId2 = GetWindowThreadProcessId(hwnd, IntPtr.Zero);

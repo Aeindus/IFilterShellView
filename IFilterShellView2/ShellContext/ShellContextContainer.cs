@@ -44,7 +44,7 @@ namespace IFilterShellView2.ShellContext
         public CIShellFolder pIShellFolder;
         public CIShellView pIShellView;
         public CIFolderView2 pIFolderView2;
-        public NativeWin32.RECT ShellViewRect;
+        //public NativeWin32.RECT CurrentMonitorRect;
 
         /// <summary>
         /// Can throw exception if failed initializing memory
@@ -54,7 +54,7 @@ namespace IFilterShellView2.ShellContext
         {
             MarshalPIDLNativeDataHolder = new CMarshalPDILNativeDataHolder(); // can throw
             EventManager = new CEventManager();  // can throw
-            ShellViewRect = new NativeWin32.RECT(); 
+            // CurrentMonitorRect = new NativeWin32.RECT(); 
         }
 
         public void Reset()

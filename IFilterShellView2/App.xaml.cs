@@ -27,12 +27,14 @@ namespace IFilterShellView2
 
             // Just instantiate the window class but don't show it.
             MainWindow AppMainWindow = new MainWindow();
+            AppMainWindow.Show();
+            AppMainWindow.UpdateWindowPositionToFixedPin();
+            Thread.Sleep(400);
+            AppMainWindow.Hide();
 
             // Don't show the window. Not yet
             // The callbacks and event monitors have been set by now.
             // It is up to the user what will happen from now on.
-
-            AppMainWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
