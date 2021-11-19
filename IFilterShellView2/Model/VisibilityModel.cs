@@ -15,7 +15,6 @@ namespace IFilterShellView2.Model
             set
             {
                 _visible = value;
-                Debug.WriteLine("11111111111111");
                 NotifyPropertyChanged();
             }
         }
@@ -23,7 +22,6 @@ namespace IFilterShellView2.Model
         private void NotifyPropertyChanged([CallerMemberName] string propertyname = null)
         {
             if (PropertyChanged == null) return;
-            Debug.WriteLine("222222222222222");
             PropertyChanged(this, new PropertyChangedEventArgs(propertyname));
         }
     }

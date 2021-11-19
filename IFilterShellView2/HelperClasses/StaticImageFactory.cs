@@ -34,7 +34,7 @@ namespace IFilterShellView2.HelperClasses
 
                 if (!ImageDictIconsOfExtensions.TryGetValue(Extension, out BitmapSource IconBitmapSource))
                 {
-                    string FilePath = Path.Combine(Context.Instance.LocationUrlBeforeBrowse, PidlName);
+                    string FilePath = Path.Combine(Context.Instance.LocationUrlOnStart, PidlName);
                     IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
                     ImageDictIconsOfExtensions[Extension] = IconBitmapSource;
                     return IconBitmapSource;

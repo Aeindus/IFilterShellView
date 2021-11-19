@@ -155,7 +155,7 @@
                             HorizontalAlignment="Stretch"
                             Margin="8,0,0,0">
                     <TextBlock Text="{Binding Name}"
-                               TextWrapping="WrapWithOverflow" />
+                               TextWrapping="Wrap" />
                     <TextBlock Text="{Binding CmdAlias}"
                                FontWeight="Light"
                                TextWrapping="Wrap" />
@@ -371,7 +371,9 @@
                                           VirtualizingStackPanel.IsVirtualizing="True"
                                           VirtualizingStackPanel.VirtualizationMode="Recycling"
                                           PreviewMouseLeftButtonUp="CommandList_PreviewMouseLeftButtonUp"
-                                          MaxHeight="{StaticResource MaxViewHeight}" />
+                                          MaxHeight="{StaticResource MaxViewHeight}"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          HorizontalContentAlignment="Stretch" />
                             </StackPanel>
 
                             <StackPanel Grid.Column="1"
@@ -418,6 +420,13 @@
                             <ui:ProgressBar x:Name="ProgressPb"
                                             IsIndeterminate="True"
                                             Visibility="Collapsed" />
+
+                            <Button Name="BrowseBackBt"
+                                    Click="BrowseBackBt_Click"
+                                    ToolTip="Go back to spawn folder">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57616;" />
+                            </Button>
 
                             <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
                                   MouseLeave="ItemsPanelGrid_MouseLeave">
@@ -482,6 +491,7 @@
                                           PreviewMouseMove="ItemsList_PreviewMouseMove"
                                           SelectionChanged="ItemsList_SelectionChanged"
                                           MaxHeight="{StaticResource MaxViewHeight}">
+
                                 </ListView>
                             </Grid>
                         </StackPanel>

@@ -29,7 +29,7 @@ namespace IFilterShellView2.Program
 
         public IntPtr PrevShellWindowHwnd;
         public string LocationUrl;
-        public string LocationUrlBeforeBrowse;
+        public string LocationUrlOnStart;
         public string FilterText;
         public string PrevFilterText;
         public int FilterCount;

@@ -38,6 +38,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Threading;
 
 namespace IFilterShellView2
 {
@@ -63,7 +64,7 @@ namespace IFilterShellView2
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
 
 
-        public readonly  VisibilityModel SearchPageVisibilityModel = new VisibilityModel();
+        public readonly VisibilityModel SearchPageVisibilityModel = new VisibilityModel();
         private readonly ListViewItemPidl prevListViewItemPidl = new ListViewItemPidl();
         private readonly GlobalKeyboardHook globalHookObject;
         private readonly BackgroundWorker workerObject_SelectionProc;
@@ -90,7 +91,7 @@ namespace IFilterShellView2
 
             // Initialize application settings
             LoadApplicationSettings();
-            
+
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
             workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
@@ -323,7 +324,7 @@ namespace IFilterShellView2
                  * because we will need a copy when we click on a filtered item. When we click we call GatherShellInterfacesLinkedToShell 
                  * which resets LocationUrl. 
                  */
-                Context.Instance.LocationUrlBeforeBrowse = Context.Instance.LocationUrl;
+                Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
                 // Enable dispatcher timer
                 dispatcherInputFilter.Start();
@@ -701,16 +702,6 @@ namespace IFilterShellView2
             string FilterText = FilterTb.Text.TrimStart();
             Context.Instance.FilterText = FilterText;
 
-            /* NOTE: consider the following scenario: we start filtering A's items and click on a subitem B.
-             * LocationUrlBeforeBrowse is set to the initial path and LocationUrl will be changed as we click any of A's subitems (i.e B,C, ...)
-             * However now we decide to change the filter. As we do that we get B's subitems. LocationUrl changes as well. 
-             * However LocationUrlBeforeBrowse will not reflect the changes as it is set only when the window is show.
-             * 
-             * Edit: LocationUrlBeforeBrowse is important because browsing is done via it's value
-             */
-            Context.Instance.LocationUrlBeforeBrowse = Context.Instance.LocationUrl;
-
-
             lastTimeTextChanged = DateTime.Now;
             flagStringReadyToProcess = true;
         }
@@ -814,7 +805,7 @@ namespace IFilterShellView2
             {
                 if (!BrowseToFolderByDisplayName(FullyQuallifiedItemName))
                 {
-                    // TODO: log this event
+                    // TODO: do something ?
                 }
             }
         }
@@ -927,11 +918,11 @@ namespace IFilterShellView2
         }
         private void BrowseBackBt_Click(object sender, RoutedEventArgs e)
         {
-            if (Context.Instance.LocationUrlBeforeBrowse == Context.Instance.LocationUrl) return;
+            if (Context.Instance.LocationUrlOnStart == Context.Instance.LocationUrl) return;
 
-            if (!BrowseToFolderByDisplayName(Context.Instance.LocationUrlBeforeBrowse))
+            if (!BrowseBackToParentItem())
             {
-                // TODO: log this event
+                // TODO: report
             }
         }
         #endregion
@@ -1049,7 +1040,11 @@ namespace IFilterShellView2
             // Browse to selected folder
             NativeWin32.HResult hr = Context.Instance.pIShellBrowser.BrowseObject(
                 PidlBrowse,
-                SBSP.SBSP_SAMEBROWSER | SBSP.SBSP_WRITENOHISTORY | SBSP.SBSP_NOTRANSFERHIST
+                SBSP.SBSP_SAMEBROWSER | 
+                SBSP.SBSP_WRITENOHISTORY | 
+                SBSP.SBSP_CREATENOHISTORY |
+                SBSP.SBSP_NOTRANSFERHIST |
+                SBSP.SBSP_NOAUTOSELECT
             );
 
             bool FlagResult = hr == NativeWin32.HResult.Ok;
@@ -1058,6 +1053,15 @@ namespace IFilterShellView2
             Marshal.FreeCoTaskMem(PidlBrowse);
 
             // When we browse a new folder some of the data changes
+            return FlagResult && GatherShellInterfacesLinkedToShell(Context.Instance.PrevShellWindowHwnd);
+        }
+        private bool BrowseBackToParentItem()
+        {
+            bool FlagResult = Context.Instance.pIShellBrowser.BrowseObject(
+                IntPtr.Zero,
+                SBSP.SBSP_SAMEBROWSER | SBSP.SBSP_PARENT
+                ) == NativeWin32.HResult.Ok;
+
             return FlagResult && GatherShellInterfacesLinkedToShell(Context.Instance.PrevShellWindowHwnd);
         }
         private bool GetPidlAndFullPath(int Index, out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
@@ -1081,7 +1085,7 @@ namespace IFilterShellView2
         }
         private void GetPidlFullPath(CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
-            FullyQuallifiedItemName = Path.Combine(Context.Instance.LocationUrlBeforeBrowse, SelectedPidlData.PidlName);
+            FullyQuallifiedItemName = Path.Combine(Context.Instance.LocationUrlOnStart, SelectedPidlData.PidlName);
         }
         private bool DeletePidlFromSystem(CPidlData SelectedPidlData)
         {

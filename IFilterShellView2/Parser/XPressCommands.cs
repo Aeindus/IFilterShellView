@@ -85,14 +85,14 @@ namespace IFilterShellView2.Parser
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
         {
-            {ComIndex.OLDER, "Gets all the items older than a date" },
-            {ComIndex.NEWER, "Gets all the items newer than a date"  },
-            {ComIndex.STARTS, "Gets all the items that start with"  },
-            {ComIndex.ENDS, "Gets all the items that end with"  },
-            {ComIndex.CONTAINS, "Gets all the items that contain"  },
-            {ComIndex.EXTENSION, "Gets all the items with extension X"  },
-            {ComIndex.DIRECTORY, "Gets all the items that are directories"  },
-            {ComIndex.FILE, "Gets all the items that are files"},
+            {ComIndex.OLDER, "get all items older than" },
+            {ComIndex.NEWER, "get items newer than"  },
+            {ComIndex.STARTS, "get items that start with"  },
+            {ComIndex.ENDS, "get items that end with"  },
+            {ComIndex.CONTAINS, "get items that contain"  },
+            {ComIndex.EXTENSION, "get items with extension"  },
+            {ComIndex.DIRECTORY, "get folder items"  },
+            {ComIndex.FILE, "get file items"},
         };
 
 
