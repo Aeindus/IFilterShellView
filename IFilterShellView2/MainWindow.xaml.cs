@@ -15,7 +15,6 @@
 */
 
 using IFilterShellView2.Exceptions;
-using IFilterShellView2.Export;
 using IFilterShellView2.Extensions;
 using IFilterShellView2.Filter;
 using IFilterShellView2.HelperClasses;
@@ -100,13 +99,15 @@ namespace IFilterShellView2
             InitializeComponent();
             this.DataContext = SearchPageVisibilityModel;
 
+
+
             Assembly CurrentImageAssembly = Assembly.GetExecutingAssembly();
             assemblyImageName = CurrentImageAssembly.GetName().Name;
             assemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), assemblyImageName + ".exe");
 
             // Initialize application settings
             LoadApplicationSettings();
-
+            
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
             workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
@@ -229,8 +230,6 @@ namespace IFilterShellView2
             //ItemsList.ItemsSource = listOfPidlData;
             //GC.Collect();
 
-            UpdateSelectionStatusBarInfo(0);
-
             if (!Properties.Settings.Default.KeepFilterText && GoesIntoHidingMode)
             {
                 FilterTb.Text = "";
@@ -274,7 +273,7 @@ namespace IFilterShellView2
                 }
             }
 
-            if (shellContext.FilterCount == 0)
+            if (shellContext.FilterCount == 0 && shellContext.FilterText.Length == 0)
             {
                 // ItemsPanel.Visibility = Visibility.Collapsed;
                 ShowSearchResultsPage(false);
@@ -283,7 +282,6 @@ namespace IFilterShellView2
         private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
         {
             ListOfSelections.ForEach(pidl_data => listOfPidlData.Add(pidl_data));
-            UpdateSelectionStatusBarInfo();
         }
         #endregion
 
@@ -953,48 +951,6 @@ namespace IFilterShellView2
                 // TODO: log this event
             }
         }
-        private void SaveListBt_Click(object sender, RoutedEventArgs e)
-        {
-            bool IncludePath = SaveListSettings_Path.IsChecked;
-            bool IncludeExtension = SaveListSettings_Ext.IsChecked;
-
-            ComboBoxItem cbi = (ComboBoxItem)SaveListSettings_Format.SelectedItem;
-            int itag = Convert.ToInt32(cbi.Tag);
-            ExportManger.FORMAT fmt = (ExportManger.FORMAT)itag;
-            // TODO: it expects a list of strings
-            string ExportData = ExportManger.ExportData(fmt, listOfPidlData.ToList(), IncludePath, IncludeExtension, shellContext.LocationUrl);
-
-            SaveFileDialog SaveDialogWindow = new SaveFileDialog();
-            SaveDialogWindow.Filter = "CSV files (*.csv)|*.csv|JSON files (*.json)|*.json|XML files (*.xml)|*.xml|C header (*.h;*.hpp;*.c;*.cpp;*.x)|*.h;*.hpp;*.c;*.cpp;*.x|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            SaveDialogWindow.FilterIndex = itag;
-            SaveDialogWindow.RestoreDirectory = true;
-
-            if (SaveDialogWindow.ShowDialog() != true) return;
-
-            try
-            {
-                File.WriteAllText(SaveDialogWindow.FileName, ExportData);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-        private void LikeBt_Click(object sender, RoutedEventArgs e)
-        {
-            Process myProcess = new Process();
-
-            try
-            {
-                myProcess.StartInfo.UseShellExecute = true;
-                myProcess.StartInfo.FileName = "https://github.com/ReznicencuBogdan/ExplorerFilterExtension";
-                myProcess.Start();
-            }
-            catch (Exception)
-            {
-                // TODO: log this exception
-            }
-        }
         #endregion
 
 
@@ -1121,10 +1077,6 @@ namespace IFilterShellView2
             // When we browse a new folder some of the data changes
             return FlagResult && GatherShellInterfacesLinkedToShell(shellContext.PrevShellWindowHwnd);
         }
-        private void UpdateSelectionStatusBarInfo(int? FilterCount = null, int? PidlCount = null)
-        {
-            FolCountTb.Text = string.Format("{0}/{1}", FilterCount ?? shellContext.FilterCount, PidlCount ?? shellContext.PidlCount);
-        }
         private bool GetPidlAndFullPath(int Index, out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)
         {
             SelectedPidlData = null;
@@ -1207,5 +1159,6 @@ namespace IFilterShellView2
             this.Left = 0;
             this.Top = 0;
         }
+
     }
 }
