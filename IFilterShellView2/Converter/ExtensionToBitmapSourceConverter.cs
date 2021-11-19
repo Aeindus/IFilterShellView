@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace IFilterShellView2.Converter
 {
-    internal class ExtensionToBitmapSourceConverter : IMultiValueConverter
+    public class ExtensionToBitmapSourceConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
