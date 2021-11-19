@@ -15,27 +15,18 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
+
 
 namespace IFilterShellView2
 {
     public class CPidlData
     {
-        //public System.Runtime.InteropServices.ComTypes.FILETIME ftCreationTime { get; set; }
-        //public System.Runtime.InteropServices.ComTypes.FILETIME ftLastAccessTime { get; set; }
-        //public System.Runtime.InteropServices.ComTypes.FILETIME ftLastWriteTime { get; set; }
-
-        public BitmapSource IconBitmapSource { get; set; }
-
-        public DateTime ftCreationTime { get; set; }
-        public DateTime ftLastAccessTime { get; set; }
-        public DateTime ftLastWriteTime { get; set; }
+        public DateTime CreationTime { get; set; }
+        public DateTime LastAccessTime { get; set; }
+        public DateTime LastWriteTime { get; set; }
 
 
-        public uint dwFileAttributes { get; set; }
+        public uint FileAttributes { get; set; }
         public bool AttributesSet { get; set; }
         public string PidlName { get; set; }
         public ulong FileSize { get; set; }

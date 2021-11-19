@@ -31,6 +31,8 @@
     <Window.Resources>
         <sys:Double x:Key="ShadowDepth">20</sys:Double>
         <sys:Double x:Key="MaxViewHeight">400</sys:Double>
+        <sys:Int32 x:Key="IconIndexCommand">2</sys:Int32>
+        <sys:Int32 x:Key="IconIndexHistory">3</sys:Int32>
         <Thickness x:Key="RowMargins"
                    Left="4"
                    Top="4"
@@ -41,6 +43,9 @@
         <cvrtr:ItemTooltipAttributeConverter x:Key="ItemTooltipAttributeConverter" />
         <cvrtr:ItemSubtitleConverter x:Key="ItemSubtitleConverter" />
         <cvrtr:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <cvrtr:ExtensionToBitmapSourceConverter x:Key="ExtensionToBitmapSourceConverter" />
+        <cvrtr:IdToBitmapSourceFromStaticImageFactory x:Key="IdToBitmapSourceFromStaticImageFactory" />
+
         <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
 
 
@@ -93,25 +98,32 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Image Source="{Binding IconBitmapSource, Mode=OneTime}"
-                       Grid.Column="0"
+                <Image Grid.Column="0"
                        Margin="4,0,0,0"
                        Width="28"
-                       Height="28" />
+                       Height="28">
+                    <Image.Source>
+                        <MultiBinding Converter="{StaticResource ExtensionToBitmapSourceConverter}">
+                            <Binding Path="PidlName" />
+                            <Binding Path="FileAttributes" />
+                        </MultiBinding>
+                    </Image.Source>
+                </Image>
+
                 <StackPanel Orientation="Vertical"
                             Grid.Column="1"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Stretch"
-                            ToolTip="{Binding Path=dwFileAttributes, Converter={StaticResource ItemTooltipAttributeConverter}}"
+                            ToolTip="{Binding Path=FileAttributes, Converter={StaticResource ItemTooltipAttributeConverter}}"
                             Margin="12,3,0,3">
                     <TextBlock Text="{Binding PidlName}"
                                TextWrapping="Wrap" />
                     <TextBlock FontSize="12">
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource ItemSubtitleConverter}">
-                                <Binding Path="ftCreationTime" />
+                                <Binding Path="CreationTime" />
                                 <Binding Path="FileSize" />
-                                <Binding Path="dwFileAttributes" />
+                                <Binding Path="FileAttributes" />
                             </MultiBinding>
                         </TextBlock.Text>
                     </TextBlock>
@@ -129,9 +141,13 @@
                 </Grid.ColumnDefinitions>
 
                 <Image Grid.Column="0"
-                       Source="{Binding IconBitmap, Mode=OneTime}"
                        Width="28"
-                       Height="28" />
+                       Height="28">
+                    <Image.Source>
+                        <Binding Source="{StaticResource IconIndexCommand}"
+                                 Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
+                    </Image.Source>
+                </Image>
 
                 <StackPanel Grid.Column="1"
                             Orientation="Vertical"
@@ -152,15 +168,19 @@
                       DataType="base:CHistoryItem">
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Center">
-                <Image Source="{Binding IconBitmap, Mode=OneTime}"
-                       Width="28"
-                       Height="28" />
+                <Image Width="28"
+                       Height="28">
+                    <Image.Source>
+                        <Binding Source="{StaticResource IconIndexHistory}"
+                                 Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
+                    </Image.Source>
+                </Image>
 
                 <TextBlock Text="{Binding Command}"
                            TextWrapping="Wrap"
                            HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center" 
-                           Margin="4,0,0,0"/>
+                           VerticalAlignment="Center"
+                           Margin="4,0,0,0" />
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
@@ -281,7 +301,7 @@
                                  HorizontalAlignment="Stretch"
                                  FontSize="15"
                                  Focusable="True"
-                                 KeyDown="FilterTb_KeyDown"
+                                 PreviewKeyDown="FilterTb_PreviewKeyDown"
                                  KeyUp="FilterTb_KeyUp"
                                  TextChanged="FilterTb_TextChanged">
                         </TextBox>
@@ -460,6 +480,7 @@
                                           VirtualizingStackPanel.VirtualizationMode="Recycling"
                                           PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
                                           PreviewMouseMove="ItemsList_PreviewMouseMove"
+                                          SelectionChanged="ItemsList_SelectionChanged"
                                           MaxHeight="{StaticResource MaxViewHeight}">
                                 </ListView>
                             </Grid>

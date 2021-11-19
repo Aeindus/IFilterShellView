@@ -21,7 +21,6 @@ namespace IFilterShellView2
 {
     public class CCommandItem
     {
-        public BitmapImage IconBitmap => StaticImageFactory.ImageList[2];
         public string Name { get; set; }
         public string CmdAlias { get; set; }
     }

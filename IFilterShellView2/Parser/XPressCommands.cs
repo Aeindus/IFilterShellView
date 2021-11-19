@@ -120,7 +120,7 @@ namespace IFilterShellView2.Parser
                             throw new UserException("Date failed format checks.");
                         }
 
-                        return DateTime.Compare(PidlData.ftCreationTime, FormatedDate) < 0;
+                        return DateTime.Compare(PidlData.CreationTime, FormatedDate) < 0;
                     }
                 },
 
@@ -133,7 +133,7 @@ namespace IFilterShellView2.Parser
                             throw new UserException("Date failed format checks.");
                         }
 
-                        return DateTime.Compare(PidlData.ftCreationTime, FormatedDate) > 0;
+                        return DateTime.Compare(PidlData.CreationTime, FormatedDate) > 0;
                     }
                 },
 
@@ -160,12 +160,12 @@ namespace IFilterShellView2.Parser
 
                 /* directory */
                 {
-                    ComIndex.DIRECTORY, (PidlData, CommAndArgs) => PidlData.dwFileAttributes == 0x10
+                    ComIndex.DIRECTORY, (PidlData, CommAndArgs) => PidlData.FileAttributes == 0x10
                 },
 
                 /* file */
                 {
-                    ComIndex.FILE, (PidlData, CommAndArgs) => PidlData.dwFileAttributes != 0x10
+                    ComIndex.FILE, (PidlData, CommAndArgs) => PidlData.FileAttributes != 0x10
                 },
             };
 
