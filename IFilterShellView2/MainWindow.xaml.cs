@@ -219,33 +219,19 @@ namespace IFilterShellView2
 
             return false;
         }
-        private void ResetInterfaceData(bool GoesIntoHidingMode = false)
-        {
-            listOfPidlData.Clear();
-
-            if (!Properties.Settings.Default.KeepFilterText && GoesIntoHidingMode)
-            {
-                FilterTb.Text = "";
-            }
-
-            ShowSearchResultsPage(false);
-        }
-
 
 
 
         #region Events that are called on before, after and during the filtering process
         private void Callback_UIOnBeforeFiltering(bool GoesInDeepProcessing = false)
         {
-            ResetInterfaceData();
+            listOfPidlData.Clear();
 
-            // ItemsPanel.Visibility = Visibility.Visible;
             ShowSearchResultsPage(true);
 
             if (GoesInDeepProcessing)
             {
                 ProgressPb.Visibility = Visibility.Visible;
-                //ItemsPanel.IsEnabled = false;
                 FilterTb.IsReadOnly = true;
             }
         }
@@ -254,7 +240,6 @@ namespace IFilterShellView2
             if (ReturnedFromDeepProcessing)
             {
                 ProgressPb.Visibility = Visibility.Collapsed;
-                // ItemsPanel.IsEnabled = true;
                 FilterTb.IsReadOnly = false;
 
                 if (tempListOfHistoryItems.Count != 0)
@@ -264,9 +249,8 @@ namespace IFilterShellView2
                 }
             }
 
-            if (Context.Instance.FilterCount == 0 && Context.Instance.FilterText.Length == 0)
+            if (listOfPidlData.Count == 0 && Context.Instance.FilterText.Length == 0)
             {
-                // ItemsPanel.Visibility = Visibility.Collapsed;
                 ShowSearchResultsPage(false);
             }
         }
@@ -289,11 +273,12 @@ namespace IFilterShellView2
                 NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
             }
 
+            ShowSearchResultsPage(false);
+            listOfPidlData.Clear();
+
             // Disable the timer
             dispatcherInputFilter.Stop();
             Context.Instance.Reset();
-
-            ResetInterfaceData(true);
 
             if (ApplicationIsExiting)
             {
@@ -305,6 +290,11 @@ namespace IFilterShellView2
             }
             else
             {
+                if (!Properties.Settings.Default.KeepFilterText)
+                {
+                    FilterTb.Text = "";
+                }
+
                 Hide();
             }
         }
@@ -388,36 +378,39 @@ namespace IFilterShellView2
 
             try
             {
+                // Don't move this line. It must be placed right before checking the FilterText.Length and returning
+                Callback_UIOnBeforeFiltering();
+
+                // If there is no command then jump into the finally block
+                if (Context.Instance.FilterText.Length == 0)
+                {
+                    return;
+                }
+
                 // Query the view for the number of items that are hosted
                 Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
-
-                // If I want to enter a command
-                if (Context.Instance.FlagExtendedFilterMod)
+                // The query provided is in fact a command that need special parsing
+                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.FlagExtendedFilterMod;
+                // Check if the number of items in folder is greater than the maximum accepted
+                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
+                
+                if (Context.Instance.FlagRunInBackgroundWorker)
                 {
-                    Context.Instance.FlagRunInBackgroundWorker = true;
-
                     return;
                 }
 
                 Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), Context.Instance.FilterText));
-
-                Callback_UIOnBeforeFiltering();
-
-                // Check if the number of items in folder is greate than the maximum accepted
-                if (Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan)
-                {
-                    Context.Instance.FlagRunInBackgroundWorker = true;
-                    return;
-                }
 
                 StartFilteringTheNamespaceFolderInContext();
             }
             catch (Exception ExceptionMessage)
             {
                 HandleFilteringNamespaceException(ExceptionMessage, out ErrorString);
+            } 
+            finally
+            {
+                Callback_UIOnAfterFiltering(false, ErrorString);
             }
-
-            Callback_UIOnAfterFiltering(false, ErrorString);
         }
         #endregion
 
@@ -491,8 +484,7 @@ namespace IFilterShellView2
                 LocalSelectionBuffer.Clear();
             };
 
-            // Setting some variables
-            Context.Instance.FilterReportCount = 0;
+            // Reset filter count
             Context.Instance.FilterCount = 0;
 
             // Disable redrawing for faster selection
@@ -626,7 +618,6 @@ namespace IFilterShellView2
                     {
                         ReportAction();
                         TempCounter = 0;
-                        Context.Instance.FilterReportCount++;
                     }
 
                     if (IsOnWorkerThread && worker.CancellationPending)
@@ -718,8 +709,7 @@ namespace IFilterShellView2
         #region Filter input handlers
         private void FilterTb_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string FilterText = FilterTb.Text.TrimStart();
-            Context.Instance.FilterText = FilterText;
+            Context.Instance.FilterText = FilterTb.Text.TrimStart();
             Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
             lastTimeTextChanged = DateTime.Now;

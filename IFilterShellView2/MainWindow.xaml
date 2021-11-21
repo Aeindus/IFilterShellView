@@ -445,7 +445,6 @@
                                     <!-- Overlay controls here -->
                                     <StackPanel>
                                         <StackPanel Name="FilterItemsControlBox"
-                                                    Visibility="Collapsed"
                                                     Orientation="Horizontal"
                                                     Margin="0,0,12,0">
                                             <!-- Run file -->

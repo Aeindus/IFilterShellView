@@ -34,7 +34,6 @@ namespace IFilterShellView2.Program
         public string FilterText;
         public string PrevFilterText;
         public int FilterCount;
-        public int FilterReportCount;
         public int PidlCount;
         public bool FlagRunInBackgroundWorker;
         public bool FlagExtendedFilterMod;
@@ -60,7 +59,6 @@ namespace IFilterShellView2.Program
             FilterText = "";
             LocationUrl = "";
             FilterCount = 0;
-            FilterReportCount = 0;
             PidlCount = 0;
 
             FlagRunInBackgroundWorker = false;

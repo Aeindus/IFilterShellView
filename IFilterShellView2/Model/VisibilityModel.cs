@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace IFilterShellView2.Model
@@ -14,6 +13,8 @@ namespace IFilterShellView2.Model
             get => _visible;
             set
             {
+             if (_visible == value) return;
+
                 _visible = value;
                 NotifyPropertyChanged();
             }
