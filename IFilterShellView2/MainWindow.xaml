@@ -34,6 +34,7 @@
         <sys:Double x:Key="MaxViewHeight">400</sys:Double>
         <sys:Int32 x:Key="IconIndexCommand">2</sys:Int32>
         <sys:Int32 x:Key="IconIndexHistory">3</sys:Int32>
+        <sys:Int32 x:Key="IconIndexFilter">4</sys:Int32>
         <Thickness x:Key="RowMargins"
                    Left="4"
                    Top="4"
@@ -181,11 +182,12 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
                             Margin="4,0,0,0">
-                    
+
                     <TextBlock Text="{Binding Command}"
-                               TextWrapping="Wrap"/>
+                               TextWrapping="Wrap" />
                     <TextBlock Text="{Binding Issued}"
-                               TextWrapping="Wrap" FontWeight="Light"/>
+                               TextWrapping="Wrap"
+                               FontWeight="Light" />
                 </StackPanel>
 
             </StackPanel>
@@ -326,7 +328,6 @@
             </ui:ThemeShadowChrome>
 
 
-
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
                 <Border>
@@ -378,7 +379,7 @@
                                         Orientation="Vertical"
                                         Margin="8">
                                 <TextBlock Text="List of available commands"
-                                           FontWeight="Bold"/>
+                                           FontWeight="Bold" />
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                            Margin="0, 8" />
                                 <ListView Name="CommandList"
@@ -395,7 +396,7 @@
                             <StackPanel Grid.Column="1"
                                         Orientation="Vertical"
                                         Margin="8">
-                                <TextBlock Text="History"
+                                <TextBlock Text="Recently issued commands"
                                            FontWeight="Bold" />
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                            Margin="0, 8" />
@@ -497,8 +498,45 @@
                                           PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
                                           PreviewMouseMove="ItemsList_PreviewMouseMove"
                                           SelectionChanged="ItemsList_SelectionChanged"
+                                          BorderThickness="0"
                                           MaxHeight="{StaticResource MaxViewHeight}">
-
+                                    <ListView.Style>
+                                        <Style TargetType="{x:Type ListView}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
+                                                             Value="0">
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate>
+                                                                <Grid HorizontalAlignment="Stretch"
+                                                                      Margin="12">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                        <ColumnDefinition />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <Image Grid.Column="0"
+                                                                           Width="28"
+                                                                           Height="28">
+                                                                        <Image.Source>
+                                                                            <Binding Source="{StaticResource IconIndexFilter}"
+                                                                                     Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
+                                                                        </Image.Source>
+                                                                    </Image>
+                                                                    <StackPanel Grid.Column="1"
+                                                                                HorizontalAlignment="Right"
+                                                                                Orientation="Vertical">
+                                                                        <TextBlock FontWeight="Bold">No items to display</TextBlock>
+                                                                        <TextBlock HorizontalAlignment="Stretch"
+                                                                                   TextWrapping="Wrap">The filter couldn't return any results. Try to change the case sensitivity parameter. Maybe there are no items that match your filter. Are you sure you know what you are looking for ?</TextBlock>
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListView.Style>
                                 </ListView>
                             </Grid>
                         </StackPanel>

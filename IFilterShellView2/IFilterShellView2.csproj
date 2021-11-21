@@ -20,6 +20,7 @@
     <None Remove="Resources\ICommandIcon.png" />
     <None Remove="Resources\ic_file.ico" />
     <None Remove="Resources\ic_folder.ico" />
+    <None Remove="Resources\IFilterIcon.png" />
     <None Remove="Resources\IHistoryIcon.png" />
   </ItemGroup>
 
@@ -44,6 +45,7 @@
     <Resource Include="Resources\ICommandIcon.png" />
     <Resource Include="Resources\ic_file.ico" />
     <Resource Include="Resources\ic_folder.ico" />
+    <Resource Include="Resources\IFilterIcon.png" />
     <Resource Include="Resources\IHistoryIcon.png" />
   </ItemGroup>
 
