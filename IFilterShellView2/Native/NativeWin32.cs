@@ -35,7 +35,6 @@ namespace IFilterShellView2.Native
         [DllImport("user32.dll", SetLastError = true)]
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SetForegroundWindow(IntPtr hWnd);
 
@@ -159,6 +158,9 @@ namespace IFilterShellView2.Native
 
 
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
 
 
 
@@ -275,6 +277,16 @@ namespace IFilterShellView2.Native
 
 
 
+
+        public delegate bool EnumWindowProc(IntPtr hwnd, IntPtr lParam);
+
+        [DllImport("user32")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnumChildWindows(IntPtr window, EnumWindowProc callback, IntPtr lParam);
+
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
 
 

@@ -176,11 +176,17 @@
                     </Image.Source>
                 </Image>
 
-                <TextBlock Text="{Binding Command}"
-                           TextWrapping="Wrap"
-                           HorizontalAlignment="Stretch"
-                           VerticalAlignment="Center"
-                           Margin="4,0,0,0" />
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Margin="4,0,0,0">
+                    
+                    <TextBlock Text="{Binding Command}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Issued}"
+                               TextWrapping="Wrap" FontWeight="Light"/>
+                </StackPanel>
+
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
@@ -197,88 +203,96 @@
                 <Border>
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Click="PlacementSettingsBt_Click">
-                                <ui:FlyoutBase.AttachedFlyout>
-                                    <ui:Flyout Placement="Bottom">
-                                        <Border>
-                                            <StackPanel Name="SettingsPlacement"
-                                                        Orientation="Horizontal">
-                                                <RadioButton GroupName="SettingsPlacement"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="True"
-                                                             Tag="1"
-                                                             ToolTip="Starts with">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57762;" />
-                                                </RadioButton>
-                                                <RadioButton GroupName="SettingsPlacement"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="false"
-                                                             Tag="2"
-                                                             ToolTip="Contains">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57761;" />
-                                                </RadioButton>
-                                                <RadioButton GroupName="SettingsPlacement"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="false"
-                                                             Tag="4"
-                                                             ToolTip="Ends with">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57760;" />
-                                                </RadioButton>
-                                                <RadioButton GroupName="SettingsPlacement"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="false"
-                                                             Tag="8"
-                                                             ToolTip="Regex expression">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57710;" />
-                                                </RadioButton>
-                                            </StackPanel>
-                                        </Border>
-                                    </ui:Flyout>
-                                </ui:FlyoutBase.AttachedFlyout>
-                                <ui:FontIcon Name="PlacementSettingsIc"
-                                             FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57762;" />
-                            </Button>
+                        <Button Click="PlacementSettingsBt_Click">
+                            <ui:FlyoutBase.AttachedFlyout>
+                                <ui:Flyout Placement="Bottom">
+                                    <Border>
+                                        <StackPanel Name="SettingsPlacement"
+                                                    Orientation="Horizontal">
+                                            <RadioButton GroupName="SettingsPlacement"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="True"
+                                                         Tag="1"
+                                                         ToolTip="Starts with">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57762;" />
+                                            </RadioButton>
+                                            <RadioButton GroupName="SettingsPlacement"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="false"
+                                                         Tag="2"
+                                                         ToolTip="Contains">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57761;" />
+                                            </RadioButton>
+                                            <RadioButton GroupName="SettingsPlacement"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="false"
+                                                         Tag="4"
+                                                         ToolTip="Ends with">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57760;" />
+                                            </RadioButton>
+                                            <RadioButton GroupName="SettingsPlacement"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="false"
+                                                         Tag="8"
+                                                         ToolTip="Regex expression">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57710;" />
+                                            </RadioButton>
+                                        </StackPanel>
+                                    </Border>
+                                </ui:Flyout>
+                            </ui:FlyoutBase.AttachedFlyout>
+                            <ui:FontIcon Name="PlacementSettingsIc"
+                                         FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57762;" />
+                        </Button>
 
-                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+                        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
 
-                            <Button Click="CaseSettingsBt_Click">
-                                <ui:FlyoutBase.AttachedFlyout>
-                                    <ui:Flyout Placement="Bottom">
-                                        <Border>
-                                            <StackPanel Name="SettingsCase"
-                                                        Orientation="Horizontal">
-                                                <RadioButton GroupName="SettingsCase"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="false"
-                                                             Tag="1"
-                                                             ToolTip="Case sensitive">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57800;" />
-                                                </RadioButton>
-                                                <RadioButton GroupName="SettingsCase"
-                                                             Click="FilterSettingChanged"
-                                                             IsChecked="false"
-                                                             Tag="2"
-                                                             ToolTip="Case insensitive">
-                                                    <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                                 Glyph="&#57799;" />
-                                                </RadioButton>
-                                            </StackPanel>
+                        <Button Click="CaseSettingsBt_Click">
+                            <ui:FlyoutBase.AttachedFlyout>
+                                <ui:Flyout Placement="Bottom">
+                                    <Border>
+                                        <StackPanel Name="SettingsCase"
+                                                    Orientation="Horizontal">
+                                            <RadioButton GroupName="SettingsCase"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="false"
+                                                         Tag="1"
+                                                         ToolTip="Case sensitive">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57800;" />
+                                            </RadioButton>
+                                            <RadioButton GroupName="SettingsCase"
+                                                         Click="FilterSettingChanged"
+                                                         IsChecked="false"
+                                                         Tag="2"
+                                                         ToolTip="Case insensitive">
+                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                             Glyph="&#57799;" />
+                                            </RadioButton>
+                                        </StackPanel>
 
-                                        </Border>
-                                    </ui:Flyout>
-                                </ui:FlyoutBase.AttachedFlyout>
-                                <ui:FontIcon Name="CaseSettingsIc"
-                                             FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57800;" />
-                            </Button>
-                        </StackPanel>
+                                    </Border>
+                                </ui:Flyout>
+                            </ui:FlyoutBase.AttachedFlyout>
+                            <ui:FontIcon Name="CaseSettingsIc"
+                                         FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57800;" />
+                        </Button>
+
+                        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+
+                        <Button Name="BrowseBackBt"
+                                Click="BrowseBackBt_Click"
+                                ToolTip="Go back"
+                                HorizontalAlignment="Center">
+                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                         Glyph="&#57795;" />
+                        </Button>
                     </StackPanel>
                 </Border>
             </ui:ThemeShadowChrome>
@@ -309,6 +323,7 @@
                     </StackPanel>
                 </Border>
             </ui:ThemeShadowChrome>
+
 
 
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
@@ -421,17 +436,9 @@
                                             IsIndeterminate="True"
                                             Visibility="Collapsed" />
 
-                            <Button Name="BrowseBackBt"
-                                    Click="BrowseBackBt_Click"
-                                    ToolTip="Go back to spawn folder">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57616;" />
-                            </Button>
-
                             <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
                                   MouseLeave="ItemsPanelGrid_MouseLeave">
-                                <Grid Visibility="Visible"
-                                      Panel.ZIndex="1000"
+                                <Grid Panel.ZIndex="1000"
                                       HorizontalAlignment="Right">
                                     <!-- Overlay controls here -->
                                     <StackPanel>
@@ -478,7 +485,6 @@
                                         </StackPanel>
                                     </StackPanel>
                                 </Grid>
-
                                 <!-- Use whatever layout you need -->
                                 <ListView Name="ItemsList"
                                           SelectionMode="Single"
@@ -500,78 +506,5 @@
                 </StackPanel>
             </Border>
         </ui:ThemeShadowChrome>
-
-
-        <!-- Row #1 -->
-        <!-- Settings menu -->
-        <ui:ThemeShadowChrome Name="AdvancedSettingsPanel"
-                              Visibility="Collapsed"
-                              IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
-                              Depth="{StaticResource ShadowDepth}">
-            <Border>
-                <StackPanel Orientation="Vertical"
-                            Margin="12">
-                    <TextBlock Text="Application settings"
-                               FontWeight="Bold" />
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                               Margin="0, 8" />
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0"
-                                    Orientation="Vertical">
-                            <ui:NumberBox x:Name="MaxFolderPidlCount_Deepscan"
-                                          Header="Deep scan after"
-                                          ToolTip="If folder item count is bigger than this, then filtering will be done via a deep scan"
-                                          LostFocus="MaxFolderPidlCount_Deepscan_LostFocus"
-                                          Text="250" />
-                            <ui:NumberBox x:Name="MaxNumberFilterUpTo"
-                                          Header="Filter up to"
-                                          ToolTip="Will stop scanning once reached this number. If less than 0 then ignore this field and scan all"
-                                          LostFocus="MaxNumberFilterUpTo_LostFocus"
-                                          Text="-1" />
-                            <TextBox x:Name="DateFilterFormat"
-                                     ui:ControlHelper.Header="Date format"
-                                     ToolTip="Set the date format. Commands and filter views will bind to this settings"
-                                     LostFocus="DateFilterFormat_LostFocus"
-                                     Text="dd/MM/yyyy" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Vertical"
-                                    HorizontalAlignment="Right"
-                                    Margin="8,0,8,0">
-                            <ui:NumberBox x:Name="MaxHistory"
-                                          Header="Max history items"
-                                          ToolTip="How many entries will be saved in the history"
-                                          LostFocus="MaxHistory_LostFocus"
-                                          Text="15" />
-                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                       Margin="0,8" />
-
-                            <CheckBox Name="RunStartupCb"
-                                      Content="Run when the computer starts up"
-                                      Click="RunStartupCb_Click" />
-                            <CheckBox Name="KeepFilterText"
-                                      Content="Keep previous filter text"
-                                      Click="KeepFilterText_Click" />
-                        </StackPanel>
-                    </Grid>
-
-                    <ui:HyperlinkButton Content="Application developed by Reznicencu Team - Aerus"
-                                        NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension"
-                                        Margin="0,12,0,0"
-                                        Padding="0" />
-                    <ui:HyperlinkButton Padding="0"
-                                        Content="Licensing"
-                                        NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension/blob/master/LICENSE" />
-                </StackPanel>
-            </Border>
-        </ui:ThemeShadowChrome>
-
     </StackPanel>
-
 </Window>

@@ -28,6 +28,7 @@ namespace IFilterShellView2.Program
         public readonly CMarshalPDILNativeDataHolder MarshalPIDLNativeDataHolder;
 
         public IntPtr PrevShellWindowHwnd;
+        public IntPtr PrevShellWindowModernSearchBoxHwnd;
         public string LocationUrl;
         public string LocationUrlOnStart;
         public string FilterText;

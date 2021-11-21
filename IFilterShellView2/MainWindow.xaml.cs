@@ -70,8 +70,7 @@ namespace IFilterShellView2
         private readonly BackgroundWorker workerObject_SelectionProc;
         private readonly DispatcherTimer dispatcherInputFilter;
 
-        private readonly string assemblyImageName;
-        private readonly string assemblyImageLocation;
+
         private const char keyModExtendedCommandMode = '?';
 
         private readonly int filterAfterDelay = 120;
@@ -85,12 +84,6 @@ namespace IFilterShellView2
             InitializeComponent();
             this.DataContext = SearchPageVisibilityModel;
 
-            Assembly CurrentImageAssembly = Assembly.GetExecutingAssembly();
-            assemblyImageName = CurrentImageAssembly.GetName().Name;
-            assemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), assemblyImageName + ".exe");
-
-            // Initialize application settings
-            LoadApplicationSettings();
 
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
@@ -108,6 +101,24 @@ namespace IFilterShellView2
                 SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
 
             HistoryList.ItemsSource = listOfHistoryItems;
+
+
+            Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
+            {
+                foreach (RadioButton RButton in SButtons)
+                {
+                    int tag = Convert.ToInt32(RButton.Tag);
+                    if (Setting != tag) continue;
+                    RButton.IsChecked = true;
+                    HandleSettingChangedUniv(RButton, false);
+                    break;
+                }
+            };
+
+            ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
+            ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
+
+
 
             try
             {
@@ -184,13 +195,17 @@ namespace IFilterShellView2
                     return false;
                 }
 
+                // 
+                IntPtr ModernSearchBoxHwnd = WindowExtensions.FindChildWindowByClassName(ForegroundWindow, "ModernSearchBox");
+
                 // Old way of positioning the window - removed because of bug caused by KB5007186 
                 //NativeWin32.GetWindowRect(ForegroundWindow, out Context.Instance.ShellViewRect);
                 //System.Drawing.Point point = new System.Drawing.Point(0, 0);
                 //NativeWin32.ClientToScreen(ForegroundWindow, ref point);
 
-
                 // Set the rest of the Context.Instance class
+                Context.Instance.PrevShellWindowModernSearchBoxHwnd = ModernSearchBoxHwnd;
+                Context.Instance.PrevShellWindowHwnd = ForegroundWindow;
                 Context.Instance.pIShellBrowser = pIShellBrowser;
                 Context.Instance.pIFolderView2 = pIFolderView2;
                 Context.Instance.pIShellFolder = pIShellFolder;
@@ -216,7 +231,6 @@ namespace IFilterShellView2
                 FilterTb.Text = "";
             }
 
-            AdvancedSettingsPanel.Visibility = Visibility.Collapsed;
             ShowSearchResultsPage(false);
         }
 
@@ -272,6 +286,13 @@ namespace IFilterShellView2
         {
             if (workerObject_SelectionProc.IsBusy) workerObject_SelectionProc.CancelAsync();
 
+            // Re-eanble the shell's filter window.
+            if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
+            {
+                NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
+            }
+
+            // Disable the timer
             dispatcherInputFilter.Stop();
             Context.Instance.Reset();
 
@@ -282,7 +303,6 @@ namespace IFilterShellView2
                 // Save settings here as a precaution
                 SaveApplicationSettings();
 
-                dispatcherInputFilter.Stop();
                 globalHookObject.Dispose();
                 Context.Instance.Dispose();
             }
@@ -297,14 +317,23 @@ namespace IFilterShellView2
         }
         private void Callback_GlobalKeyboardHookSafeSta()
         {
-            Context.Instance.PrevShellWindowHwnd = NativeWin32.GetForegroundWindow();
+            IntPtr ForegroundWindow = NativeWin32.GetForegroundWindow();
 
-            if (GatherShellInterfacesLinkedToShell(Context.Instance.PrevShellWindowHwnd))
+            if (GatherShellInterfacesLinkedToShell(ForegroundWindow))
             {
+                // Disable the shell's filter window.
+                if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
+                {
+                    NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, false);
+                }
+
                 // Show the window and make it visible
                 this.Show();
                 this.Activate(); // must be set before ?
                 this.Focus();
+
+
+                NativeWin32.SetForegroundWindow(this.GetHWND());
 
                 // Make sure that the window is active using native calls
                 // WindowExtensions.ActivateWindow(ThisWindowRef);
@@ -318,7 +347,7 @@ namespace IFilterShellView2
                 UpdateWindowPositionToFixedPin();
 
                 // Subscribe to the shell's message pump and filter close messages
-                Context.Instance.EventManager.ResubscribeToExtCloseEvent(Context.Instance.PrevShellWindowHwnd, Callback_OnShellWindowCloseEvent);
+                Context.Instance.EventManager.ResubscribeToExtCloseEvent(ForegroundWindow, Callback_OnShellWindowCloseEvent);
 
                 /* Note: Do not move this line. We will create a copy of the current location url and store it inside LocationUrlBefore browse
                  * because we will need a copy when we click on a filtered item. When we click we call GatherShellInterfacesLinkedToShell 
@@ -459,16 +488,20 @@ namespace IFilterShellView2
             Context.Instance.FilterReportCount = 0;
             Context.Instance.FilterCount = 0;
 
+            // Disable redrawing for faster selection
             Context.Instance.pIFolderView2.SetRedraw(false);
-            Context.Instance.pIShellView.SelectItem(IntPtr.Zero, SVSI.SVSI_DESELECTOTHERS);
-
+            
+            // No point in unselecting all items if I don't want to select any
+            if (Properties.Settings.Default.AutoSelectFiltered)
+            {
+                Context.Instance.pIShellView.SelectItem(IntPtr.Zero, SVSI.SVSI_DESELECTOTHERS);
+            }
 
             // After deselecting all items check if the filter is empty
             if (Context.Instance.FilterText.Length == 0)
             {
                 goto LabelRestoreState;
             }
-
 
             // Compile the predicate chain if needed
             if (Context.Instance.FlagExtendedFilterMod)
@@ -510,7 +543,10 @@ namespace IFilterShellView2
                         FailedAttempts++;
                         continue;
                     }
-                    else FailedAttempts = 0;
+                    else
+                    {
+                        FailedAttempts = 0;
+                    }
 
                     NativeWin32.HResult hr = NativeWin32.SHGetDataFromIDListW(
                         Context.Instance.pIShellFolder,
@@ -567,7 +603,12 @@ namespace IFilterShellView2
                     if (FilterMatched)
                     {
                         LocalSelectionBuffer.Add(PidlData);
-                        Context.Instance.pIShellView.SelectItem(PidlPtrObj, SVSI.SVSI_SELECT);
+
+                        if (Properties.Settings.Default.AutoSelectFiltered)
+                        {
+                            Context.Instance.pIShellView.SelectItem(PidlPtrObj, SVSI.SVSI_SELECT);
+                        }
+
                         Context.Instance.FilterCount++;
                     }
 
@@ -601,7 +642,9 @@ namespace IFilterShellView2
 
             // Flush the last reports inside the buffer
             if (FlagFlushBuffer && LocalSelectionBuffer.Count != 0)
+            {
                 ReportAction();
+            }
 
             Context.Instance.pIFolderView2.SetRedraw(true);
 
@@ -623,37 +666,7 @@ namespace IFilterShellView2
          */
 
         #region Settings
-        private void LoadApplicationSettings()
-        {
-            Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
-            {
-                foreach (RadioButton RButton in SButtons)
-                {
-                    int tag = Convert.ToInt32(RButton.Tag);
-                    if (Setting != tag) continue;
-                    RButton.IsChecked = true;
-                    HandleSettingChangedUniv(RButton, false);
-                    break;
-                }
-            };
 
-            ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
-            ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
-
-            // Other settings
-            MaxFolderPidlCount_Deepscan.Text = Convert.ToString(Properties.Settings.Default.MaxFolderPidlCount_Deepscan);
-            MaxNumberFilterUpTo.Text = Convert.ToString(Properties.Settings.Default.MaxNumberFilterUpTo);
-            KeepFilterText.IsChecked = Properties.Settings.Default.KeepFilterText;
-            DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
-            MaxHistory.Text = Properties.Settings.Default.MaxHistory.ToString();
-
-            try
-            {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                RunStartupCb.IsChecked = key.GetValue(assemblyImageName) != null;
-            }
-            catch { }
-        }
         private void SaveApplicationSettings()
         {
             List<CHistoryItem> HistoryListFromIObs = listOfHistoryItems.ToList();
@@ -701,6 +714,7 @@ namespace IFilterShellView2
         {
             string FilterText = FilterTb.Text.TrimStart();
             Context.Instance.FilterText = FilterText;
+            Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
             lastTimeTextChanged = DateTime.Now;
             flagStringReadyToProcess = true;
@@ -782,7 +796,8 @@ namespace IFilterShellView2
             ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         private void SettingsBt_Click(object sender, RoutedEventArgs e)
         {
-            AdvancedSettingsPanel.Visibility = AdvancedSettingsPanel.IsVisible ? Visibility.Collapsed : Visibility.Visible;
+            SettingsWindow settingsWindow = new SettingsWindow();
+            settingsWindow.Show();
         }
         private void ExitBt_Click(object sender, RoutedEventArgs e)
         {
@@ -931,54 +946,6 @@ namespace IFilterShellView2
 
 
 
-        #region Advanced settings panel
-        private void MaxFolderPidlCount_Deepscan_LostFocus(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.MaxFolderPidlCount_Deepscan = Convert.ToInt32(MaxFolderPidlCount_Deepscan.Text);
-        }
-        private void MaxNumberFilterUpTo_LostFocus(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.MaxNumberFilterUpTo = Convert.ToInt32(MaxNumberFilterUpTo.Text);
-        }
-        private void DateFilterFormat_LostFocus(object sender, RoutedEventArgs e)
-        {
-            string NewDateFormat = DateFilterFormat.Text.Trim();
-
-            if (DateTimeExtensions.ValidateDateTimeFormatString(NewDateFormat))
-            {
-                Properties.Settings.Default.DateFormat = NewDateFormat;
-            }
-            else
-            {
-                DateFilterFormat.Text = Properties.Settings.Default.DateFormat;
-            }
-        }
-        private void MaxHistory_LostFocus(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.MaxHistory = Convert.ToInt32(MaxHistory.Text);
-        }
-        private void RunStartupCb_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-                if (RunStartupCb.IsChecked == true)
-                    key.SetValue(assemblyImageName, assemblyImageLocation);
-                else
-                    key.DeleteValue(assemblyImageName);
-            }
-            catch { }
-        }
-        private void KeepFilterText_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.KeepFilterText = (bool)KeepFilterText.IsChecked;
-        }
-        #endregion
-
-
-
-
 
         #region History List
         private void HistoryList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -1040,12 +1007,14 @@ namespace IFilterShellView2
             // Browse to selected folder
             NativeWin32.HResult hr = Context.Instance.pIShellBrowser.BrowseObject(
                 PidlBrowse,
-                SBSP.SBSP_SAMEBROWSER | 
-                SBSP.SBSP_WRITENOHISTORY | 
-                SBSP.SBSP_CREATENOHISTORY |
-                SBSP.SBSP_NOTRANSFERHIST |
+                SBSP.SBSP_SAMEBROWSER |
                 SBSP.SBSP_NOAUTOSELECT
             );
+
+            // These are ignored because of SBSP_SAMEBROWSER
+            // SBSP.SBSP_WRITENOHISTORY |
+            // SBSP.SBSP_CREATENOHISTORY |
+            // SBSP.SBSP_NOTRANSFERHIST |
 
             bool FlagResult = hr == NativeWin32.HResult.Ok;
 

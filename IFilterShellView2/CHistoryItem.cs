@@ -23,9 +23,11 @@ namespace IFilterShellView2
     public class CHistoryItem
     {
         public string Command { get; set; }
+        public DateTime Issued { get; set; }
 
         public CHistoryItem(string Command)
         {
+            this.Issued = DateTime.Now;
             this.Command = Command;
         }
     }

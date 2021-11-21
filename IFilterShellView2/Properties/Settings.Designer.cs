@@ -118,5 +118,17 @@ namespace IFilterShellView2.Properties {
                 this["SettingsCaseId"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoSelectFiltered {
+            get {
+                return ((bool)(this["AutoSelectFiltered"]));
+            }
+            set {
+                this["AutoSelectFiltered"] = value;
+            }
+        }
     }
 }

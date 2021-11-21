@@ -55,11 +55,9 @@ namespace IFilterShellView2.Program
         private void NativeEventCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, long idObject, long idChild, uint dwEventThread, uint dwmsEventTime)
         {
             const long OBJID_WINDOW = 0;
-            const long INDEXID_CONTAINER = 0;
 
             if (iEvent == NativeWin32.SetWinEventHookEvents.EVENT_OBJECT_DESTROY &&
-                 hWnd == Hwnd && idObject == OBJID_WINDOW
-                 /*idObject == OBJID_WINDOW && idChild == INDEXID_CONTAINER*/)
+                 hWnd == Hwnd && idObject == OBJID_WINDOW)
             {
                 if (Execute != null) Application.Current.Dispatcher.Invoke(Execute);
             }

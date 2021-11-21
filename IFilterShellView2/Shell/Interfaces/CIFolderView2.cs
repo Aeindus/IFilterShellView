@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace IFilterShellView2.Shell.Interfaces
 {
+#pragma warning disable CS0108 // Member hides inherited member; missing new keyword
 
     [ComImport, Guid("1af3a467-214f-4298-908e-06b03e0b39f9"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface CIFolderView2 : CIFolderView
@@ -13,6 +14,7 @@ namespace IFilterShellView2.Shell.Interfaces
         [PreserveSig]
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         NativeWin32.HResult GetCurrentViewMode(out uint pViewMode);
+
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         void SetCurrentViewMode(uint ViewMode);
