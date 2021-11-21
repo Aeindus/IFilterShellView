@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Collections.Generic;
 
-namespace IFilterShellView2
+namespace IFilterShellView2.Parser
 {
     public static class PredicateBuilder
     {

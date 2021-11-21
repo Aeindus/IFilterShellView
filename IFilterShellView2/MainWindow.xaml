@@ -378,7 +378,7 @@
                                         Orientation="Vertical"
                                         Margin="8">
                                 <TextBlock Text="List of available commands"
-                                           FontWeight="Bold" />
+                                           FontWeight="Bold"/>
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
                                            Margin="0, 8" />
                                 <ListView Name="CommandList"

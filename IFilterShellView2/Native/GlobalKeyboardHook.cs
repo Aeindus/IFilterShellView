@@ -14,7 +14,6 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-using IFilterShellView2.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,7 +24,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
-namespace IFilterShellView2
+namespace IFilterShellView2.Native
 {
     public sealed class GlobalKeyboardHook : IDisposable
     {

@@ -343,9 +343,10 @@ namespace IFilterShellView2
                 NativeWin32.SendInput(1, pInputs, NativeWin32.INPUT.Size);
 
                 // Make sure the window is the foreground window
-                NativeWin32.SetForegroundWindow(this.GetHWND());
-                NativeWin32.SwitchToThisWindow(this.GetHWND(), true);
-                NativeWin32.ShowWindowAsync(this.GetHWND(), 5);
+                IntPtr hwnd = this.GetHWND();
+                NativeWin32.SetForegroundWindow(hwnd);
+                NativeWin32.SwitchToThisWindow(hwnd, true);
+                NativeWin32.ShowWindowAsync(hwnd, 5);
 
 
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
