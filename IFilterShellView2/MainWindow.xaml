@@ -17,6 +17,7 @@
         Deactivated="Window_Deactivated"
         ui:WindowHelper.UseModernWindowStyle="false"
         ui:TitleBar.ExtendViewIntoTitleBar="false"
+        FocusManager.FocusedElement="{Binding ElementName=FilterTb}"
         ShowInTaskbar="false"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -24,7 +25,7 @@
         ui:ThemeManager.IsThemeAware="True"
         Background="Transparent"
         ShowActivated="True"
-        Focusable="False"
+        Focusable="True"
         UseLayoutRounding="True">
 
 

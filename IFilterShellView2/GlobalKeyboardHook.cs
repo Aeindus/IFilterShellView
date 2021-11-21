@@ -118,7 +118,7 @@ namespace IFilterShellView2
                             Worker.RunWorkerAsync((object)KeyAction);
 
                             // Cancel the key stroke
-                            //return (IntPtr)1; // it produced unwanted sideffects
+                            return (IntPtr)1; // it produced unwanted sideffects
                         }
                     }
                 }

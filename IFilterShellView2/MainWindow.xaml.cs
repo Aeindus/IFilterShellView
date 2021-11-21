@@ -102,7 +102,6 @@ namespace IFilterShellView2
 
             HistoryList.ItemsSource = listOfHistoryItems;
 
-
             Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
             {
                 foreach (RadioButton RButton in SButtons)
@@ -117,8 +116,6 @@ namespace IFilterShellView2
 
             ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
             ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
-
-
 
             try
             {
@@ -329,18 +326,27 @@ namespace IFilterShellView2
 
                 // Show the window and make it visible
                 this.Show();
-                this.Activate(); // must be set before ?
-                this.Focus();
-
-
-                NativeWin32.SetForegroundWindow(this.GetHWND());
-
-                // Make sure that the window is active using native calls
-                // WindowExtensions.ActivateWindow(ThisWindowRef);
+                this.Activate();
 
                 // Add focus to the search bar
                 FilterTb.Focus();
                 Keyboard.Focus(FilterTb);
+
+                // Thank you powertoys repo! - used to bypass SetForegroundWindow restrictions
+                // https://github.com/microsoft/PowerToys/blob/5a9f52fb11a7d8281fd3c93610bc6ae6ac770ff1/src/modules/fancyzones/FancyZonesLib/util.cpp#L383
+                NativeWin32.INPUT[] pInputs = {
+                    new NativeWin32.INPUT() 
+                    { 
+                        type = 0 
+                    }
+                };
+                NativeWin32.SendInput(1, pInputs, NativeWin32.INPUT.Size);
+
+                // Make sure the window is the foreground window
+                NativeWin32.SetForegroundWindow(this.GetHWND());
+                NativeWin32.SwitchToThisWindow(this.GetHWND(), true);
+                NativeWin32.ShowWindowAsync(this.GetHWND(), 5);
+
 
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
                 //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
@@ -490,7 +496,7 @@ namespace IFilterShellView2
 
             // Disable redrawing for faster selection
             Context.Instance.pIFolderView2.SetRedraw(false);
-            
+
             // No point in unselecting all items if I don't want to select any
             if (Properties.Settings.Default.AutoSelectFiltered)
             {
@@ -680,7 +686,6 @@ namespace IFilterShellView2
 
             Properties.Settings.Default.Save();
         }
-
         private void FilterSettingChanged(object sender, RoutedEventArgs e)
         {
             HandleSettingChangedUniv(sender, true);
