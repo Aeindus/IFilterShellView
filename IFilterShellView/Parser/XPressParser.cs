@@ -104,12 +104,12 @@ namespace IFilterShellView.Parser
 
             CCommAndArgs cc = ComAndArgs;
 
-            switch (OperatorChar)
+            return OperatorChar switch
             {
-                case StateCharAnd: return PredicateChain.And(Pidl => CommandCallback(Pidl, cc));
-                case StateCharOr: return PredicateChain.Or(Pidl => CommandCallback(Pidl, cc));
-                default: throw new UserException("Predicate unifier not implemented.");
-            }
+                StateCharAnd => PredicateChain.And(Pidl => CommandCallback(Pidl, cc)),
+                StateCharOr => PredicateChain.Or(Pidl => CommandCallback(Pidl, cc)),
+                _ => throw new UserException("Predicate unifier not implemented."),
+            };
         }
 
 
@@ -183,7 +183,7 @@ namespace IFilterShellView.Parser
                             throw new UserException("There is no matching paranthesis in the filter string.");
                         }
 
-                        Subgroup = Subgroup.Substring(1, Subgroup.Length - 2);
+                        Subgroup = Subgroup[1..^1];
 
                         XPressParser xpress = new XPressParser(Subgroup);
                         var SubPredicateChain = xpress.ParseToLinqPredicateList(ref Identities);
@@ -244,7 +244,7 @@ namespace IFilterShellView.Parser
 
 
             if (!FinalStates.Contains(CurrentState))
-                throw new UserException("The parser couldn't validate the given filter.");
+                throw new UserException("Reached end of input too early and entered a non final state.");
 
 
             if (CurrentState == 6 || CurrentState == 8)

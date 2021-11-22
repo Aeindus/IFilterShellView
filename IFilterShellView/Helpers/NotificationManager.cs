@@ -1,4 +1,20 @@
-﻿using System;
+﻿/* Copyright (C) 2021 Reznicencu Bogdan
+*  This program is free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*  
+*  You should have received a copy of the GNU General Public License along
+*  with this program; if not, write to the Free Software Foundation, Inc.,
+*  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -30,14 +46,16 @@ namespace IFilterShellView.Helpers
         public static NotificationData Notification_CommandGiven = new NotificationData()
         {
             Title = "Command notice",
-            Message = "You are about to compile a command.\n • List of available commands can be seen on the first page\n • Write your query in the search box then press [ENTER] to start matching items\n • To cancel press [BACKSPACE] or [ESCAPE]"
+            Message = "You are about to compile a command. Consider the following indications:\n • List of available commands can be seen on the first page\n • Write your query in the search box then press [ENTER] to start matching items\n • To cancel press [BACKSPACE] or [ESCAPE]"
         };
 
-
-        public static NotificationData Notification_CommandError = new NotificationData()
+        public static NotificationData Get(string Title, string Message)
         {
-            Title = "Malformed command",
-            Message = "There was an error processing the command.\n Tips:\n • Make sure the command is followed by the right arguments\n • Don't forget to close the '\",(,)' symbols\n • Make sure the DATE arguments match the date format prvided in the settings"
-        };
+            return new NotificationData()
+            {
+                Title = Title,
+                Message = Message
+            };
+        }
     }
 }

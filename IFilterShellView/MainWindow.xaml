@@ -517,7 +517,7 @@
                                                                         <ColumnDefinition />
                                                                     </Grid.ColumnDefinitions>
 
-                                                                    <Image Grid.Column="0"
+                                                                    <Image Grid.Column="0" 
                                                                            Width="28"
                                                                            Height="28">
                                                                         <Image.Source>
@@ -527,7 +527,7 @@
                                                                     </Image>
 
                                                                     <StackPanel Grid.Column="1"
-                                                                                Orientation="Vertical"
+                                                                                Orientation="Vertical" 
                                                                                 Margin="18,0,0,0">
                                                                         <TextBlock Text="{Binding SearchPageNoticeTitle.Text}"
                                                                                    FontWeight="Bold" />

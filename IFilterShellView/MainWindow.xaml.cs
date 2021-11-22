@@ -58,7 +58,6 @@ namespace IFilterShellView
         private readonly ObservableCollection<CPidlData> listOfPidlData;
         private readonly ObservableCollection<CCommandItem> listOfAvailableCommands;
         private readonly ObservableCollection<CHistoryItem> listOfHistoryItems;
-        private readonly List<CHistoryItem> tempListOfHistoryItems = new List<CHistoryItem>();
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
 
         private readonly ListViewItemData prevListViewItemPidl = new ListViewItemData();
@@ -66,15 +65,15 @@ namespace IFilterShellView
         private readonly BackgroundWorker workerObject_SelectionProc;
         private readonly DispatcherTimer dispatcherInputFilter;
 
+        public readonly MainWindowModelMerger mainWindowModelMerger = new MainWindowModelMerger();
 
-        private const char keyModExtendedCommandMode = '?';
 
         private readonly int filterAfterDelay = 120;
+        private const char keyModExtendedCommandMode = '?';
         private bool flagStringReadyToProcess = false;
         private DateTime lastTimeTextChanged;
 
 
-        public MainWindowModelMerger mainWindowModelMerger = new MainWindowModelMerger();
 
 
         public MainWindow()
@@ -119,7 +118,6 @@ namespace IFilterShellView
             dispatcherInputFilter.Tick += Callback_TimerPulse;
             dispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
         }
-
         private void Window_Deactivated(object sender, EventArgs e)
         {
             Callback_OnWindowCancellOrExit(false);
@@ -145,18 +143,12 @@ namespace IFilterShellView
                 FilterTb.IsReadOnly = true;
             }
         }
-        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
+        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, bool OverrideLastNotice = true)
         {
             if (ReturnedFromDeepProcessing)
             {
                 ProgressPb.Visibility = Visibility.Collapsed;
                 FilterTb.IsReadOnly = false;
-
-                if (tempListOfHistoryItems.Count != 0)
-                {
-                    tempListOfHistoryItems.ForEach(HItem => listOfHistoryItems.Add(HItem));
-                    tempListOfHistoryItems.Clear();
-                }
             }
 
             if (listOfPidlData.Count == 0)
@@ -165,7 +157,7 @@ namespace IFilterShellView
                 {
                     ShowSearchResultsPage(false);
                 }
-                else if (!Context.Instance.FlagRunInBackgroundWorker)
+                else if (!Context.Instance.FlagRunInBackgroundWorker && OverrideLastNotice)
                 {
                     UpdateNotificationData(NotificationManager.Notification_EmptyResults);
                 }
@@ -353,7 +345,8 @@ namespace IFilterShellView
             if (!FilterTb.IsFocused || Context.Instance.FilterText.Equals(Context.Instance.PrevFilterText) /*|| Context.Instance.FilterText.Length == 0*/)
                 return;
 
-            string ErrorString = "";
+            bool OverrideLastNotice = true;
+
             Context.Instance.PrevFilterText = Context.Instance.FilterText;
             Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
 
@@ -371,18 +364,17 @@ namespace IFilterShellView
                 // Query the view for the number of items that are hosted
                 Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
                 // The query provided is in fact a command that need special parsing
-                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.FlagExtendedFilterMod;
 
                 bool FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
 
                 // Check if the number of items in folder is greater than the maximum accepted
-                Context.Instance.FlagRunInBackgroundWorker |= FlagTooManyItems;
+                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.FlagExtendedFilterMod | FlagTooManyItems;
 
 
                 if (Context.Instance.FlagExtendedFilterMod)
                 {
                     UpdateNotificationData(NotificationManager.Notification_CommandGiven);
-                } 
+                }
                 else if (FlagTooManyItems)
                 {
                     UpdateNotificationData(NotificationManager.Notification_TooManyItems);
@@ -399,11 +391,12 @@ namespace IFilterShellView
             }
             catch (Exception ExceptionMessage)
             {
-                HandleFilteringNamespaceException(ExceptionMessage, out ErrorString);
+                HandleFilteringNamespaceException(ExceptionMessage);
+                OverrideLastNotice = false;
             }
             finally
             {
-                Callback_UIOnAfterFiltering(false, ErrorString);
+                Callback_UIOnAfterFiltering(false, OverrideLastNotice);
             }
         }
         #endregion
@@ -422,20 +415,18 @@ namespace IFilterShellView
         }
         private void WorkerCallback_SelectionProc_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
-            string ErrorString = "";
-
             if (e.Error != null)
             {
-                HandleFilteringNamespaceException(e.Error, out ErrorString);
-            }
-            else if (e.Cancelled)
-            {
-                // 
+                HandleFilteringNamespaceException(e.Error);
             }
             else
             {
+                if (Context.Instance.FlagExtendedFilterMod)
+                {
+                    listOfHistoryItems.Add(new CHistoryItem(Context.Instance.FilterText));
+                }
             }
-            Callback_UIOnAfterFiltering(true, ErrorString);
+            Callback_UIOnAfterFiltering(true);
 
             Context.Instance.FlagRunInBackgroundWorker = false;
         }
@@ -506,9 +497,6 @@ namespace IFilterShellView
                 {
                     throw new UserException("Parser couldn't compile the given command");
                 }
-
-                // Save the command in the list
-                tempListOfHistoryItems.Add(new CHistoryItem(Context.Instance.FilterText));
             }
 
             try
@@ -642,10 +630,19 @@ namespace IFilterShellView
 
             if (LastException != null) throw LastException;
         }
-        private void HandleFilteringNamespaceException(Exception ExceptionParam, out string NormalizedException)
+        private void HandleFilteringNamespaceException(Exception ExceptionParam)
         {
-            if (ExceptionParam is UserException exception) NormalizedException = exception.Message;
-            else NormalizedException = "The application failed to finalize the task due to some internal error.";
+            string NormalizedException;
+            if (ExceptionParam is UserException exception)
+            {
+                NormalizedException = exception.Message;
+            }
+            else
+            {
+                NormalizedException = "The application failed to finalize the task due to some internal error.";
+            }
+
+            UpdateNotificationData(NotificationManager.Get("Compiling the command failed", string.Format("The parser encountered the following error while compiling the given command: \n'{0}'", NormalizedException)));
         }
         #endregion
 
