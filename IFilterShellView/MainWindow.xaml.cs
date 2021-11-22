@@ -36,6 +36,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 using SHDocVw;
+using IFilterShellView.Helpers;
 
 namespace IFilterShellView
 {
@@ -54,9 +55,9 @@ namespace IFilterShellView
          * - When I press CTRL+F while in the same folder I want the filtering to continue from where I left.
          */
 
-        private readonly ObservableCollection<CPidlData> listOfPidlData = new ObservableCollection<CPidlData>();
-        private readonly ObservableCollection<CCommandItem> listOfAvailableCommands = new ObservableCollection<CCommandItem>();
-        private readonly ObservableCollection<CHistoryItem> listOfHistoryItems = new ObservableCollection<CHistoryItem>();
+        private readonly ObservableCollection<CPidlData> listOfPidlData;
+        private readonly ObservableCollection<CCommandItem> listOfAvailableCommands;
+        private readonly ObservableCollection<CHistoryItem> listOfHistoryItems;
         private readonly List<CHistoryItem> tempListOfHistoryItems = new List<CHistoryItem>();
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
 
@@ -90,34 +91,21 @@ namespace IFilterShellView
             workerObject_SelectionProc.WorkerReportsProgress = true;
             workerObject_SelectionProc.WorkerSupportsCancellation = true;
 
+            // Set item source
+            listOfPidlData = CompilePidlList();
+            listOfAvailableCommands = CompileCommandList();
+            listOfHistoryItems = CompileHistoryList();
+
             ItemsList.ItemsSource = listOfPidlData;
-            CompileCommandDataList();
             CommandList.ItemsSource = listOfAvailableCommands;
-
-            listOfHistoryItems = new ObservableCollection<CHistoryItem>(
-                SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
-
             HistoryList.ItemsSource = listOfHistoryItems;
 
-            Action<IEnumerable<RadioButton>, uint> ApplyButtonConfiguration = (IEnumerable<RadioButton> SButtons, uint Setting) =>
-            {
-                foreach (RadioButton RButton in SButtons)
-                {
-                    int tag = Convert.ToInt32(RButton.Tag);
-                    if (Setting != tag) continue;
-                    RButton.IsChecked = true;
-                    HandleSettingChangedUniv(RButton, false);
-                    break;
-                }
-            };
-
-            ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
-            ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
+            SyncApplicationSettingsWithUI();
 
             try
             {
                 // This can throw - it handles unmanaged resources and it's a critical component
-                _ = Context.Instance;
+                Context _unused_ = Context.Instance;
                 globalHookObject = new GlobalKeyboardHook();
                 globalHookObject.AddHotkeys(listOfHotkeys, Callback_GlobalKeyboardHookSafeSta);
             }
@@ -131,6 +119,7 @@ namespace IFilterShellView
             dispatcherInputFilter.Tick += Callback_TimerPulse;
             dispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
         }
+
         private void Window_Deactivated(object sender, EventArgs e)
         {
             Callback_OnWindowCancellOrExit(false);
@@ -143,6 +132,88 @@ namespace IFilterShellView
 
 
 
+        #region Events that are called on before, after or during the filtering process
+        private void Callback_UIOnBeforeFiltering(bool GoesInDeepProcessing = false)
+        {
+            listOfPidlData.Clear();
+
+            ShowSearchResultsPage(true);
+
+            if (GoesInDeepProcessing)
+            {
+                ProgressPb.Visibility = Visibility.Visible;
+                FilterTb.IsReadOnly = true;
+            }
+        }
+        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
+        {
+            if (ReturnedFromDeepProcessing)
+            {
+                ProgressPb.Visibility = Visibility.Collapsed;
+                FilterTb.IsReadOnly = false;
+
+                if (tempListOfHistoryItems.Count != 0)
+                {
+                    tempListOfHistoryItems.ForEach(HItem => listOfHistoryItems.Add(HItem));
+                    tempListOfHistoryItems.Clear();
+                }
+            }
+
+            if (listOfPidlData.Count == 0)
+            {
+                if (Context.Instance.FilterText.Length == 0)
+                {
+                    ShowSearchResultsPage(false);
+                }
+                else if (!Context.Instance.FlagRunInBackgroundWorker)
+                {
+                    UpdateNotificationData(NotificationManager.Notification_EmptyResults);
+                }
+            }
+        }
+        private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
+        {
+            ListOfSelections.ForEach(pidl_data => listOfPidlData.Add(pidl_data));
+        }
+        private void Callback_OnWindowCancellOrExit(bool ApplicationIsExiting)
+        {
+            if (workerObject_SelectionProc.IsBusy) workerObject_SelectionProc.CancelAsync();
+
+            // Re-eanble the shell's filter window.
+            if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
+            {
+                NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
+            }
+
+            ShowSearchResultsPage(false);
+            listOfPidlData.Clear();
+
+            // Disable the timer
+            dispatcherInputFilter.Stop();
+            Context.Instance.Reset();
+
+            if (ApplicationIsExiting)
+            {
+                // Save settings here as a precaution
+                SaveApplicationSettings();
+
+                globalHookObject.Dispose();
+                Context.Instance.Dispose();
+            }
+            else
+            {
+                if (!Properties.Settings.Default.KeepFilterText)
+                {
+                    FilterTb.Text = "";
+                }
+
+                Hide();
+            }
+        }
+        private void Callback_OnShellWindowCloseEvent()
+        {
+            Callback_OnWindowCancellOrExit(false);
+        }
         private bool GatherShellInterfacesLinkedToShell(IntPtr ForegroundWindow)
         {
             ShellWindows pIShellWindows = new ShellWindows();
@@ -152,9 +223,7 @@ namespace IFilterShellView
                 if (pIWebBrowserApp.HWND != (int)ForegroundWindow /*&& pIWebBrowserApp.FullName == ShellPath*/)
                     continue;
 
-                CIServiceProvider pIServiceProvider = pIWebBrowserApp as CIServiceProvider;
-
-                if (pIServiceProvider == null)
+                if (!(pIWebBrowserApp is CIServiceProvider pIServiceProvider))
                 {
                     Debug.WriteLine("Failed getting IServiceProvider interface");
                     return false;
@@ -170,10 +239,8 @@ namespace IFilterShellView
                 }
 
                 pIShellBrowser.QueryActiveShellView(out CIShellView pIShellView);
-                CIFolderView2 pIFolderView2 = pIShellView as CIFolderView2;
 
-
-                if (pIFolderView2 == null || pIShellView == null)
+                if (!(pIShellView is CIFolderView2 pIFolderView2) || pIShellView == null)
                 {
                     Debug.WriteLine("Failed getting IFolderView2/IShellView interface");
                     return false;
@@ -215,89 +282,6 @@ namespace IFilterShellView
             }
 
             return false;
-        }
-
-
-
-        #region Events that are called on before, after and during the filtering process
-        private void Callback_UIOnBeforeFiltering(bool GoesInDeepProcessing = false)
-        {
-            listOfPidlData.Clear();
-
-            ShowSearchResultsPage(true);
-
-            if (GoesInDeepProcessing)
-            {
-                ProgressPb.Visibility = Visibility.Visible;
-                FilterTb.IsReadOnly = true;
-            }
-        }
-        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, string ErrorMessage = "")
-        {
-            if (ReturnedFromDeepProcessing)
-            {
-                ProgressPb.Visibility = Visibility.Collapsed;
-                FilterTb.IsReadOnly = false;
-
-                if (tempListOfHistoryItems.Count != 0)
-                {
-                    tempListOfHistoryItems.ForEach(HItem => listOfHistoryItems.Add(HItem));
-                    tempListOfHistoryItems.Clear();
-                }
-            }
-
-            if (listOfPidlData.Count == 0 && Context.Instance.FilterText.Length == 0)
-            {
-                ShowSearchResultsPage(false);
-            }
-        }
-        private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
-        {
-            ListOfSelections.ForEach(pidl_data => listOfPidlData.Add(pidl_data));
-        }
-        #endregion
-
-
-
-        #region General callbacks that handle the filtering process
-        private void Callback_OnWindowCancellOrExit(bool ApplicationIsExiting)
-        {
-            if (workerObject_SelectionProc.IsBusy) workerObject_SelectionProc.CancelAsync();
-
-            // Re-eanble the shell's filter window.
-            if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
-            {
-                NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
-            }
-
-            ShowSearchResultsPage(false);
-            listOfPidlData.Clear();
-
-            // Disable the timer
-            dispatcherInputFilter.Stop();
-            Context.Instance.Reset();
-
-            if (ApplicationIsExiting)
-            {
-                // Save settings here as a precaution
-                SaveApplicationSettings();
-
-                globalHookObject.Dispose();
-                Context.Instance.Dispose();
-            }
-            else
-            {
-                if (!Properties.Settings.Default.KeepFilterText)
-                {
-                    FilterTb.Text = "";
-                }
-
-                Hide();
-            }
-        }
-        private void Callback_OnShellWindowCloseEvent()
-        {
-            Callback_OnWindowCancellOrExit(false);
         }
         private void Callback_GlobalKeyboardHookSafeSta()
         {
@@ -388,8 +372,21 @@ namespace IFilterShellView
                 Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
                 // The query provided is in fact a command that need special parsing
                 Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.FlagExtendedFilterMod;
+
+                bool FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
+
                 // Check if the number of items in folder is greater than the maximum accepted
-                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
+                Context.Instance.FlagRunInBackgroundWorker |= FlagTooManyItems;
+
+
+                if (Context.Instance.FlagExtendedFilterMod)
+                {
+                    UpdateNotificationData(NotificationManager.Notification_CommandGiven);
+                } 
+                else if (FlagTooManyItems)
+                {
+                    UpdateNotificationData(NotificationManager.Notification_TooManyItems);
+                }
 
                 if (Context.Instance.FlagRunInBackgroundWorker)
                 {
@@ -466,7 +463,7 @@ namespace IFilterShellView
             int MaxFailedAttempts = 15;
 
             // Callback that handles report management - dispatches reports according to the caller's context.
-            Action ReportAction = () =>
+            void ReportAction()
             {
                 List<CPidlData> NewList = LocalSelectionBuffer.GetRange(0, LocalSelectionBuffer.Count);
                 if (IsOnWorkerThread)
@@ -479,7 +476,7 @@ namespace IFilterShellView
                 }
 
                 LocalSelectionBuffer.Clear();
-            };
+            }
 
             // Reset filter count
             Context.Instance.FilterCount = 0;
@@ -647,7 +644,7 @@ namespace IFilterShellView
         }
         private void HandleFilteringNamespaceException(Exception ExceptionParam, out string NormalizedException)
         {
-            if (ExceptionParam is UserException) NormalizedException = ((UserException)ExceptionParam).Message;
+            if (ExceptionParam is UserException exception) NormalizedException = exception.Message;
             else NormalizedException = "The application failed to finalize the task due to some internal error.";
         }
         #endregion
@@ -661,7 +658,23 @@ namespace IFilterShellView
          */
 
         #region Settings
+        private void SyncApplicationSettingsWithUI()
+        {
+            void ApplyButtonConfiguration(IEnumerable<RadioButton> SButtons, uint Setting)
+            {
+                foreach (RadioButton RButton in SButtons)
+                {
+                    int tag = Convert.ToInt32(RButton.Tag);
+                    if (Setting != tag) continue;
+                    RButton.IsChecked = true;
+                    HandleSettingChangedUniv(RButton, false);
+                    break;
+                }
+            }
 
+            ApplyButtonConfiguration(SettingsPlacement.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsPlacementId);
+            ApplyButtonConfiguration(SettingsCase.Children.OfType<RadioButton>(), Properties.Settings.Default.SettingsCaseId);
+        }
         private void SaveApplicationSettings()
         {
             List<CHistoryItem> HistoryListFromIObs = listOfHistoryItems.ToList();
@@ -891,7 +904,7 @@ namespace IFilterShellView
         }
         private void Cmd_RunFile_Click(object sender, RoutedEventArgs e)
         {
-            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+            if (!GetHoveredPidlAndFullPath(out _, out string FullyQuallifiedItemName)) return;
 
             try
             {
@@ -908,7 +921,7 @@ namespace IFilterShellView
         }
         private void Cmd_CopyFile_Click(object sender, RoutedEventArgs e)
         {
-            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+            if (!GetHoveredPidlAndFullPath(out _, out string FullyQuallifiedItemName)) return;
 
             DataObject ClpDataObject = new DataObject();
             string[] ClpFileArray = new string[1];
@@ -918,13 +931,13 @@ namespace IFilterShellView
         }
         private void Cmd_InvokeProperty_Click(object sender, RoutedEventArgs e)
         {
-            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+            if (!GetHoveredPidlAndFullPath(out _, out string FullyQuallifiedItemName)) return;
 
             NativeUtilities.ShowFileProperties(FullyQuallifiedItemName);
         }
         private void Cmd_DeleteItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out string FullyQuallifiedItemName)) return;
+            if (!GetHoveredPidlAndFullPath(out CPidlData SelectedPidlData, out _)) return;
 
             if (DeletePidlFromSystem(SelectedPidlData))
             {
@@ -945,7 +958,15 @@ namespace IFilterShellView
         #endregion
 
 
+        #region Related functions
 
+        private void UpdateNotificationData(NotificationManager.NotificationData notification)
+        {
+            mainWindowModelMerger.SearchPageNoticeTitle.Text = notification.Title;
+            mainWindowModelMerger.SearchPageNoticeMessage.Text = notification.Message;
+        }
+
+        #endregion
 
 
 
@@ -971,7 +992,6 @@ namespace IFilterShellView
         }
         private void ShowCommandList(object sender, RoutedEventArgs e) =>
             ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-
         #endregion
 
 
@@ -1079,8 +1099,15 @@ namespace IFilterShellView
 
             return true;
         }
-        private void CompileCommandDataList()
+
+
+        private ObservableCollection<CPidlData> CompilePidlList()
         {
+            return new ObservableCollection<CPidlData>();
+        }
+        private ObservableCollection<CCommandItem> CompileCommandList()
+        {
+            ObservableCollection<CCommandItem> list = new ObservableCollection<CCommandItem>();
             CCommandItem CmdWrapperUI = null;
             int LastComIndex = -1;
 
@@ -1090,17 +1117,27 @@ namespace IFilterShellView
                 {
                     if (CmdWrapperUI != null)
                     {
-                        listOfAvailableCommands.Add(CmdWrapperUI);
+                        list.Add(CmdWrapperUI);
                     }
 
-                    CmdWrapperUI = new CCommandItem();
-                    CmdWrapperUI.Name = String.Format("{0} - {1}", CommandEntry.Key, XPressCommands.ComIndexDescription[CommandEntry.Value]);
-                    CmdWrapperUI.CmdAlias = "Alias - ";
+                    CmdWrapperUI = new CCommandItem
+                    {
+                        Name = string.Format("{0} - {1}", CommandEntry.Key, XPressCommands.ComIndexDescription[CommandEntry.Value]),
+                        CmdAlias = "Alias - "
+                    };
                     LastComIndex = (int)CommandEntry.Value;
                 }
                 else CmdWrapperUI.CmdAlias += CommandEntry.Key + " | ";
             }
+
+            return list;
         }
+        public ObservableCollection<CHistoryItem> CompileHistoryList()
+        {
+            return new ObservableCollection<CHistoryItem>(SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
+        }
+
+
         public void UpdateWindowPositionToFixedPin()
         {
             NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();

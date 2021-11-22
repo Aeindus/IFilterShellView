@@ -446,6 +446,7 @@
                                     <StackPanel>
                                         <StackPanel Name="FilterItemsControlBox"
                                                     Orientation="Horizontal"
+                                                    Visibility="Collapsed"
                                                     Margin="0,0,12,0">
                                             <!-- Run file -->
                                             <Button Name="Cmd_RunFile"
@@ -526,11 +527,12 @@
                                                                     </Image>
 
                                                                     <StackPanel Grid.Column="1"
-                                                                                HorizontalAlignment="Right"
-                                                                                Orientation="Vertical">
-                                                                        <TextBlock FontWeight="Bold">No items to display</TextBlock>
-                                                                        <TextBlock HorizontalAlignment="Stretch"
-                                                                                   TextWrapping="Wrap">The filter couldn't return any results. Try to change the case sensitivity parameter. Maybe there are no items that match your filter. Are you sure you know what you are looking for ?</TextBlock>
+                                                                                Orientation="Vertical"
+                                                                                Margin="18,0,0,0">
+                                                                        <TextBlock Text="{Binding SearchPageNoticeTitle.Text}"
+                                                                                   FontWeight="Bold" />
+                                                                        <TextBlock Text="{Binding SearchPageNoticeMessage.Text}"
+                                                                                   TextWrapping="Wrap" />
                                                                     </StackPanel>
                                                                 </Grid>
                                                             </ControlTemplate>
@@ -541,7 +543,6 @@
                                         </Style>
                                     </ListView.Style>
                                 </ListView>
-
                             </Grid>
                         </StackPanel>
                     </Grid>

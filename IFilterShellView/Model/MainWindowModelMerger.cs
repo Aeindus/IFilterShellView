@@ -8,13 +8,14 @@ namespace IFilterShellView.Model
 {
     public class MainWindowModelMerger
     {
-        public VisibilityModel _SearchPageVisibilityModel = new VisibilityModel();
-
-        public VisibilityModel SearchPageVisibilityModel
-        {
-            get => _SearchPageVisibilityModel;
-        }
+        private readonly VisibilityModel _SearchPageVisibilityModel = new VisibilityModel();
+        private readonly StringModel _SearchPageNoticeTitle = new StringModel();
+        private readonly StringModel _SearchPageNoticeSubtitle = new StringModel();
 
 
+
+        public VisibilityModel SearchPageVisibilityModel => _SearchPageVisibilityModel;
+        public StringModel SearchPageNoticeTitle => _SearchPageNoticeTitle;
+        public StringModel SearchPageNoticeMessage => _SearchPageNoticeSubtitle;
     }
 }
