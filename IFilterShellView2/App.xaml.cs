@@ -1,8 +1,8 @@
-﻿using IFilterShellView2.Native;
+﻿using IFilterShellView.Native;
 using System.Threading;
 using System.Windows;
 
-namespace IFilterShellView2
+namespace IFilterShellView
 {
     /// <summary>
     /// Interaction logic for App.xaml

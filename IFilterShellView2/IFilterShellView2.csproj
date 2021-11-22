@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>IFilterIcon.ico</ApplicationIcon>
+    <ApplicationIcon>icon_application.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
@@ -15,14 +15,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>D:\Local Projects\Github Projects\Aeindus Group\IFilterShellView\bin\IFilterShellView\</OutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Resources\ICommandIcon.png" />
-    <None Remove="Resources\ic_file.ico" />
-    <None Remove="Resources\ic_folder.ico" />
-    <None Remove="Resources\IFilterIcon.png" />
-    <None Remove="Resources\IHistoryIcon.png" />
-  </ItemGroup>
 
   <ItemGroup>
     <COMReference Include="SHDocVw">
@@ -37,16 +29,39 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="icon_application.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\image_history.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\icon_application.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\icon_file.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\icon_folder.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
     <PackageReference Include="SciChart.Wpf.UI.Transitionz" Version="3.1.251" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\ICommandIcon.png" />
-    <Resource Include="Resources\ic_file.ico" />
-    <Resource Include="Resources\ic_folder.ico" />
-    <Resource Include="Resources\IFilterIcon.png" />
-    <Resource Include="Resources\IHistoryIcon.png" />
+    <Resource Include="Resources\image_command.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\image_filter.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

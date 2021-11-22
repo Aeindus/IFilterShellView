@@ -17,7 +17,7 @@
 using System;
 using System.Windows.Media.Imaging;
 
-namespace IFilterShellView2.Extensions
+namespace IFilterShellView.Extensions
 {
     public static class ResourceExtensions
     {

@@ -1,15 +1,17 @@
-﻿<Window x:Class="IFilterShellView2.MainWindow"
+﻿<Window x:Class="IFilterShellView.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:base="clr-namespace:IFilterShellView2"
-        xmlns:cvrtr="clr-namespace:IFilterShellView2.Converter"
+        xmlns:base="clr-namespace:IFilterShellView"
+        xmlns:cvrtr="clr-namespace:IFilterShellView.Converter"
         xmlns:tz="http://schemas.abtsoftware.co.uk/transitionz"
         mc:Ignorable="d"
         Title="FilterWindow"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:model="clr-namespace:IFilterShellView.Model"
+        d:DataContext="{d:DesignInstance Type=model:MainWindowModelMerger}"
         Topmost="True"
         Height="Auto"
         SizeToContent="Height"
@@ -17,7 +19,6 @@
         Deactivated="Window_Deactivated"
         ui:WindowHelper.UseModernWindowStyle="false"
         ui:TitleBar.ExtendViewIntoTitleBar="false"
-        FocusManager.FocusedElement="{Binding ElementName=FilterTb}"
         ShowInTaskbar="false"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -27,7 +28,6 @@
         ShowActivated="True"
         Focusable="True"
         UseLayoutRounding="True">
-
 
     <Window.Resources>
         <sys:Double x:Key="ShadowDepth">20</sys:Double>
@@ -369,7 +369,7 @@
                         <!-- Page 1 -->
                         <Grid HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch"
-                              Visibility="{Binding Path=Visible, Converter={StaticResource ReverseBooleanToVisibilityConverter}}">
+                              Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource ReverseBooleanToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -431,9 +431,9 @@
                         <StackPanel Orientation="Vertical"
                                     Visibility="Collapsed"
                                     VerticalAlignment="Stretch"
-                                    tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=120, TransitionOn=Visibility}"
-                                    tz:Transitionz.Translate="{tz:TranslateParams From='0,-20', To='0,0', Duration=200, TransitionOn=Visibility}"
-                                    tz:Transitionz.Visibility="{Binding Path=Visible, Converter={StaticResource b2vc}}">
+                                    tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=150, TransitionOn=Visibility}"
+                                    tz:Transitionz.Translate="{tz:TranslateParams From='0,-20', To='0,0', Duration=150, TransitionOn=Visibility}"
+                                    tz:Transitionz.Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource b2vc}}">
                             <ui:ProgressBar x:Name="ProgressPb"
                                             IsIndeterminate="True"
                                             Visibility="Collapsed" />
@@ -487,6 +487,8 @@
                                     </StackPanel>
                                 </Grid>
                                 <!-- Use whatever layout you need -->
+
+                                <!-- Filtered item list here -->
                                 <ListView Name="ItemsList"
                                           SelectionMode="Single"
                                           HorizontalContentAlignment="Stretch"
@@ -499,44 +501,8 @@
                                           SelectionChanged="ItemsList_SelectionChanged"
                                           BorderThickness="0"
                                           MaxHeight="{StaticResource MaxViewHeight}">
-                                    <ListView.Style>
-                                        <Style TargetType="{x:Type ListView}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
-                                                             Value="0">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate>
-                                                                <Grid HorizontalAlignment="Stretch"
-                                                                      Margin="12">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto" />
-                                                                        <ColumnDefinition />
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <Image Grid.Column="0"
-                                                                           Width="28"
-                                                                           Height="28">
-                                                                        <Image.Source>
-                                                                            <Binding Source="{StaticResource IconIndexFilter}"
-                                                                                     Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
-                                                                        </Image.Source>
-                                                                    </Image>
-                                                                    <StackPanel Grid.Column="1"
-                                                                                HorizontalAlignment="Right"
-                                                                                Orientation="Vertical">
-                                                                        <TextBlock FontWeight="Bold">No items to display</TextBlock>
-                                                                        <TextBlock HorizontalAlignment="Stretch"
-                                                                                   TextWrapping="Wrap">The filter couldn't return any results. Try to change the case sensitivity parameter. Maybe there are no items that match your filter. Are you sure you know what you are looking for ?</TextBlock>
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ListView.Style>
                                 </ListView>
+
                             </Grid>
                         </StackPanel>
                     </Grid>

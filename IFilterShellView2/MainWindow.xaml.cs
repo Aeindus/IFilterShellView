@@ -14,17 +14,15 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-using IFilterShellView2.Exceptions;
-using IFilterShellView2.Extensions;
-using IFilterShellView2.Filter;
-using IFilterShellView2.HelperClasses;
-using IFilterShellView2.Model;
-using IFilterShellView2.Native;
-using IFilterShellView2.Parser;
-using IFilterShellView2.Shell.Interfaces;
-using IFilterShellView2.Program;
-using Microsoft.Win32;
-using SHDocVw;
+using IFilterShellView.Exceptions;
+using IFilterShellView.Extensions;
+using IFilterShellView.Filter;
+using IFilterShellView.HelperClasses;
+using IFilterShellView.Model;
+using IFilterShellView.Native;
+using IFilterShellView.Parser;
+using IFilterShellView.Shell.Interfaces;
+using IFilterShellView.Program;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,15 +30,14 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Threading;
+using SHDocVw;
 
-namespace IFilterShellView2
+namespace IFilterShellView
 {
     public partial class MainWindow : Window
     {
@@ -63,9 +60,7 @@ namespace IFilterShellView2
         private readonly List<CHistoryItem> tempListOfHistoryItems = new List<CHistoryItem>();
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
 
-
-        public readonly VisibilityModel SearchPageVisibilityModel = new VisibilityModel();
-        private readonly ListViewItemPidl prevListViewItemPidl = new ListViewItemPidl();
+        private readonly ListViewItemData prevListViewItemPidl = new ListViewItemData();
         private readonly GlobalKeyboardHook globalHookObject;
         private readonly BackgroundWorker workerObject_SelectionProc;
         private readonly DispatcherTimer dispatcherInputFilter;
@@ -78,12 +73,14 @@ namespace IFilterShellView2
         private DateTime lastTimeTextChanged;
 
 
+        public MainWindowModelMerger mainWindowModelMerger = new MainWindowModelMerger();
+
 
         public MainWindow()
         {
-            InitializeComponent();
-            this.DataContext = SearchPageVisibilityModel;
+            this.DataContext = mainWindowModelMerger;
 
+            InitializeComponent();
 
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
@@ -835,38 +832,47 @@ namespace IFilterShellView2
             }
             else
             {
-                ListViewItem listViewItem = ItemsList.GetItemAt(e.GetPosition(ItemsList));
-
-                if (listViewItem == null || listViewItem.Content == null) return;
-
-                Rect listViewItemRect = ItemsList.GetListViewItemRect(listViewItem);
-
-                if (prevListViewItemPidl.ItemRect.Equals(listViewItemRect)) return;
-
-                string PidlName = (listViewItem.Content as CPidlData).PidlName;
-                var SearchResult = listOfPidlData.Select((Pidl, Index) => (Pidl, Index))
-                    .FirstOrDefault(Item => Item.Pidl.PidlName == PidlName);
-
-                prevListViewItemPidl.Index = (SearchResult.Pidl == null) ? -1 : SearchResult.Index;
-                prevListViewItemPidl.ItemRect = listViewItemRect;
-
-                if (prevListViewItemPidl.Index == -1) return;
-
-                var newMargins = FilterItemsControlBox.Margin;
-                newMargins.Top = listViewItemRect.Top + listViewItemRect.Height / 2 - FilterItemsControlBox.ActualHeight / 2;
-
-                if (NativeUtilities.IsAttributeOfFolder(SearchResult.Pidl.FileAttributes))
+                if (ItemsList.Items.Count == 0)
                 {
-                    Cmd_RunFile.Visibility = Visibility.Collapsed;
-                    Cmd_CopyFile.Visibility = Visibility.Collapsed;
+                    FilterItemsControlBox.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    Cmd_RunFile.Visibility = Visibility.Visible;
-                    Cmd_CopyFile.Visibility = Visibility.Visible;
-                }
+                    ListViewItem listViewItem = ItemsList.GetItemAt(e.GetPosition(ItemsList));
 
-                FilterItemsControlBox.Margin = newMargins;
+                    if (listViewItem == null || listViewItem.Content == null) return;
+
+                    Rect listViewItemRect = ItemsList.GetListViewItemRect(listViewItem);
+
+                    if (prevListViewItemPidl.ItemRect.Equals(listViewItemRect)) return;
+
+                    string PidlName = (listViewItem.Content as CPidlData).PidlName;
+                    var SearchResult = listOfPidlData.Select((Pidl, Index) => (Pidl, Index))
+                        .FirstOrDefault(Item => Item.Pidl.PidlName == PidlName);
+
+                    prevListViewItemPidl.Index = (SearchResult.Pidl == null) ? -1 : SearchResult.Index;
+                    prevListViewItemPidl.ItemRect = listViewItemRect;
+
+                    if (prevListViewItemPidl.Index == -1) return;
+
+                    var newMargins = FilterItemsControlBox.Margin;
+                    newMargins.Top = listViewItemRect.Top + listViewItemRect.Height / 2 - FilterItemsControlBox.ActualHeight / 2;
+
+                    FilterItemsControlBox.Visibility = Visibility.Visible;
+
+                    if (NativeUtilities.IsAttributeOfFolder(SearchResult.Pidl.FileAttributes))
+                    {
+                        Cmd_RunFile.Visibility = Visibility.Collapsed;
+                        Cmd_CopyFile.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        Cmd_RunFile.Visibility = Visibility.Visible;
+                        Cmd_CopyFile.Visibility = Visibility.Visible;
+                    }
+
+                    FilterItemsControlBox.Margin = newMargins;
+                }
             }
         }
         private void ItemsPanelGrid_MouseEnter(object sender, MouseEventArgs e)
@@ -1113,7 +1119,7 @@ namespace IFilterShellView2
         }
         private void ShowSearchResultsPage(bool Visible)
         {
-            SearchPageVisibilityModel.Visible = Visible;
+            mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
         }
     }
 }

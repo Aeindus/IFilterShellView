@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace IFilterShellView2.Properties {
+namespace IFilterShellView.Properties {
     using System;
     
     
@@ -63,9 +63,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] ic_file {
+        public static byte[] icon_application {
             get {
-                object obj = ResourceManager.GetObject("ic_file", resourceCulture);
+                object obj = ResourceManager.GetObject("icon_application", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] ic_folder {
+        public static byte[] icon_file {
             get {
-                object obj = ResourceManager.GetObject("ic_folder", resourceCulture);
+                object obj = ResourceManager.GetObject("icon_file", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] ICommandIcon {
+        public static byte[] icon_folder {
             get {
-                object obj = ResourceManager.GetObject("ICommandIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("icon_folder", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] IFilterIcon {
+        public static byte[] image_command {
             get {
-                object obj = ResourceManager.GetObject("IFilterIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("image_command", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] IFilterIcon1 {
+        public static byte[] image_filter {
             get {
-                object obj = ResourceManager.GetObject("IFilterIcon1", resourceCulture);
+                object obj = ResourceManager.GetObject("image_filter", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace IFilterShellView2.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        public static byte[] IHistoryIcon {
+        public static byte[] image_history {
             get {
-                object obj = ResourceManager.GetObject("IHistoryIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("image_history", resourceCulture);
                 return ((byte[])(obj));
             }
         }
