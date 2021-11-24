@@ -681,7 +681,7 @@ namespace IFilterShellView
             List<CHistoryItem> HistoryListFromIObs = listOfHistoryItems.ToList();
             if (listOfHistoryItems.Count > Properties.Settings.Default.MaxHistory)
             {
-                HistoryListFromIObs.RemoveRange(0, Properties.Settings.Default.MaxHistory / 2);
+                HistoryListFromIObs.RemoveRange(Properties.Settings.Default.MaxHistory / 2, Properties.Settings.Default.MaxHistory);
             }
 
             Properties.Settings.Default.HistoryListSerialized =

@@ -5,82 +5,83 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:IFilterShellView"
         xmlns:ui="http://schemas.modernwpf.com/2019"
+        ui:ThemeManager.IsThemeAware="true"
+        ui:WindowHelper.UseModernWindowStyle="true"
+        ui:TitleBar.ExtendViewIntoTitleBar="true"
+        
         mc:Ignorable="d"
         Title="Settings Window"
         Height="Auto"
         Width="Auto"
         SizeToContent="WidthAndHeight"
         ResizeMode="NoResize">
-    <Grid>
-        <Border>
-            <StackPanel Orientation="Vertical"
-                        Margin="12">
 
-                <TextBlock Text="Application settings"
-                           FontWeight="Bold"
-                           FontSize="15" />
-                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                           Margin="0, 8" />
+    <StackPanel Orientation="Vertical"
+                Margin="12">
 
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+        <TextBlock Text="Application settings"
+                   FontWeight="Bold"
+                   FontSize="15" />
+        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                   Margin="0, 8" />
 
-                    <StackPanel Grid.Column="0"
-                                Orientation="Vertical"
-                                MinWidth="200">
-                        <ui:NumberBox x:Name="MaxFolderPidlCount_Deepscan"
-                                      Header="Deep scan if folder count bigger than"
-                                      ToolTip="If folder item count is bigger than this, then filtering will be done via a deep scan"
-                                      LostFocus="MaxFolderPidlCount_Deepscan_LostFocus"
-                                      Text="250" />
-                        <ui:NumberBox x:Name="MaxNumberFilterUpTo"
-                                      Header="Filter only this max. number of items"
-                                      ToolTip="Will stop scanning once reached this number. If less than 0 then ignore this field and scan all"
-                                      LostFocus="MaxNumberFilterUpTo_LostFocus"
-                                      Text="-1" />
-                        <ui:NumberBox x:Name="MaxHistory"
-                                      Header="Store only this many history entries"
-                                      ToolTip="How many entries will be saved in the history"
-                                      LostFocus="MaxHistory_LostFocus"
-                                      Text="15" />
-                        <TextBox x:Name="DateFilterFormat"
-                                 ui:ControlHelper.Header="Date format"
-                                 ToolTip="Set the date format. Commands and filter views will bind to this setting"
-                                 LostFocus="DateFilterFormat_LostFocus"
-                                 Text="dd/MM/yyyy" />
-                    </StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="1"
-                                Orientation="Vertical"
-                                HorizontalAlignment="Right"
-                                Margin="12,0,8,0">
-
-                        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                   Margin="0,8" />
-
-                        <CheckBox Name="AutoSelectFiltered"
-                                  Content="Automatically select the shell items that match the filter"
-                                  Click="AutoSelectFiltered_Click" />
-                        <CheckBox Name="RunStartupCb"
-                                  Content="Run when the computer starts up"
-                                  Click="RunStartupCb_Click" />
-                        <CheckBox Name="KeepFilterText"
-                                  Content="Keep previous filter text"
-                                  Click="KeepFilterText_Click" />
-                    </StackPanel>
-                </Grid>
-
-                <ui:HyperlinkButton Content="Application developed by Reznicencu Team - Aerus"
-                                    NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension"
-                                    Margin="0,12,0,0"
-                                    Padding="0" />
-                <ui:HyperlinkButton Padding="0"
-                                    Content="Licensing"
-                                    NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension/blob/master/LICENSE" />
+            <StackPanel Grid.Column="0"
+                        Orientation="Vertical"
+                        MinWidth="200">
+                <ui:NumberBox x:Name="MaxFolderPidlCount_Deepscan"
+                              Header="Deep scan if folder count bigger than"
+                              ToolTip="If folder item count is bigger than this, then filtering will be done via a deep scan"
+                              LostFocus="MaxFolderPidlCount_Deepscan_LostFocus"
+                              Text="250" />
+                <ui:NumberBox x:Name="MaxNumberFilterUpTo"
+                              Header="Filter only this max. number of items"
+                              ToolTip="Will stop scanning once reached this number. If less than 0 then ignore this field and scan all"
+                              LostFocus="MaxNumberFilterUpTo_LostFocus"
+                              Text="-1" />
+                <ui:NumberBox x:Name="MaxHistory"
+                              Header="Store only this many history entries"
+                              ToolTip="How many entries will be saved in the history"
+                              LostFocus="MaxHistory_LostFocus"
+                              Text="15" />
+                <TextBox x:Name="DateFilterFormat"
+                         ui:ControlHelper.Header="Date format"
+                         ToolTip="Set the date format. Commands and filter views will bind to this setting"
+                         LostFocus="DateFilterFormat_LostFocus"
+                         Text="dd/MM/yyyy" />
             </StackPanel>
-        </Border>
-    </Grid>
+
+            <StackPanel Grid.Column="1"
+                        Orientation="Vertical"
+                        HorizontalAlignment="Right"
+                        Margin="12,0,8,0">
+
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                           Margin="0,8" />
+
+                <CheckBox Name="AutoSelectFiltered"
+                          Content="Automatically select the shell items that match the filter"
+                          Click="AutoSelectFiltered_Click" />
+                <CheckBox Name="RunStartupCb"
+                          Content="Run when the computer starts up"
+                          Click="RunStartupCb_Click" />
+                <CheckBox Name="KeepFilterText"
+                          Content="Keep previous filter text"
+                          Click="KeepFilterText_Click" />
+            </StackPanel>
+        </Grid>
+
+        <ui:HyperlinkButton Content="Application developed by Reznicencu Team - Aerus"
+                            NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension"
+                            Margin="0,12,0,0"
+                            Padding="0" />
+        <ui:HyperlinkButton Padding="0"
+                            Content="Licensing"
+                            NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension/blob/master/LICENSE" />
+    </StackPanel>
 </Window>

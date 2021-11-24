@@ -43,17 +43,6 @@
                    Right="4"
                    Bottom="4" />
 
-        <cvrtr:ItemDatesConverter x:Key="ItemDatesConverter" />
-        <cvrtr:ItemTooltipAttributeConverter x:Key="ItemTooltipAttributeConverter" />
-        <cvrtr:ItemSubtitleConverter x:Key="ItemSubtitleConverter" />
-        <cvrtr:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
-        <cvrtr:ExtensionToBitmapSourceConverter x:Key="ExtensionToBitmapSourceConverter" />
-        <cvrtr:IdToBitmapSourceFromStaticImageFactory x:Key="IdToBitmapSourceFromStaticImageFactory" />
-        <cvrtr:LayeredBrushToSolidBrushConverter x:Key="LayeredBrushToSolidBrushConverter" />
-        <cvrtr:StringToUpperConverter x:Key="StringToUpperConverter" />
-        <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
-
-
         <Style TargetType="{x:Type Button}"
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background"
@@ -83,6 +72,19 @@
             <Setter Property="CornerRadius"
                     Value="4,4,4,4" />
         </Style>
+
+
+
+        <cvrtr:ItemDatesConverter x:Key="ItemDatesConverter" />
+        <cvrtr:ItemTooltipAttributeConverter x:Key="ItemTooltipAttributeConverter" />
+        <cvrtr:ItemSubtitleConverter x:Key="ItemSubtitleConverter" />
+        <cvrtr:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
+        <cvrtr:ExtensionToBitmapSourceConverter x:Key="ExtensionToBitmapSourceConverter" />
+        <cvrtr:IdToBitmapSourceFromStaticImageFactory x:Key="IdToBitmapSourceFromStaticImageFactory" />
+        <cvrtr:LayeredBrushToSolidBrushConverter x:Key="LayeredBrushToSolidBrushConverter" />
+        <cvrtr:StringToUpperConverter x:Key="StringToUpperConverter" />
+        <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
+
 
 
         <!-- A template view for the item listview -->
