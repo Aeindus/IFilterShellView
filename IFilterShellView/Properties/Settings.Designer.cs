@@ -61,7 +61,7 @@ namespace IFilterShellView.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("dd/MM/yyyy")]
+        [global::System.Configuration.DefaultSettingValueAttribute("d/M/yyyy")]
         public string DateFormat {
             get {
                 return ((string)(this["DateFormat"]));

@@ -28,13 +28,15 @@ namespace IFilterShellView.Parser
         public enum ComIndex
         {
             OLDER,
+            IN,
+            BETWEEN,
             NEWER,
             CONTAINS,
             STARTS,
             ENDS,
             EXTENSION,
             DIRECTORY,
-            FILE
+            FILE,
         }
 
         public static readonly IReadOnlyDictionary<string, ComIndex> ComStrToComIndex = new Dictionary<string, ComIndex>(StringComparer.InvariantCultureIgnoreCase)
@@ -44,6 +46,16 @@ namespace IFilterShellView.Parser
             { "Bef", ComIndex.OLDER },
             { "Old", ComIndex.OLDER },
             { "O", ComIndex.OLDER},
+
+            { "Inside", ComIndex.IN},
+            { "In", ComIndex.IN},
+            { "During", ComIndex.IN},
+            { "Du", ComIndex.IN},
+
+            { "Between", ComIndex.BETWEEN},
+            { "Bet", ComIndex.BETWEEN},
+            { "Be", ComIndex.BETWEEN},
+            { "B", ComIndex.BETWEEN},
 
             { "Newer", ComIndex.NEWER },
             { "New", ComIndex.NEWER },
@@ -71,6 +83,8 @@ namespace IFilterShellView.Parser
 
             { "Extension", ComIndex.EXTENSION },
             { "Ext", ComIndex.EXTENSION },
+            { "Ex", ComIndex.EXTENSION },
+
 
             { "Directory", ComIndex.DIRECTORY },
             { "Folder", ComIndex.DIRECTORY },
@@ -87,20 +101,24 @@ namespace IFilterShellView.Parser
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
         {
-            {ComIndex.OLDER, "get all items older than" },
-            {ComIndex.NEWER, "get items newer than"  },
-            {ComIndex.STARTS, "get items that start with"  },
-            {ComIndex.ENDS, "get items that end with"  },
-            {ComIndex.CONTAINS, "get items that contain"  },
-            {ComIndex.EXTENSION, "get items with extension"  },
-            {ComIndex.DIRECTORY, "get folder items"  },
-            {ComIndex.FILE, "get file items"},
+            {ComIndex.OLDER, "select items older than" },
+            {ComIndex.IN, "select items created in the year" },
+            {ComIndex.BETWEEN, "select items created between years" },
+            {ComIndex.NEWER, "select items newer than"  },
+            {ComIndex.STARTS, "select items that start with"  },
+            {ComIndex.ENDS, "select items that end with"  },
+            {ComIndex.CONTAINS, "select items that contain"  },
+            {ComIndex.EXTENSION, "select items with extension"  },
+            {ComIndex.DIRECTORY, "select folder items"  },
+            {ComIndex.FILE, "select file items"},
         };
 
 
         public static readonly IReadOnlyDictionary<ComIndex, int> ComIndexOptions = new Dictionary<ComIndex, int>()
         {
             {ComIndex.OLDER, 1 },
+            {ComIndex.IN, 1 },
+            {ComIndex.BETWEEN, 2 },
             {ComIndex.NEWER, 1 },
             {ComIndex.STARTS, 1 },
             {ComIndex.ENDS, 1 },
@@ -117,7 +135,7 @@ namespace IFilterShellView.Parser
                 {
                     ComIndex.OLDER, (PidlData, CommAndArgs) =>
                     {
-                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], out DateTime FormatedDate))
+                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], -1, out DateTime FormatedDate, out _))
                         {
                             throw new UserException("Date failed format checks.");
                         }
@@ -126,11 +144,56 @@ namespace IFilterShellView.Parser
                     }
                 },
 
+                /* in command */
+                {
+                    ComIndex.IN, (PidlData, CommAndArgs) =>
+                    {
+                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], 0, out DateTime FormatedDate, out bool OnlyYearParsed))
+                        {
+                            throw new UserException("Date failed format checks.");
+                        }
+
+                        if (OnlyYearParsed)
+                        {
+                            return PidlData.CreationTime.Year == FormatedDate.Year;
+                        }
+                        else
+                        {
+                            return PidlData.CreationTime.SameYearMonthAndDay(FormatedDate);
+                        }
+                    }
+                },
+
+                /* between command */
+                {
+                    ComIndex.BETWEEN, (PidlData, CommAndArgs) =>
+                    {
+                        if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0],0, out DateTime FormatedDate1, out bool OnlyYearParsed1) ||
+                            !DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[1],0, out DateTime FormatedDate2, out bool OnlyYearParsed2))
+                        {
+                            throw new UserException("Date failed format checks.");
+                        }
+
+                        if (OnlyYearParsed1 != OnlyYearParsed2) throw new UserException("Both date arguments must have the same format.");
+
+                        if (OnlyYearParsed1)
+                        {
+                            return FormatedDate1.Year <= PidlData.CreationTime.Year &&
+                                   PidlData.CreationTime.Year <= FormatedDate2.Year;
+                        }
+                        else
+                        {
+                            return FormatedDate1 <= PidlData.CreationTime && 
+                                   PidlData.CreationTime <= FormatedDate2;
+                        }
+                    }
+                },
+
                 /* newer command */
                 {
                     ComIndex.NEWER, (PidlData, CommAndArgs) =>
                     {
-                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], out DateTime FormatedDate))
+                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], 1, out DateTime FormatedDate, out _))
                         {
                             throw new UserException("Date failed format checks.");
                         }

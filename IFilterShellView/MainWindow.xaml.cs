@@ -146,7 +146,7 @@ namespace IFilterShellView
                 FilterTb.IsReadOnly = true;
             }
         }
-        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing = false, bool OverrideLastNotice = true)
+        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing, Exception RuntimeException, bool WasQueryExecuted)
         {
             if (ReturnedFromDeepProcessing)
             {
@@ -155,15 +155,37 @@ namespace IFilterShellView
                 FilterTb.IsReadOnly = false;
             }
 
-            if (listOfPidlData.Count == 0)
+            if (RuntimeException != null)
+            {
+                string NormalizedException;
+                if (RuntimeException is UserException exception)
+                {
+                    NormalizedException = exception.Message;
+                }
+                else
+                {
+                    NormalizedException = "The application failed to finalize the task due to some internal error.";
+                }
+                NotificationManager.NotificationData NotificationData = NotificationManager.Get("Compiling the command failed", string.Format("The parser encountered the following error while compiling the given command: \n'{0}'", NormalizedException));
+                UpdateNotificationData(NotificationData);
+            }
+            else if (listOfPidlData.Count == 0)
             {
                 if (Context.Instance.FilterText.Length == 0)
                 {
                     ShowSearchResultsPage(false);
                 }
-                else if (!Context.Instance.FlagRunInBackgroundWorker && OverrideLastNotice)
+                else if (WasQueryExecuted)
                 {
                     UpdateNotificationData(NotificationManager.Notification_EmptyResults);
+                }
+                else if (Context.Instance.FlagExtendedFilterMod)
+                {
+                    UpdateNotificationData(NotificationManager.Notification_CommandGiven);
+                }
+                else if (Context.Instance.FlagTooManyItems)
+                {
+                    UpdateNotificationData(NotificationManager.Notification_TooManyItems);
                 }
             }
         }
@@ -349,9 +371,9 @@ namespace IFilterShellView
             if (!FilterTb.IsFocused || Context.Instance.FilterText.Equals(Context.Instance.PrevFilterText) /*|| Context.Instance.FilterText.Length == 0*/)
                 return;
 
-            bool OverrideLastNotice = true;
-
+            Exception RuntimeException = null;
             Context.Instance.PrevFilterText = Context.Instance.FilterText;
+            bool WasQueryExecuted = false;
 
             try
             {
@@ -368,20 +390,11 @@ namespace IFilterShellView
                 Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
                 // The query provided is in fact a command that need special parsing
 
-                bool FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
+                Context.Instance.FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
 
                 // Check if the number of items in folder is greater than the maximum accepted
-                Context.Instance.FlagRunInBackgroundWorker = Context.Instance.FlagExtendedFilterMod | FlagTooManyItems;
-
-
-                if (Context.Instance.FlagExtendedFilterMod)
-                {
-                    UpdateNotificationData(NotificationManager.Notification_CommandGiven);
-                }
-                else if (FlagTooManyItems)
-                {
-                    UpdateNotificationData(NotificationManager.Notification_TooManyItems);
-                }
+                Context.Instance.FlagRunInBackgroundWorker =
+                    Context.Instance.FlagExtendedFilterMod | Context.Instance.FlagTooManyItems;
 
                 if (Context.Instance.FlagRunInBackgroundWorker)
                 {
@@ -391,15 +404,15 @@ namespace IFilterShellView
                 Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), Context.Instance.FilterText));
 
                 StartFilteringTheNamespaceFolderInContext();
+                WasQueryExecuted = true;
             }
             catch (Exception ExceptionMessage)
             {
-                HandleFilteringNamespaceException(ExceptionMessage);
-                OverrideLastNotice = false;
+                RuntimeException = ExceptionMessage;
             }
             finally
             {
-                Callback_UIOnAfterFiltering(false, OverrideLastNotice);
+                Callback_UIOnAfterFiltering(false, RuntimeException, WasQueryExecuted);
             }
         }
         #endregion
@@ -418,18 +431,20 @@ namespace IFilterShellView
         }
         private void WorkerCallback_SelectionProc_Completed(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (e.Error != null)
+            Exception RuntimeException = e.Error;
+
+            if (RuntimeException == null && Context.Instance.FlagExtendedFilterMod)
             {
-                HandleFilteringNamespaceException(e.Error);
-            }
-            else
-            {
-                if (Context.Instance.FlagExtendedFilterMod)
+                var CommandText = Context.Instance.FilterTextWithoutCommandModifier;
+                var CommandFound = listOfHistoryItems.Any(o => o.Command.Equals(CommandText));
+
+                if (!CommandFound)
                 {
-                    listOfHistoryItems.Add(new CHistoryItem(Context.Instance.FilterText));
+                    listOfHistoryItems.Insert(0, new CHistoryItem(CommandText));
                 }
             }
-            Callback_UIOnAfterFiltering(true);
+
+            Callback_UIOnAfterFiltering(true, RuntimeException, true);
 
             Context.Instance.FlagRunInBackgroundWorker = false;
         }
@@ -493,7 +508,7 @@ namespace IFilterShellView
             // Compile the predicate chain if needed
             if (Context.Instance.FlagExtendedFilterMod)
             {
-                XPressParser XLanguageParser = new XPressParser(Context.Instance.FilterText[1..]);
+                XPressParser XLanguageParser = new XPressParser(Context.Instance.FilterTextWithoutCommandModifier);
                 ILLanguageFunct = XLanguageParser.Compile();
 
                 if (ILLanguageFunct == null)
@@ -633,20 +648,6 @@ namespace IFilterShellView
 
             if (LastException != null) throw LastException;
         }
-        private void HandleFilteringNamespaceException(Exception ExceptionParam)
-        {
-            string NormalizedException;
-            if (ExceptionParam is UserException exception)
-            {
-                NormalizedException = exception.Message;
-            }
-            else
-            {
-                NormalizedException = "The application failed to finalize the task due to some internal error.";
-            }
-
-            UpdateNotificationData(NotificationManager.Get("Compiling the command failed", string.Format("The parser encountered the following error while compiling the given command: \n'{0}'", NormalizedException)));
-        }
         #endregion
 
 
@@ -721,6 +722,7 @@ namespace IFilterShellView
         {
             Context.Instance.FilterText = FilterTb.Text.TrimStart();
             Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
+            Context.Instance.FlagRunInBackgroundWorker = Context.Instance.FlagExtendedFilterMod;
             Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
             lastTimeTextChanged = DateTime.Now;

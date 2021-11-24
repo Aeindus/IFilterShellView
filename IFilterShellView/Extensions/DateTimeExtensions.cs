@@ -22,29 +22,62 @@ namespace IFilterShellView.Extensions
 {
     public static class DateTimeExtensions
     {
-        private static string[] ExpectedDateComponents = { "dd", "MM", "yyyy" };
-
-        public static bool ParseTimeByGlobalDateFormat(string DateString, out DateTime FormatedTime)
+        public static bool ParseTimeByGlobalDateFormat(string DateString, int Direction, out DateTime FormatedTime, out bool OnlyYearParsed)
         {
-            return DateTime.TryParseExact(DateString,
-                Properties.Settings.Default.DateFormat,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out FormatedTime
-                );
+            FormatedTime = default;
+            OnlyYearParsed = false;
+
+            if (DateString.Length == 4)
+            {
+                // only the year is present
+                if (!int.TryParse(DateString, out int Year)) return false;
+
+                OnlyYearParsed = true;
+
+                switch (Direction)
+                {
+                    case -1:
+                        FormatedTime = new DateTime(Year - 1, 12, 31);
+                        break;
+                    case 0:
+                        FormatedTime = new DateTime(Year, 1, 1);
+                        break;
+                    case 1:
+                        FormatedTime = new DateTime(Year + 1, 1, 1);
+                        break;
+                }
+            }
+            else
+            {
+                if (!DateTime.TryParseExact(
+                    DateString,
+                    Properties.Settings.Default.DateFormat, 
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out FormatedTime
+                )) return false;
+            }
+
+            return true;
         }
 
         public static bool ValidateDateTimeFormatString(string DateTimeFormat)
         {
-            if (DateTimeFormat.Length != 10) return false;
+            if (DateTimeFormat.Length != 8) return false;
+            uint sumcheck = 0;
 
-            string[] DateComponents = DateTimeFormat.Split('/');
+            foreach (byte b in DateTimeFormat) sumcheck += b;
 
-            foreach (string component in DateComponents)
-            {
-                if (!ExpectedDateComponents.Contains(component)) return false;
-            }
-            return true;
+            return sumcheck == 0x2F3;
         }
+
+
+        public static bool SameYearMonthAndDay(this DateTime ThisDateTime, DateTime CompareDateTime)
+        {
+            return ThisDateTime.Year == CompareDateTime.Year &&
+                ThisDateTime.Month == CompareDateTime.Month &&
+                ThisDateTime.Day == CompareDateTime.Day;
+        }
+
     }
 }

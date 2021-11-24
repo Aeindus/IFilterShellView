@@ -38,7 +38,8 @@ namespace IFilterShellView.Parser
             { new Tuple<int, char>(0, StateASCIIChar), 1},
             { new Tuple<int, char>(1, StateASCIIChar), 1},
             { new Tuple<int, char>(1, StateCharWhiteSpace), 2},
-            { new Tuple<int, char>(2, StateCharWhiteSpace), 2},
+            //{ new Tuple<int, char>(2, StateCharWhiteSpace), 2},
+
             { new Tuple<int, char>(10, StateCharWhiteSpace), 0},
             { new Tuple<int, char>(9, StateCharOr), 10},
             { new Tuple<int, char>(9, StateCharAnd), 10},
@@ -48,6 +49,7 @@ namespace IFilterShellView.Parser
             { new Tuple<int, char>(12, StateCharWhiteSpace), 9},
 
             /**/
+            { new Tuple<int, char>(4, StateCharWhiteSpace), 4},
             { new Tuple<int, char>(4, StateASCIIChar), 6},
             { new Tuple<int, char>(6, StateASCIIChar), 6},
             { new Tuple<int, char>(4, StateCharQuote), 5},
@@ -98,6 +100,11 @@ namespace IFilterShellView.Parser
             if (!ComStrToComIndex.TryGetValue(ComAndArgs.Command, out ComIndex cindex))
                 throw new UserException("The command you entered is not registered. Please enter a valid command.");
 
+            if (!ComIndexOptions.TryGetValue(cindex, out int Attributes))
+                throw new UserException("There are no attributes assigned to this function.");
+
+            if (Attributes != ComAndArgs.Arguments.Count)
+                throw new UserException("Wrong number of parameters given to the specified command.");
 
             if (!CommandAttributeDict.TryGetValue(cindex, out Func<CPidlData, CCommAndArgs, bool> CommandCallback))
                 throw new UserException("Registered command has no associated callback.");

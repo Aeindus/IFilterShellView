@@ -31,15 +31,18 @@ namespace IFilterShellView.Program
         public IntPtr PrevShellWindowModernSearchBoxHwnd;
         public string LocationUrl;
         public string LocationUrlOnStart;
-        public string FilterText;
         public string PrevFilterText;
         public int FilterCount;
         public int PidlCount;
         private bool Disposed;
 
+        public string FilterText;
+        public string FilterTextWithoutCommandModifier => FilterText[1..].TrimStart();
+
 
         public bool FlagRunInBackgroundWorker;
         public bool FlagExtendedFilterMod;
+        public bool FlagTooManyItems;
 
 
         public CIShellBrowser pIShellBrowser;
@@ -65,6 +68,7 @@ namespace IFilterShellView.Program
 
             FlagRunInBackgroundWorker = false;
             FlagExtendedFilterMod = false;
+            FlagTooManyItems = false;
 
             EventManager.ResetSubscription();
         }
