@@ -35,9 +35,11 @@ namespace IFilterShellView.Program
         public string PrevFilterText;
         public int FilterCount;
         public int PidlCount;
+        private bool Disposed;
+
+
         public bool FlagRunInBackgroundWorker;
         public bool FlagExtendedFilterMod;
-        private bool Disposed;
 
 
         public CIShellBrowser pIShellBrowser;
@@ -54,7 +56,7 @@ namespace IFilterShellView.Program
             EventManager = new CEventManager();  // can throw
         }
 
-        public void Reset()
+        public void HardReset()
         {
             FilterText = "";
             LocationUrl = "";
@@ -62,6 +64,8 @@ namespace IFilterShellView.Program
             PidlCount = 0;
 
             FlagRunInBackgroundWorker = false;
+            FlagExtendedFilterMod = false;
+
             EventManager.ResetSubscription();
         }
 

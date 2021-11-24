@@ -51,8 +51,8 @@
         <cvrtr:IdToBitmapSourceFromStaticImageFactory x:Key="IdToBitmapSourceFromStaticImageFactory" />
         <cvrtr:LayeredBrushToSolidBrushConverter x:Key="LayeredBrushToSolidBrushConverter" />
         <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
-        
-        
+
+
         <Style TargetType="{x:Type Button}"
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background"
@@ -335,24 +335,22 @@
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
                         <StackPanel Orientation="Horizontal">
-                            <!--<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />-->
-                            <Button Name="SettingsBt"
-                                    ToolTip="Settings"
+                            <Button Click="ToggleThemeBt_Click"
+                                    ToolTip="Toggle theme">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             Glyph="&#57739;" />
+                            </Button>
+                            <Button ToolTip="Settings"
                                     Grid.Column="1"
                                     HorizontalAlignment="Right"
                                     Click="SettingsBt_Click">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57621;" />
                             </Button>
-                            <Button Name="ExitBt"
-                                    Click="ExitBt_Click"
+                            <Button Click="ExitBt_Click"
                                     ToolTip="Completely close this application">
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57610;" />
-                            </Button>
-                            <Button Click="Button_Click"
-                                    ToolTip="Completely close this application">
-                                adas
                             </Button>
                         </StackPanel>
                     </StackPanel>
@@ -398,59 +396,76 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Vertical"
-                                    Margin="12">
-                            <TextBlock Text="Recently issued commands"
-                                       FontWeight="Bold" />
-                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                       Margin="0, 8" />
-                            <ListView Name="HistoryList"
-                                      SelectionMode="Single"
-                                      ItemTemplate="{StaticResource HistoryTemplate}"
-                                      VirtualizingStackPanel.IsVirtualizing="True"
-                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                      PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp"
-                                      MaxHeight="{StaticResource MaxViewHeight}"
-                                      BorderThickness="0">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem"
-                                           BasedOn="{StaticResource {x:Type ListViewItem}}">
-                                        <Setter Property="HorizontalContentAlignment"
-                                                Value="Left" />
-                                        <Setter Property="VerticalContentAlignment"
-                                                Value="Center" />
-                                        <Setter Property="Margin"
-                                                Value="0,0,0,0" />
-                                        <Setter Property="Padding"
-                                                Value="8,2,8,2" />
-                                        <Setter Property="MinHeight"
-                                                Value="20" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.Style>
-                                    <Style TargetType="{x:Type ListView}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
-                                                         Value="0">
-                                                <Setter Property="OverridesDefaultStyle"
-                                                        Value="False" />
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate>
-                                                            <TextBlock Text="Your history is empty for now. Only succesfully compiled commands will show up here"
-                                                                       VerticalAlignment="Center"
-                                                                       HorizontalAlignment="Stretch"
-                                                                       TextWrapping="Wrap" Style="{StaticResource {x:Type TextBlock}}"/>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ListView.Style>
-                            </ListView>
-                        </StackPanel>
+
+                        <Grid Grid.Column="1"
+                              Margin="12">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Vertical">
+                                <TextBlock Text="Recently issued commands"
+                                           FontWeight="Bold" />
+                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                           Margin="0, 8" />
+
+                                <ListView Name="HistoryList"
+                                          SelectionMode="Single"
+                                          ItemTemplate="{StaticResource HistoryTemplate}"
+                                          VirtualizingStackPanel.IsVirtualizing="True"
+                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                          PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp"
+                                          MaxHeight="{StaticResource MaxViewHeight}"
+                                          BorderThickness="0">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem"
+                                               BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                            <Setter Property="HorizontalContentAlignment"
+                                                    Value="Left" />
+                                            <Setter Property="VerticalContentAlignment"
+                                                    Value="Center" />
+                                            <Setter Property="Margin"
+                                                    Value="0,0,0,0" />
+                                            <Setter Property="Padding"
+                                                    Value="8,2,8,2" />
+                                            <Setter Property="MinHeight"
+                                                    Value="20" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.Style>
+                                        <Style TargetType="{x:Type ListView}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
+                                                             Value="0">
+                                                    <Setter Property="OverridesDefaultStyle"
+                                                            Value="False" />
+                                                    <Setter Property="Template">
+                                                        <Setter.Value>
+                                                            <ControlTemplate>
+                                                                <TextBlock Text="Your history is empty for now. Only succesfully compiled commands will show up here"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Stretch"
+                                                                           TextWrapping="Wrap"
+                                                                           Style="{StaticResource {x:Type TextBlock}}" />
+                                                            </ControlTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListView.Style>
+                                </ListView>
+                            </StackPanel>
+
+                            <Button Grid.Row="1" HorizontalAlignment="Right" Background="Transparent"
+                                    VerticalAlignment="Bottom"
+                                    ToolTip="Clear history"
+                                    Click="ClearHistoryBt_Click">
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                             Glyph="&#57607;" />
+                            </Button>
+                        </Grid>
                     </Grid>
 
 
@@ -461,7 +476,7 @@
                                 Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
                                 VerticalAlignment="Stretch"
                                 tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=350, TransitionOn=Visibility}"
-                                tz:Transitionz.Translate="{tz:TranslateParams From='0,-10', To='0,0', Duration=350, TransitionOn=Visibility}"
+                                tz:Transitionz.Translate="{tz:TranslateParams From='0,10', To='0,0', Duration=350, TransitionOn=Visibility}"
                                 tz:Transitionz.Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource b2vc}}">
                         <ui:ProgressBar x:Name="ProgressPb"
                                         Visibility="Collapsed" />
@@ -515,7 +530,6 @@
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
-                            <!-- Use whatever layout you need -->
 
                             <!-- Filtered item list here -->
                             <ListView Name="ItemsList"

@@ -70,17 +70,6 @@
                         <CheckBox Name="KeepFilterText"
                                   Content="Keep previous filter text"
                                   Click="KeepFilterText_Click" />
-
-                        <Button Name="ClearHistory"
-                                Click="ClearHistory_Click"
-                                Margin="0,4">
-                            <StackPanel Orientation="Horizontal">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                             Glyph="&#57614;" />
-                                <TextBlock Text="Clear search history"
-                                           Margin="8,0,0,0" />
-                            </StackPanel>
-                        </Button>
                     </StackPanel>
                 </Grid>
 

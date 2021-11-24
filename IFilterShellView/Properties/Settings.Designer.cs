@@ -97,7 +97,7 @@ namespace IFilterShellView.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public uint SettingsPlacementId {
             get {
                 return ((uint)(this["SettingsPlacementId"]));
@@ -109,7 +109,7 @@ namespace IFilterShellView.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public uint SettingsCaseId {
             get {
                 return ((uint)(this["SettingsCaseId"]));

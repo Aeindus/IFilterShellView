@@ -84,8 +84,6 @@ namespace IFilterShellView
 
             InitializeComponent();
 
-            Properties.Settings.Default.HistoryListSerialized = "";
-
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
             workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
@@ -188,7 +186,7 @@ namespace IFilterShellView
 
             // Disable the timer
             dispatcherInputFilter.Stop();
-            Context.Instance.Reset();
+            Context.Instance.HardReset();
 
             if (ApplicationIsExiting)
             {
@@ -354,7 +352,6 @@ namespace IFilterShellView
             bool OverrideLastNotice = true;
 
             Context.Instance.PrevFilterText = Context.Instance.FilterText;
-            Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
 
             try
             {
@@ -374,7 +371,7 @@ namespace IFilterShellView
                 bool FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
 
                 // Check if the number of items in folder is greater than the maximum accepted
-                Context.Instance.FlagRunInBackgroundWorker |= Context.Instance.FlagExtendedFilterMod | FlagTooManyItems;
+                Context.Instance.FlagRunInBackgroundWorker = Context.Instance.FlagExtendedFilterMod | FlagTooManyItems;
 
 
                 if (Context.Instance.FlagExtendedFilterMod)
@@ -723,6 +720,7 @@ namespace IFilterShellView
         private void FilterTb_TextChanged(object sender, TextChangedEventArgs e)
         {
             Context.Instance.FilterText = FilterTb.Text.TrimStart();
+            Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
             Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
             lastTimeTextChanged = DateTime.Now;
@@ -811,6 +809,17 @@ namespace IFilterShellView
         private void ExitBt_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+        private void ToggleThemeBt_Click(object sender, RoutedEventArgs e)
+        {
+            if (ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark)
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            }
+            else
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            }
         }
         #endregion
 
@@ -1162,16 +1171,10 @@ namespace IFilterShellView
             mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ClearHistoryBt_Click(object sender, RoutedEventArgs e)
         {
-            if (ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark)
-            {
-                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-            }
-            else
-            {
-                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-            }
+            Properties.Settings.Default.HistoryListSerialized = "";
+            listOfHistoryItems.Clear();
         }
     }
 }

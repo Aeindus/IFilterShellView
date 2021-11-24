@@ -16,8 +16,10 @@
 
 using IFilterShellView.Exceptions;
 using IFilterShellView.Extensions;
+using IFilterShellView.Native;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace IFilterShellView.Parser
 {
@@ -142,14 +144,14 @@ namespace IFilterShellView.Parser
                     ComIndex.STARTS, (PidlData, CommAndArgs) => PidlData.PidlName.StartsWith(CommAndArgs.Arguments[0])
                 },
 
-                /* contains with command */
+                /* contains command */
                 {
                     ComIndex.CONTAINS, (PidlData, CommAndArgs) => PidlData.PidlName.Contains(CommAndArgs.Arguments[0])
                 },
 
-                /* contains with command */
+                /* ends with command */
                 {
-                    ComIndex.ENDS, (PidlData, CommAndArgs) => PidlData.PidlName.EndsWith(CommAndArgs.Arguments[0])
+                    ComIndex.ENDS, (PidlData, CommAndArgs) => Path.GetFileNameWithoutExtension(PidlData.PidlName).EndsWith(CommAndArgs.Arguments[0])
                 },
 
                 /* extension */
@@ -157,15 +159,14 @@ namespace IFilterShellView.Parser
                     ComIndex.EXTENSION, (PidlData, CommAndArgs) => PidlData.PidlName.EndsWith(CommAndArgs.Arguments[0])
                 },
 
-
                 /* directory */
                 {
-                    ComIndex.DIRECTORY, (PidlData, CommAndArgs) => PidlData.FileAttributes == 0x10
+                    ComIndex.DIRECTORY, (PidlData, CommAndArgs) => NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes)
                 },
 
                 /* file */
                 {
-                    ComIndex.FILE, (PidlData, CommAndArgs) => PidlData.FileAttributes != 0x10
+                    ComIndex.FILE, (PidlData, CommAndArgs) => !NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes)
                 },
             };
 

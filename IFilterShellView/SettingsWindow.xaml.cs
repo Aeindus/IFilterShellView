@@ -94,11 +94,5 @@ namespace IFilterShellView
         {
             Properties.Settings.Default.AutoSelectFiltered = (bool)AutoSelectFiltered.IsChecked;
         }
-
-
-        private void ClearHistory_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.HistoryListSerialized = "";
-        }
     }
 }
