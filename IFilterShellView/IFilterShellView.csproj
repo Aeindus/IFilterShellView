@@ -4,6 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,7 @@
     <None Remove="Resources\icon_file.ico" />
     <None Remove="Resources\icon_folder.ico" />
     <None Remove="Resources\image_command.png" />
+    <None Remove="Resources\image_emptycrate.png" />
     <None Remove="Resources\image_filter.png" />
     <None Remove="Resources\image_history.png" />
   </ItemGroup>
@@ -28,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\image_emptycrate.png" />
     <Resource Include="Resources\image_filter.png" />
   </ItemGroup>
 

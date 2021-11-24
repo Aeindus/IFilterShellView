@@ -6,8 +6,32 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemeResources />
+                <ui:ThemeResources>
+                    <ui:ThemeResources.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light">
+                            <ResourceDictionary.MergedDictionaries>
+                                <ResourceDictionary Source="/ModernWpf;component/ThemeResources/Light.xaml" />
+                            </ResourceDictionary.MergedDictionaries>
+                            
+                            <SolidColorBrush x:Key="RuntimeSolidColorBrushBack"
+                                             Color="#ddf2f2f2" />
+                        </ResourceDictionary>
+                        
+                        <!-- ///// ///// -->
+                        <ResourceDictionary x:Key="Dark">
+                            <ResourceDictionary.MergedDictionaries>
+                                <ResourceDictionary Source="/ModernWpf;component/ThemeResources/Dark.xaml" />
+                            </ResourceDictionary.MergedDictionaries>
+
+                            <SolidColorBrush x:Key="RuntimeSolidColorBrushBack"
+                                             Color="#000" />
+                        </ResourceDictionary>
+                    </ui:ThemeResources.ThemeDictionaries>
+                </ui:ThemeResources>
+
+                <!-- ModernWPF controls resources -->
                 <ui:XamlControlsResources />
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

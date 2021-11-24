@@ -6,23 +6,24 @@
         xmlns:base="clr-namespace:IFilterShellView"
         xmlns:cvrtr="clr-namespace:IFilterShellView.Converter"
         xmlns:tz="http://schemas.abtsoftware.co.uk/transitionz"
-        mc:Ignorable="d"
-        Title="FilterWindow"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime"
         xmlns:model="clr-namespace:IFilterShellView.Model"
+        xmlns:binding="clr-namespace:IFilterShellView.Binding"
         d:DataContext="{d:DesignInstance Type=model:MainWindowModelMerger}"
+        mc:Ignorable="d"
+        Title="FilterWindow"
         Topmost="True"
         Height="Auto"
         SizeToContent="Height"
         Closing="Window_Closing"
         Deactivated="Window_Deactivated"
-        ui:WindowHelper.UseModernWindowStyle="false"
-        ui:TitleBar.ExtendViewIntoTitleBar="false"
         ShowInTaskbar="false"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
+        ui:WindowHelper.UseModernWindowStyle="false"
+        ui:TitleBar.ExtendViewIntoTitleBar="false"
         ui:ThemeManager.IsThemeAware="True"
         Background="Transparent"
         ShowActivated="True"
@@ -32,9 +33,10 @@
     <Window.Resources>
         <sys:Double x:Key="ShadowDepth">20</sys:Double>
         <sys:Double x:Key="MaxViewHeight">400</sys:Double>
-        <sys:Int32 x:Key="IconIndexCommand">2</sys:Int32>
-        <sys:Int32 x:Key="IconIndexHistory">3</sys:Int32>
-        <sys:Int32 x:Key="IconIndexFilter">4</sys:Int32>
+        <sys:Int32 x:Key="index_image_command">2</sys:Int32>
+        <sys:Int32 x:Key="index_image_history">3</sys:Int32>
+        <sys:Int32 x:Key="index_image_filter">4</sys:Int32>
+        <sys:Int32 x:Key="index_image_emptycrate">5</sys:Int32>
         <Thickness x:Key="RowMargins"
                    Left="4"
                    Top="4"
@@ -47,10 +49,10 @@
         <cvrtr:ReverseBooleanToVisibilityConverter x:Key="ReverseBooleanToVisibilityConverter" />
         <cvrtr:ExtensionToBitmapSourceConverter x:Key="ExtensionToBitmapSourceConverter" />
         <cvrtr:IdToBitmapSourceFromStaticImageFactory x:Key="IdToBitmapSourceFromStaticImageFactory" />
-
+        <cvrtr:LayeredBrushToSolidBrushConverter x:Key="LayeredBrushToSolidBrushConverter" />
         <BooleanToVisibilityConverter x:Key="b2vc"></BooleanToVisibilityConverter>
-
-
+        
+        
         <Style TargetType="{x:Type Button}"
                BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background"
@@ -68,25 +70,23 @@
         </Style>
 
         <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="Background"
-                    Value="{DynamicResource SystemControlPageBackgroundAltHighBrush}" />
+            <!--<Setter Property="Background"
+                    Value="{DynamicResource SystemControlPageBackgroundAltHighBrush}" />-->
             <Setter Property="Foreground"
                     Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
         </Style>
 
         <Style TargetType="{x:Type Border}">
-            <Setter Property="Background"
-                    Value="{DynamicResource SystemControlPageBackgroundAltHighBrush}" />
             <Setter Property="BorderBrush"
-                    Value="Silver" />
+                    Value="#90efefef" />
             <Setter Property="BorderThickness"
                     Value="1" />
             <Setter Property="CornerRadius"
                     Value="4,4,4,4" />
-            <Setter Property="Margin"
-                    Value="1" />
-            <Setter Property="Padding"
-                    Value="1" />
+            <!--<Setter Property="Margin"
+                    Value="1" />-->
+            <!--<Setter Property="Padding"
+                    Value="1" />-->
         </Style>
 
 
@@ -146,7 +146,7 @@
                        Width="28"
                        Height="28">
                     <Image.Source>
-                        <Binding Source="{StaticResource IconIndexCommand}"
+                        <Binding Source="{StaticResource index_image_command}"
                                  Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
                     </Image.Source>
                 </Image>
@@ -173,7 +173,7 @@
                 <Image Width="28"
                        Height="28">
                     <Image.Source>
-                        <Binding Source="{StaticResource IconIndexHistory}"
+                        <Binding Source="{StaticResource index_image_history}"
                                  Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
                     </Image.Source>
                 </Image>
@@ -184,7 +184,8 @@
                             Margin="4,0,0,0">
 
                     <TextBlock Text="{Binding Command}"
-                               TextWrapping="Wrap" />
+                               TextWrapping="Wrap"
+                               FontWeight="Bold" />
                     <TextBlock Text="{Binding Issued}"
                                TextWrapping="Wrap"
                                FontWeight="Light" />
@@ -203,7 +204,7 @@
                     Margin="0,0,0,4">
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
-                <Border>
+                <Border Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
                         <Button Click="PlacementSettingsBt_Click">
@@ -305,7 +306,7 @@
                                   IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}"
                                   Margin="4,0">
-                <Border>
+                <Border Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
 
@@ -330,7 +331,7 @@
 
             <ui:ThemeShadowChrome IsShadowEnabled="{DynamicResource {x:Static SystemParameters.DropShadowKey}}"
                                   Depth="{StaticResource ShadowDepth}">
-                <Border>
+                <Border Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
                     <StackPanel Orientation="Horizontal"
                                 Margin="{StaticResource RowMargins}">
                         <StackPanel Orientation="Horizontal">
@@ -349,6 +350,10 @@
                                 <ui:FontIcon FontFamily="Segoe MDL2 Assets"
                                              Glyph="&#57610;" />
                             </Button>
+                            <Button Click="Button_Click"
+                                    ToolTip="Completely close this application">
+                                adas
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -362,22 +367,21 @@
                               Depth="{StaticResource ShadowDepth}"
                               MaxWidth="{Binding ElementName=Toolbar,Path=ActualWidth}">
             <Border>
-                <StackPanel Orientation="Vertical"
-                            Margin="{StaticResource RowMargins}">
+                <Grid Background="{DynamicResource RuntimeSolidColorBrushBack}">
+                    <!-- Page 1 -->
+                    <Grid HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Panel.ZIndex="20"
+                          Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource ReverseBooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                    <Grid>
-                        <!-- Page 1 -->
-                        <Grid HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch"
-                              Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource ReverseBooleanToVisibilityConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0"
-                                        Orientation="Vertical"
-                                        Margin="8">
+                        <StackPanel Grid.Column="0"
+                                    Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}">
+                            <StackPanel Orientation="Vertical"
+                                        Margin="12">
                                 <TextBlock Text="List of available commands"
                                            FontWeight="Bold" />
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
@@ -392,162 +396,189 @@
                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                           HorizontalContentAlignment="Stretch" />
                             </StackPanel>
+                        </StackPanel>
 
-                            <StackPanel Grid.Column="1"
-                                        Orientation="Vertical"
-                                        Margin="8">
-                                <TextBlock Text="Recently issued commands"
-                                           FontWeight="Bold" />
-                                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
-                                           Margin="0, 8" />
-                                <ListView Name="HistoryList"
-                                          SelectionMode="Single"
-                                          ItemTemplate="{StaticResource HistoryTemplate}"
-                                          VirtualizingStackPanel.IsVirtualizing="True"
-                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                          PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp"
-                                          MaxHeight="{StaticResource MaxViewHeight}">
-                                    <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem"
-                                               BasedOn="{StaticResource {x:Type ListViewItem}}">
-                                            <Setter Property="HorizontalContentAlignment"
-                                                    Value="Left" />
-                                            <Setter Property="VerticalContentAlignment"
-                                                    Value="Center" />
-                                            <Setter Property="Margin"
-                                                    Value="0,0,0,0" />
-                                            <Setter Property="Padding"
-                                                    Value="8,2,8,2" />
-                                            <Setter Property="MinHeight"
-                                                    Value="20" />
-                                        </Style>
-                                    </ListView.ItemContainerStyle>
-                                </ListView>
-                            </StackPanel>
-                        </Grid>
-
-
-                        <!-- Page 2 -->
-                        <StackPanel Orientation="Vertical"
-                                    Visibility="Collapsed"
-                                    VerticalAlignment="Stretch"
-                                    tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=150, TransitionOn=Visibility}"
-                                    tz:Transitionz.Translate="{tz:TranslateParams From='0,-20', To='0,0', Duration=150, TransitionOn=Visibility}"
-                                    tz:Transitionz.Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource b2vc}}">
-                            <ui:ProgressBar x:Name="ProgressPb"
-                                            IsIndeterminate="True"
-                                            Visibility="Collapsed" />
-
-                            <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
-                                  MouseLeave="ItemsPanelGrid_MouseLeave">
-                                <Grid Panel.ZIndex="1000"
-                                      HorizontalAlignment="Right">
-                                    <!-- Overlay controls here -->
-                                    <StackPanel>
-                                        <StackPanel Name="FilterItemsControlBox"
-                                                    Orientation="Horizontal"
-                                                    Visibility="Collapsed"
-                                                    Margin="0,0,12,0">
-                                            <!-- Run file -->
-                                            <Button Name="Cmd_RunFile"
-                                                    Click="Cmd_RunFile_Click"
-                                                    Background="Transparent"
-                                                    ToolTip="Run file">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57767;"
-                                                             FontSize="14" />
-                                            </Button>
-                                            <!--Copy-->
-                                            <Button Name="Cmd_CopyFile"
-                                                    Click="Cmd_CopyFile_Click"
-                                                    Background="Transparent"
-                                                    ToolTip="Copy file">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57711;"
-                                                             FontSize="14" />
-                                            </Button>
-                                            <!--Invoke Properties-->
-                                            <Button Name="Cmd_InvokeProperty"
-                                                    Click="Cmd_InvokeProperty_Click"
-                                                    Background="Transparent"
-                                                    ToolTip="Invoke properties menu">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57694;"
-                                                             FontSize="14" />
-                                            </Button>
-                                            <!--Delete-->
-                                            <Button Name="Cmd_DeleteItem"
-                                                    Click="Cmd_DeleteItem_Click"
-                                                    Background="Transparent"
-                                                    ToolTip="Delete item">
-                                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
-                                                             Glyph="&#57607;"
-                                                             FontSize="14" />
-                                            </Button>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                                <!-- Use whatever layout you need -->
-
-                                <!-- Filtered item list here -->
-                                <ListView Name="ItemsList"
-                                          SelectionMode="Single"
-                                          HorizontalContentAlignment="Stretch"
-                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                          ItemTemplate="{StaticResource PidlItemTemplate}"
-                                          VirtualizingStackPanel.IsVirtualizing="True"
-                                          VirtualizingStackPanel.VirtualizationMode="Recycling"
-                                          PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
-                                          PreviewMouseMove="ItemsList_PreviewMouseMove"
-                                          SelectionChanged="ItemsList_SelectionChanged"
-                                          BorderThickness="0"
-                                          MaxHeight="{StaticResource MaxViewHeight}">
-                                    <ListView.Style>
-                                        <Style TargetType="{x:Type ListView}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
-                                                             Value="0">
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate>
-                                                                <Grid HorizontalAlignment="Stretch"
-                                                                      Margin="12">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto" />
-                                                                        <ColumnDefinition />
-                                                                    </Grid.ColumnDefinitions>
-
-                                                                    <Image Grid.Column="0" 
-                                                                           Width="28"
-                                                                           Height="28">
-                                                                        <Image.Source>
-                                                                            <Binding Source="{StaticResource IconIndexFilter}"
-                                                                                     Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
-                                                                        </Image.Source>
-                                                                    </Image>
-
-                                                                    <StackPanel Grid.Column="1"
-                                                                                Orientation="Vertical" 
-                                                                                Margin="18,0,0,0">
-                                                                        <TextBlock Text="{Binding SearchPageNoticeTitle.Text}"
-                                                                                   FontWeight="Bold" />
-                                                                        <TextBlock Text="{Binding SearchPageNoticeMessage.Text}"
-                                                                                   TextWrapping="Wrap" />
-                                                                    </StackPanel>
-                                                                </Grid>
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ListView.Style>
-                                </ListView>
-                            </Grid>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Vertical"
+                                    Margin="12">
+                            <TextBlock Text="Recently issued commands"
+                                       FontWeight="Bold" />
+                            <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
+                                       Margin="0, 8" />
+                            <ListView Name="HistoryList"
+                                      SelectionMode="Single"
+                                      ItemTemplate="{StaticResource HistoryTemplate}"
+                                      VirtualizingStackPanel.IsVirtualizing="True"
+                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseLeftButtonUp="HistoryList_PreviewMouseLeftButtonUp"
+                                      MaxHeight="{StaticResource MaxViewHeight}"
+                                      BorderThickness="0">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem"
+                                           BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                        <Setter Property="HorizontalContentAlignment"
+                                                Value="Left" />
+                                        <Setter Property="VerticalContentAlignment"
+                                                Value="Center" />
+                                        <Setter Property="Margin"
+                                                Value="0,0,0,0" />
+                                        <Setter Property="Padding"
+                                                Value="8,2,8,2" />
+                                        <Setter Property="MinHeight"
+                                                Value="20" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.Style>
+                                    <Style TargetType="{x:Type ListView}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
+                                                         Value="0">
+                                                <Setter Property="OverridesDefaultStyle"
+                                                        Value="False" />
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate>
+                                                            <TextBlock Text="Your history is empty for now. Only succesfully compiled commands will show up here"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Stretch"
+                                                                       TextWrapping="Wrap" Style="{StaticResource {x:Type TextBlock}}"/>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Style>
+                            </ListView>
                         </StackPanel>
                     </Grid>
 
-                </StackPanel>
+
+                    <!-- Page 2 -->
+                    <StackPanel Orientation="Vertical"
+                                Visibility="Collapsed"
+                                Panel.ZIndex="10"
+                                Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+                                VerticalAlignment="Stretch"
+                                tz:Transitionz.Opacity="{tz:OpacityParams From=0, To=1, Duration=350, TransitionOn=Visibility}"
+                                tz:Transitionz.Translate="{tz:TranslateParams From='0,-10', To='0,0', Duration=350, TransitionOn=Visibility}"
+                                tz:Transitionz.Visibility="{Binding Path=SearchPageVisibilityModel.Visible, Converter={StaticResource b2vc}}">
+                        <ui:ProgressBar x:Name="ProgressPb"
+                                        Visibility="Collapsed" />
+
+                        <Grid MouseEnter="ItemsPanelGrid_MouseEnter"
+                              MouseLeave="ItemsPanelGrid_MouseLeave">
+                            <Grid Panel.ZIndex="1000"
+                                  HorizontalAlignment="Right">
+                                <!-- Overlay controls here -->
+                                <StackPanel>
+                                    <StackPanel Name="FilterItemsControlBox"
+                                                Orientation="Horizontal"
+                                                Visibility="Collapsed"
+                                                Margin="0,0,12,0">
+                                        <!-- Run file -->
+                                        <Button Name="Cmd_RunFile"
+                                                Click="Cmd_RunFile_Click"
+                                                Background="Transparent"
+                                                ToolTip="Run file">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57767;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Copy-->
+                                        <Button Name="Cmd_CopyFile"
+                                                Click="Cmd_CopyFile_Click"
+                                                Background="Transparent"
+                                                ToolTip="Copy file">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57711;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Invoke Properties-->
+                                        <Button Name="Cmd_InvokeProperty"
+                                                Click="Cmd_InvokeProperty_Click"
+                                                Background="Transparent"
+                                                ToolTip="Invoke properties menu">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57694;"
+                                                         FontSize="14" />
+                                        </Button>
+                                        <!--Delete-->
+                                        <Button Name="Cmd_DeleteItem"
+                                                Click="Cmd_DeleteItem_Click"
+                                                Background="Transparent"
+                                                ToolTip="Delete item">
+                                            <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                                         Glyph="&#57607;"
+                                                         FontSize="14" />
+                                        </Button>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                            <!-- Use whatever layout you need -->
+
+                            <!-- Filtered item list here -->
+                            <ListView Name="ItemsList"
+                                      SelectionMode="Single"
+                                      HorizontalContentAlignment="Stretch"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ItemTemplate="{StaticResource PidlItemTemplate}"
+                                      VirtualizingStackPanel.IsVirtualizing="True"
+                                      VirtualizingStackPanel.VirtualizationMode="Recycling"
+                                      PreviewMouseLeftButtonUp="ItemsList_PreviewMouseLeftButtonUp"
+                                      PreviewMouseMove="ItemsList_PreviewMouseMove"
+                                      SelectionChanged="ItemsList_SelectionChanged"
+                                      BorderThickness="0"
+                                      Background="Transparent"
+                                      MaxHeight="{StaticResource MaxViewHeight}">
+                                <ListView.Style>
+                                    <Style TargetType="{x:Type ListView}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Path=Items.Count, RelativeSource={RelativeSource Self}}"
+                                                         Value="0">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate>
+                                                            <Grid HorizontalAlignment="Stretch"
+                                                                  Margin="12"
+                                                                  Height="Auto">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition />
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Image Grid.Column="0"
+                                                                       Width="28"
+                                                                       Height="28">
+                                                                    <Image.Source>
+                                                                        <Binding Source="{StaticResource index_image_filter}"
+                                                                                 Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
+                                                                    </Image.Source>
+                                                                </Image>
+
+                                                                <StackPanel Grid.Column="1"
+                                                                            Orientation="Vertical"
+                                                                            Margin="18,0,0,0">
+                                                                    <TextBlock Text="{Binding SearchPageNoticeTitle.Text}"
+                                                                               Style="{StaticResource {x:Type TextBlock}}"
+                                                                               FontWeight="Bold" />
+                                                                    <TextBlock Text="{Binding SearchPageNoticeMessage.Text}"
+                                                                               Style="{StaticResource {x:Type TextBlock}}"
+                                                                               TextWrapping="Wrap" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.Style>
+                            </ListView>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
             </Border>
         </ui:ThemeShadowChrome>
     </StackPanel>

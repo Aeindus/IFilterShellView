@@ -14,6 +14,8 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using System.Windows.Media;
+
 namespace IFilterShellView.Model
 {
     public class MainWindowModelMerger
@@ -21,7 +23,6 @@ namespace IFilterShellView.Model
         private readonly VisibilityModel _SearchPageVisibilityModel = new VisibilityModel();
         private readonly StringModel _SearchPageNoticeTitle = new StringModel();
         private readonly StringModel _SearchPageNoticeSubtitle = new StringModel();
-
 
 
         public VisibilityModel SearchPageVisibilityModel => _SearchPageVisibilityModel;

@@ -37,6 +37,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using SHDocVw;
 using IFilterShellView.Helpers;
+using ModernWpf;
+using System.Windows.Media;
 
 namespace IFilterShellView
 {
@@ -81,6 +83,8 @@ namespace IFilterShellView
             this.DataContext = mainWindowModelMerger;
 
             InitializeComponent();
+
+            Properties.Settings.Default.HistoryListSerialized = "";
 
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
@@ -139,6 +143,7 @@ namespace IFilterShellView
 
             if (GoesInDeepProcessing)
             {
+                ProgressPb.IsIndeterminate = true;
                 ProgressPb.Visibility = Visibility.Visible;
                 FilterTb.IsReadOnly = true;
             }
@@ -147,6 +152,7 @@ namespace IFilterShellView
         {
             if (ReturnedFromDeepProcessing)
             {
+                ProgressPb.IsIndeterminate = false;
                 ProgressPb.Visibility = Visibility.Collapsed;
                 FilterTb.IsReadOnly = false;
             }
@@ -1154,6 +1160,18 @@ namespace IFilterShellView
         private void ShowSearchResultsPage(bool Visible)
         {
             mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (ThemeManager.Current.ActualApplicationTheme == ApplicationTheme.Dark)
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+            }
+            else
+            {
+                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            }
         }
     }
 }

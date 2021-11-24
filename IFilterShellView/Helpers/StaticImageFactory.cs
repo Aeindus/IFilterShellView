@@ -16,6 +16,7 @@ namespace IFilterShellView.HelperClasses
             ResourceExtensions.LoadBitmapFromResource("image_command.png"),
             ResourceExtensions.LoadBitmapFromResource("image_history.png"),
             ResourceExtensions.LoadBitmapFromResource("image_filter.png"),
+            ResourceExtensions.LoadBitmapFromResource("image_emptycrate.png"),
         };
 
         public static readonly Dictionary<string, BitmapSource> ImageDictIconsOfExtensions =
