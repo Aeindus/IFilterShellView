@@ -51,9 +51,13 @@ To `/summon/` the instance of `IFilterShellView`
 * Bring forward a new explorer window and navigate to a folder populated with items. 
 * Press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window.
 
+## Gallery view - theme awareness
 Light view
+<br>
 <img src="Gallery/View1.png" />
+<br>
 Dark view
+<br>
 <img src="Gallery/View2.png" />
 
 
