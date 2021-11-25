@@ -71,7 +71,7 @@ With the `IFilterShellView` filter window now open, start typing a search query 
 
 
 Example of a search query:
-<img src="Gallery/View3.png" width="300" height="567" align="left"/>
+<img src="Gallery/View3.png" height="300" align="left"/>
 In the image above you can observe the results of a search query. 
 
 Actions that can be performed on a query result item:
@@ -80,6 +80,10 @@ Actions that can be performed on a query result item:
 * `Selecting and dragging` to another window performs a `drag-and-drop` to the target window.
 
 <br>
+<hr>
+<br>
+<br>
+
 
 ### How to do a complex query
 If a text placement query or a regex query won't help you, then you can invoke the `xpress parser` via the command symbol `?`. When the parser encounters that symbol it will know that the query that follows will be a special command.
