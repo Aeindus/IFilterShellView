@@ -1,7 +1,0 @@
-{
-  "profiles": {
-    "IFilterShellView-WinX": {
-      "commandName": "MsixPackage"
-    }
-  }
-}
