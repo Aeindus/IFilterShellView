@@ -15,7 +15,8 @@
         Title="FilterWindow"
         Topmost="True"
         Height="Auto"
-        SizeToContent="Height"
+        Width="Auto"
+        SizeToContent="WidthAndHeight"
         Closing="Window_Closing"
         Deactivated="Window_Deactivated"
         ShowInTaskbar="false"
@@ -138,27 +139,42 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
                 <Image Grid.Column="0"
+                       Grid.Row="0"
+                       Grid.RowSpan="3"
                        Width="28"
-                       Height="28">
+                       Height="28" Margin="0,0,8,0">
                     <Image.Source>
                         <Binding Source="{StaticResource index_image_command}"
                                  Converter="{StaticResource IdToBitmapSourceFromStaticImageFactory}" />
                     </Image.Source>
                 </Image>
 
-                <StackPanel Grid.Column="1"
-                            Orientation="Vertical"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Stretch"
-                            Margin="8,0,0,0">
-                    <TextBlock Text="{Binding Name}"
-                               TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding CmdAlias}"
-                               FontWeight="Light" FontSize="12"
-                               TextWrapping="Wrap" />
-                </StackPanel>
+
+                <TextBlock Grid.Column="1"
+                           Grid.Row="0"
+                           Text="{Binding Name}"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Grid.Column="1"
+                           Grid.Row="1"
+                           Text="{Binding Description}"
+                           FontWeight="Light"
+                           FontSize="12"
+                           TextWrapping="Wrap" />
+
+                <TextBlock Grid.Column="1"
+                           Grid.Row="2"
+                           Text="{Binding CmdAlias}"
+                           FontWeight="Light"
+                           FontSize="12"
+                           TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
 
@@ -397,11 +413,12 @@
                         <Grid Grid.Column="1"
                               Margin="12">
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Row="0" Orientation="Vertical">
+                            <StackPanel Grid.Row="0"
+                                        Orientation="Vertical">
                                 <TextBlock Text="Recently issued commands"
                                            FontWeight="Bold" />
                                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}"
@@ -456,11 +473,14 @@
                                 </ListView>
                             </StackPanel>
 
-                            <Button Grid.Row="1" HorizontalAlignment="Right" Background="Transparent"
+                            <Button Grid.Row="1"
+                                    HorizontalAlignment="Right"
+                                    Background="Transparent"
                                     VerticalAlignment="Bottom"
                                     ToolTip="Clear history"
                                     Click="ClearHistoryBt_Click">
-                                <ui:FontIcon FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                <ui:FontIcon FontFamily="Segoe MDL2 Assets"
+                                             FontSize="14"
                                              Glyph="&#57607;" />
                             </Button>
                         </Grid>

@@ -22,6 +22,9 @@ namespace IFilterShellView
     public class CCommandItem
     {
         public string Name { get; set; }
+
+        public string Description { get; set; }
+
         public string CmdAlias { get; set; }
     }
 }

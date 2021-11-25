@@ -702,14 +702,62 @@ namespace IFilterShellView.Native
 			internal short wParamL;
 			internal short wParamH;
 		}
-        #endregion
+		#endregion
 
 
 
+		[DllImport("user32.dll", SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+		[Serializable]
+		[StructLayout(LayoutKind.Sequential)]
+		public struct WINDOWPLACEMENT
+		{
+			public int Length;
+
+			public int Flags;
+
+			public ShowState ShowCmd;
+
+			public NativePoint MinPosition;
+
+			public NativePoint MaxPosition;
+
+			public RECT NormalPosition;
+
+			public static WINDOWPLACEMENT Default
+			{
+				get
+				{
+					WINDOWPLACEMENT result = new WINDOWPLACEMENT();
+					result.Length = Marshal.SizeOf(result);
+					return result;
+				}
+			}
+		}
+		public enum ShowState : int
+		{
+			SW_HIDE = 0,
+			SW_SHOWNORMAL = 1,
+			SW_NORMAL = 1,
+			SW_SHOWMINIMIZED = 2,
+			SW_SHOWMAXIMIZED = 3,
+			SW_MAXIMIZE = 3,
+			SW_SHOWNOACTIVATE = 4,
+			SW_SHOW = 5,
+			SW_MINIMIZE = 6,
+			SW_SHOWMINNOACTIVE = 7,
+			SW_SHOWNA = 8,
+			SW_RESTORE = 9,
+			SW_SHOWDEFAULT = 10,
+			SW_FORCEMINIMIZE = 11,
+			SW_MAX = 11
+		}
 
 
 
-        [StructLayout(LayoutKind.Explicit, Size = 264)]
+		[StructLayout(LayoutKind.Explicit, Size = 264)]
 		public struct STRRET
 		{
 			[FieldOffset(0)]
@@ -724,14 +772,9 @@ namespace IFilterShellView.Native
 			public IntPtr cStr;
 		}
 
-		//[DllImport("shlwapi.dll")]
-		//public static extern Int32 StrRetToBuf(ref STRRET pstr, IntPtr pidl,
-		//                               StringBuilder pszBuf,
-		//                               UInt32 cchBuf);
-
-
 		[DllImport("Shlwapi.Dll", CharSet = CharSet.Auto)]
 		public static extern Int32 StrRetToBuf(IntPtr pstr, IntPtr pidl, StringBuilder pszBuf, int cchBuf);
+
 
 
 

@@ -84,6 +84,9 @@ namespace IFilterShellView
 
             InitializeComponent();
 
+            // Only Net Framework?
+            // AppContext.SetSwitch("Switch.System.Windows.DoNotUsePresentationDpiCapabilityTier2OrGreater", false);
+
             // Initialize a background worker responsible for the heavy selection task
             workerObject_SelectionProc = new BackgroundWorker();
             workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
@@ -277,11 +280,6 @@ namespace IFilterShellView
                 // 
                 IntPtr ModernSearchBoxHwnd = WindowExtensions.FindChildWindowByClassName(ForegroundWindow, "ModernSearchBox");
 
-                // Old way of positioning the window - removed because of bug caused by KB5007186 
-                //NativeWin32.GetWindowRect(ForegroundWindow, out Context.Instance.ShellViewRect);
-                //System.Drawing.Point point = new System.Drawing.Point(0, 0);
-                //NativeWin32.ClientToScreen(ForegroundWindow, ref point);
-
                 // Set the rest of the Context.Instance class
                 Context.Instance.PrevShellWindowModernSearchBoxHwnd = ModernSearchBoxHwnd;
                 Context.Instance.PrevShellWindowHwnd = ForegroundWindow;
@@ -336,7 +334,6 @@ namespace IFilterShellView
                 NativeWin32.SetForegroundWindow(hwnd);
                 NativeWin32.SwitchToThisWindow(hwnd, true);
                 NativeWin32.ShowWindowAsync(hwnd, 5);
-
 
                 //IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(ThisWindowRef).EnsureHandle();
                 //NativeWin32.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, (int)ShellWidth, (int)ThisWindowRef.Height, NativeWin32.SWP_NOSIZE | NativeWin32.SWP_NOZORDER);
@@ -1136,7 +1133,8 @@ namespace IFilterShellView
 
                     CmdWrapperUI = new CCommandItem
                     {
-                        Name = string.Format("{0} - {1}", CommandEntry.Key, XPressCommands.ComIndexDescription[CommandEntry.Value]),
+                        Name = CommandEntry.Key,
+                        Description = XPressCommands.ComIndexDescription[CommandEntry.Value],
                         CmdAlias = "Alias - "
                     };
                     LastComIndex = (int)CommandEntry.Value;
@@ -1154,19 +1152,42 @@ namespace IFilterShellView
 
         public void UpdateWindowPositionToFixedPin()
         {
-            NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
-            MonitorInfo.Init();
+            // Weird .. some unusual behaviour ever since by KB5007186. 
+            // Fixed by converting points from screen space to wpf logical space
+            // Maybe a rendering rule was enforced ?
 
-            IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
-            NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-            NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+            NativeWin32.GetWindowRect(Context.Instance.PrevShellWindowHwnd, out NativeWin32.RECT ShellWindowRect);
 
-            double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
-            double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+            var TopMargin = 4;
+            var matrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
+            var result = new Rect(ShellWindowRect.Left, ShellWindowRect.Top, ShellWindowRect.Right - ShellWindowRect.Left, ShellWindowRect.Bottom - ShellWindowRect.Top);
+            result.Transform(matrix);
 
-            this.Width = ScreenWidth * widthDPIFactor;
-            this.Left = 0;
-            this.Top = 0;
+            NativeWin32.WINDOWPLACEMENT WinPlacement = NativeWin32.WINDOWPLACEMENT.Default;
+            NativeWin32.GetWindowPlacement(Context.Instance.PrevShellWindowHwnd, ref WinPlacement);
+
+            if (WinPlacement.ShowCmd.HasFlag(NativeWin32.ShowState.SW_SHOWMAXIMIZED))
+            {
+                TopMargin = 10;
+            }
+
+            this.Left = result.X + result.Width /2 - this.ActualWidth / 2;
+            this.Top = result.Y + TopMargin;
+
+
+            //NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
+            //MonitorInfo.Init();
+
+            //IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
+            //NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
+            //NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+
+            //double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
+            //double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+
+            //this.Width = ScreenWidth * widthDPIFactor;
+            //this.Left = 0;
+            //this.Top = 0;
         }
         private void ShowSearchResultsPage(bool Visible)
         {
