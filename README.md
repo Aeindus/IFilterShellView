@@ -169,7 +169,9 @@ _Note 3_: If someone decides to deprecate this project and add it as an extensio
 List of resources that I found helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
 * [ModernWPF Toolkit](https://github.com/Kinnara/ModernWpf)
+* [SciChart.Wpf.UI.Transitionz](https://github.com/ABTSoftware/SciChart.Wpf.UI)
 * [GitHub Pages](https://pages.github.com)
+
 
 <p align="right"><a href="#top">back to top</a></p>
 
