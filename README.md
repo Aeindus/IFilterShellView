@@ -108,8 +108,11 @@ Example of a command query
 ? bet 15/10/2011 20/4/2012                        # select all items created between the expanded dates given
 # or any other combination
 ```
+
 `Warning!` If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
+
 `Info!` By default all command related string comparison is case insensitive. If you want to execute a case sensitive query then invoke the command `cs` as seen in the examples above. 
+
 `Info!` An argument must be specified between quotes only if it includes whitespaces. For example the following path _C:\Program Files_ must be specified between quotes.
 
 ### Download the project's source code
