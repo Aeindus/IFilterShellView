@@ -48,8 +48,8 @@ If you choose to `upgrade` to a newer version then you must uninstall the previo
 After the intallation is complete, run the recently installed image named distinctively `IFilterShellView.exe`. It can be found inside the installation folder (either the default one or the one set by you during the installation). 
 
 To `/summon/` the instance of `IFilterShellView` 
-1. Bring forward a new explorer window and navigate to a folder populated with items. 
-2. Press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window.
+* Bring forward a new explorer window and navigate to a folder populated with items. 
+* Press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window.
 
 Light view
 <img src="Gallery/View1.png" />

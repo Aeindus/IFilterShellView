@@ -1190,6 +1190,7 @@ namespace IFilterShellView
 
             this.Left = result.X + result.Width / 2 - this.ActualWidth / 2;
             this.Top = result.Y + TopMargin;
+            FilterTb.MaxWidth = FilterTb.ActualWidth;
 
 
             //NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
