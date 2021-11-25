@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="IFilterShellView/Resources/IFilterIcon.png" width="128" height="128" align="left"/>
+<img src="./PackageLogo.png" width="128" height="128" align="left"/>
 <div>
   <h3 >IFilterShellView - Shell Extension</h3>
   <p>
