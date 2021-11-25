@@ -80,7 +80,6 @@ Actions that can be performed on a query result item:
 * `Selecting and dragging` to another window performs a `drag-and-drop` to the target window.
 
 <br>
-<hr>
 
 ### How to do write complex query
 If a text placement query or a regex query won't help you, then you can invoke the `xpress parser` via the command symbol `?`. When the parser encounters that symbol it will know that the query that follows will be a special command.
@@ -98,10 +97,20 @@ Example of a command query
 # or
 ? o 10/10/2022 & n 5/5/2015 | s Test & file       # if the argument won't contain white spaces then quotes are not necesary
 # or
+? o 2022 & size > 5                               # dates can be YYYY only too; this translates to: all items older than 2022 and whose size is greater that 5 MB
+# or
 ? cs & c "zwm cl" & f & ext ".exe"                # translates to: search `case sensitive (cs)` all where item `contains` string "zwm cl" and is of type `file` and ends with string ".exe"
+# or
+? in 2017                                         # select all items created in year 2017
+# or
+? bet 2011 2018                                   # select all items created between 2011 and 2018
+# or
+? bet 15/10/2011 20/4/2012                        # select all items created between the expanded dates given
 # or any other combination
 ```
 `Warning!` If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
+`Info!` By default all command related string comparison is case insensitive. If you want to execute a case sensitive query then invoke the command `cs` as seen in the examples above. 
+`Info!` An argument must be specified between quotes only if it includes whitespaces. For example the following path _C:\Program Files_ must be specified between quotes.
 
 ### Download the project's source code
 
