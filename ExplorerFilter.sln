@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IFilterShellView", "IFilterShellView\IFilterShellView.csproj", "{83432A3E-4F41-4C47-B965-F5BE7D31E0B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IFilterShellView", "IFilterShellView\IFilterShellView.csproj", "{83432A3E-4F41-4C47-B965-F5BE7D31E0B7}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "IFilterShellView-Setup", "IFilterShellView-Setup\IFilterShellView-Setup.vdproj", "{E04BF8F7-E51B-48C2-8C10-482639D57F28}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,16 @@ Global
 		{83432A3E-4F41-4C47-B965-F5BE7D31E0B7}.Release|x64.Build.0 = Release|Any CPU
 		{83432A3E-4F41-4C47-B965-F5BE7D31E0B7}.Release|x86.ActiveCfg = Release|Any CPU
 		{83432A3E-4F41-4C47-B965-F5BE7D31E0B7}.Release|x86.Build.0 = Release|Any CPU
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Debug|Any CPU.ActiveCfg = Debug
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Debug|ARM.ActiveCfg = Debug
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Debug|arm64.ActiveCfg = Debug
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Debug|x64.ActiveCfg = Debug
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Debug|x86.ActiveCfg = Debug
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Release|Any CPU.ActiveCfg = Release
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Release|ARM.ActiveCfg = Release
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Release|arm64.ActiveCfg = Release
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Release|x64.ActiveCfg = Release
+		{E04BF8F7-E51B-48C2-8C10-482639D57F28}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
