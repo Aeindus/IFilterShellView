@@ -41,9 +41,6 @@ The methods can be extended and will be in the future with your support and feed
 ## Installing the binaries
 To install the latest version of the plugin `IFilterShellView` you have to download the latest binaries from <a href="https://github.com/Aeindus/IFilterShellView/releases/tag/published">the release page</a> and install them. You can choose to either download the installer or download the portable version.
 
-### Warning
-If you choose to `upgrade` to a newer version then you must uninstall the previous version. Only afterwards you may proceed with the process of installing the newer version.
-
 ## Getting Started
 After the intallation is complete, run the recently installed image named distinctively `IFilterShellView.exe`. It can be found inside the installation folder (either the default one or the one set by you during the installation). 
 
@@ -51,7 +48,7 @@ To `/summon/` the instance of `IFilterShellView`
 * Bring forward a new explorer window and navigate to a folder populated with items. 
 * Press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window.
 
-## Gallery view - theme awareness
+## Gallery view
 Light view
 <br>
 <img src="Gallery/View1.png" />
@@ -81,7 +78,7 @@ Actions that can be performed on a query result item:
 
 <br>
 
-### How to do write complex query
+### How to write a complex query
 If a text placement query or a regex query won't help you, then you can invoke the `xpress parser` via the command symbol `?`. When the parser encounters that symbol it will know that the query that follows will be a special command.
 To obtain the list of available commands installed with the binary, click on the button `Show list of available commands` that can be found inside the far-right command bar.
 
@@ -164,7 +161,7 @@ _Note 1_: This is a free and opensource project. Consider a donation to suport t
 
 _Note 2_: If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.
 
-_Note 3_: If the @PowerToys team decides to deprecate this project and include it along it's other tools then it'd be nice if I'd be contacted too.
+_Note 3_: If someone decides to deprecate this project and add it as an extension for the PowerToys app, then it'd be nice if I'd be contacted too.
 <p align="right"><a href="#top">back to top</a></p>
 
 
