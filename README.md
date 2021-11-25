@@ -45,7 +45,11 @@ To install the latest version of the plugin `IFilterShellView` you have to downl
 If you choose to `upgrade` to a newer version then you must uninstall the previous version. Only afterwards you may proceed with the process of installing the newer version.
 
 ## Getting Started
-After the intallation is complete, run the recently installed image named distinctively `IFilterShellView.exe`. It can be found inside the installation folder (either the default one or the one set by you during the installation). To `/summon/` the instance of `IFilterShellView` bring forward a new explorer window and navigate to a folder populated with items. Then press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window (/nice/ is subjectively expressed).
+After the intallation is complete, run the recently installed image named distinctively `IFilterShellView.exe`. It can be found inside the installation folder (either the default one or the one set by you during the installation). 
+
+To `/summon/` the instance of `IFilterShellView` 
+1. Bring forward a new explorer window and navigate to a folder populated with items. 
+2. Press the hotkey `CTRL+F`. A nice window should popup on top of the explorer window.
 
 Light view
 <img src="Gallery/View1.png" />
