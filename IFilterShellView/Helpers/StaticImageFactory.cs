@@ -33,8 +33,9 @@ namespace IFilterShellView.HelperClasses
             else
             {
                 string Extension = Path.GetExtension(PidlName);
+                bool IsExe = Extension.Equals("exe", System.StringComparison.InvariantCulture);
 
-                if (!ImageDictIconsOfExtensions.TryGetValue(Extension, out BitmapSource IconBitmapSource))
+                if (IsExe || !ImageDictIconsOfExtensions.TryGetValue(Extension, out BitmapSource IconBitmapSource))
                 {
                     string FilePath = Path.Combine(Context.Instance.LocationUrlOnStart, PidlName);
                     IconBitmapSource = NativeUtilities.GetIconBitmapSource(FilePath, false);
