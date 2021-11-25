@@ -25,7 +25,7 @@ namespace IFilterShellView.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("150")]
+        [global::System.Configuration.DefaultSettingValueAttribute("300")]
         public int MaxFolderPidlCount_Deepscan {
             get {
                 return ((int)(this["MaxFolderPidlCount_Deepscan"]));

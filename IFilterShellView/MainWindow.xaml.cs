@@ -1120,8 +1120,10 @@ namespace IFilterShellView
         }
         private ObservableCollection<CCommandItem> CompileCommandList()
         {
-            ObservableCollection<CCommandItem> list = new ObservableCollection<CCommandItem>();
+            ObservableCollection<CCommandItem> LocalListOfCommands = new ObservableCollection<CCommandItem>();
             CCommandItem CmdWrapperUI = null;
+            List<string> ListOfAliases = new List<string>();
+
             int LastComIndex = -1;
 
             foreach (KeyValuePair<string, XPressCommands.ComIndex> CommandEntry in XPressCommands.ComStrToComIndex)
@@ -1130,26 +1132,34 @@ namespace IFilterShellView
                 {
                     if (CmdWrapperUI != null)
                     {
-                        list.Add(CmdWrapperUI);
+                        if (ListOfAliases.Count != 0)
+                        {
+                            CmdWrapperUI.CmdAlias = string.Join(" , ", ListOfAliases);
+                        }
+                        LocalListOfCommands.Add(CmdWrapperUI);
                     }
 
                     CmdWrapperUI = new CCommandItem
                     {
                         Name = CommandEntry.Key,
                         Description = XPressCommands.ComIndexDescription[CommandEntry.Value],
-                        CmdAlias = "Alias - "
+                        CmdAlias = "No alias for this command"
                     };
+                    ListOfAliases.Clear();
                     LastComIndex = (int)CommandEntry.Value;
                 }
-                else CmdWrapperUI.CmdAlias += CommandEntry.Key + " | ";
+                else
+                {
+                    ListOfAliases.Add(CommandEntry.Key);
+                }
             }
 
             if (CmdWrapperUI != null)
             {
-                list.Add(CmdWrapperUI);
+                LocalListOfCommands.Add(CmdWrapperUI);
             }
 
-            return list;
+            return LocalListOfCommands;
         }
         public ObservableCollection<CHistoryItem> CompileHistoryList()
         {
@@ -1178,7 +1188,7 @@ namespace IFilterShellView
                 TopMargin = 10;
             }
 
-            this.Left = result.X + result.Width /2 - this.ActualWidth / 2;
+            this.Left = result.X + result.Width / 2 - this.ActualWidth / 2;
             this.Top = result.Y + TopMargin;
 
 

@@ -109,26 +109,25 @@ namespace IFilterShellView.Parser
             { "CaseInsens" , ComIndex.CASEINSENS},
             { "Ci" , ComIndex.CASEINSENS},
 
-
             { "Size" , ComIndex.SIZE},
             { "Sz" , ComIndex.SIZE}
         };
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
         {
-            {ComIndex.OLDER, "select items older than" },
-            {ComIndex.IN, "select items created in the year" },
-            {ComIndex.BETWEEN, "select items created between years" },
-            {ComIndex.NEWER, "select items newer than"  },
-            {ComIndex.STARTS, "select items that start with"  },
-            {ComIndex.ENDS, "select items that end with"  },
-            {ComIndex.CONTAINS, "select items that contain"  },
-            {ComIndex.EXTENSION, "select items with extension"  },
-            {ComIndex.DIRECTORY, "select folder items"  },
-            {ComIndex.FILE, "select file items"},
-            {ComIndex.CASESENS, "do not ignore case sensitivity" },
-            {ComIndex.CASEINSENS, "ignore case sensitivity" },
-            {ComIndex.SIZE, "select files with the size attribute set" },
+            {ComIndex.OLDER, "Select items older than" },
+            {ComIndex.IN, "Select items created in the year" },
+            {ComIndex.BETWEEN, "Select items created between years" },
+            {ComIndex.NEWER, "Select items newer than"  },
+            {ComIndex.STARTS, "Select items that start with"  },
+            {ComIndex.ENDS, "Select items that end with"  },
+            {ComIndex.CONTAINS, "Select items that contain"  },
+            {ComIndex.EXTENSION, "Select items with extension"  },
+            {ComIndex.DIRECTORY, "Select only folder items"  },
+            {ComIndex.FILE, "Select only file items"},
+            {ComIndex.CASESENS, "Do not ignore case sensitivity" },
+            {ComIndex.CASEINSENS, "Ignore case sensitivity" },
+            {ComIndex.SIZE, "Select files with the size attribute set" },
         };
 
 

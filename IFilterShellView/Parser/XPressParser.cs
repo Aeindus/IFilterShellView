@@ -35,7 +35,7 @@ namespace IFilterShellView.Parser
 
 
 
-        private static readonly HashSet<int> FinalStates = new HashSet<int>() { 6, 8, 9, 12 };
+        private static readonly HashSet<int> FinalStates = new HashSet<int>() {1, 6, 8, 9, 12 };
         private static readonly IReadOnlyDictionary<Tuple<int, char>, int> TransitionList = new Dictionary<Tuple<int, char>, int>()
         {
             { new Tuple<int, char>(0, StateCharWhiteSpace), 0},
@@ -125,7 +125,7 @@ namespace IFilterShellView.Parser
 
 
 
-        private Expression<Func<CPidlData, bool>> ParseToLinqPredicateList(ref SyntaxIdentities Identities)
+        private Expression<Func<CPidlData, bool>> ParseToLinqPredicateList()
         {
             Expression<Func<CPidlData, bool>> PredicateChain = PredicateBuilder.False<CPidlData>();
             char LastPredicateUnifier = StateCharOr;
@@ -157,7 +157,6 @@ namespace IFilterShellView.Parser
 
                     if (NewState == 2 && CurrentState == 1)
                     {
-                        Identities.Intervals.Add(SyntaxInterval.Get(Cursor - Accumulator.Length, Cursor, IdentityType.CMD));
                         ComAndArgs.Command = Accumulator;
                         Accumulator = "";
                     }
@@ -199,7 +198,7 @@ namespace IFilterShellView.Parser
                         Subgroup = Subgroup[1..^1];
 
                         XPressParser xpress = new XPressParser(Subgroup);
-                        var SubPredicateChain = xpress.ParseToLinqPredicateList(ref Identities);
+                        var SubPredicateChain = xpress.ParseToLinqPredicateList();
                         PredicateChain = LinkPredicateToPredicateChain(LastPredicateUnifier, SubPredicateChain, PredicateChain);
 
                         Cursor--;
@@ -235,7 +234,6 @@ namespace IFilterShellView.Parser
                 }
                 else if (CurrentState == 6 || CurrentState == 8)
                 {
-                    Identities.Intervals.Add(SyntaxInterval.Get(Cursor - Accumulator.Length, Cursor, IdentityType.ARG));
                     ComAndArgs.Arguments.Add(Accumulator);
                     ArgumentCount--;
 
@@ -262,8 +260,15 @@ namespace IFilterShellView.Parser
 
             if (CurrentState == 6 || CurrentState == 8)
             {
-                Identities.Intervals.Add(SyntaxInterval.Get(Cursor - Accumulator.Length, Cursor, IdentityType.ARG));
                 ComAndArgs.Arguments.Add(Accumulator);
+                PredicateChain = LinkCommandToPredicateChain(LastPredicateUnifier, ComAndArgs, PredicateChain);
+            } 
+            else if (CurrentState == 1)
+            {
+                // ? d (no arguments)
+                ComAndArgs.Command = Accumulator;
+                ComAndArgs.Arguments = new List<string>();
+
                 PredicateChain = LinkCommandToPredicateChain(LastPredicateUnifier, ComAndArgs, PredicateChain);
             }
 
@@ -277,18 +282,8 @@ namespace IFilterShellView.Parser
         /// <exception cref="Exception">Thrown when compiling</exception>
         public Func<CPidlData, bool> Compile()
         {
-            SyntaxIdentities Identities = new SyntaxIdentities();
-            Expression<Func<CPidlData, bool>> LanguageSentence = ParseToLinqPredicateList(ref Identities);
+            Expression<Func<CPidlData, bool>> LanguageSentence = ParseToLinqPredicateList();
             return LanguageSentence.Compile();
         }
-
-
-        public SyntaxIdentities ParseIdentities()
-        {
-            SyntaxIdentities Identities = new SyntaxIdentities();
-            _ = ParseToLinqPredicateList(ref Identities);
-            return Identities;
-        }
-
     }
 }
