@@ -25,11 +25,15 @@ namespace IFilterShellView.Parser
 
     public class XPressParser
     {
+        public static readonly CComContext ComContext = new CComContext();
+
         private const char StateASCIIChar = ':';
         private const char StateCharWhiteSpace = ' ';
         private const char StateCharQuote = '"';
         private const char StateCharOr = '|';
         private const char StateCharAnd = '&';
+
+
 
         private static readonly HashSet<int> FinalStates = new HashSet<int>() { 6, 8, 9, 12 };
         private static readonly IReadOnlyDictionary<Tuple<int, char>, int> TransitionList = new Dictionary<Tuple<int, char>, int>()
@@ -38,7 +42,6 @@ namespace IFilterShellView.Parser
             { new Tuple<int, char>(0, StateASCIIChar), 1},
             { new Tuple<int, char>(1, StateASCIIChar), 1},
             { new Tuple<int, char>(1, StateCharWhiteSpace), 2},
-            //{ new Tuple<int, char>(2, StateCharWhiteSpace), 2},
 
             { new Tuple<int, char>(10, StateCharWhiteSpace), 0},
             { new Tuple<int, char>(9, StateCharOr), 10},
@@ -59,13 +62,15 @@ namespace IFilterShellView.Parser
             { new Tuple<int, char>(5, StateCharQuote), 8},
             { new Tuple<int, char>(7, StateCharQuote), 8},
         };
+        
         private readonly string Filter;
 
 
-
-
-        public XPressParser(string FilterParam) => Filter = FilterParam;
-
+        public XPressParser(string FilterParam)
+        {
+            Filter = FilterParam;
+            ComContext.SetToDefaultValues();
+        }
 
 
 
@@ -93,7 +98,7 @@ namespace IFilterShellView.Parser
 
         public Expression<Func<CPidlData, bool>> LinkCommandToPredicateChain(
             char OperatorChar,
-            CCommAndArgs ComAndArgs,
+            CComAndArgs ComAndArgs,
             Expression<Func<CPidlData, bool>> PredicateChain
         )
         {
@@ -106,15 +111,14 @@ namespace IFilterShellView.Parser
             if (Attributes != ComAndArgs.Arguments.Count)
                 throw new UserException("Wrong number of parameters given to the specified command.");
 
-            if (!CommandAttributeDict.TryGetValue(cindex, out Func<CPidlData, CCommAndArgs, bool> CommandCallback))
+            if (!CommandAttributeDict.TryGetValue(cindex, out Func<CPidlData, CComAndArgs, bool> CommandCallback))
                 throw new UserException("Registered command has no associated callback.");
 
-            CCommAndArgs cc = ComAndArgs;
 
             return OperatorChar switch
             {
-                StateCharAnd => PredicateChain.And(Pidl => CommandCallback(Pidl, cc)),
-                StateCharOr => PredicateChain.Or(Pidl => CommandCallback(Pidl, cc)),
+                StateCharAnd => PredicateChain.And(Pidl => CommandCallback(Pidl, ComAndArgs)),
+                StateCharOr => PredicateChain.Or(Pidl => CommandCallback(Pidl, ComAndArgs)),
                 _ => throw new UserException("Predicate unifier not implemented."),
             };
         }
@@ -128,7 +132,7 @@ namespace IFilterShellView.Parser
             int CurrentState = 0;
 
 
-            CCommAndArgs ComAndArgs;
+            CComAndArgs ComAndArgs;
             ComAndArgs.Command = "";
             ComAndArgs.Arguments = new List<string>();
 
@@ -182,7 +186,9 @@ namespace IFilterShellView.Parser
                             Subgroup += Filter[Cursor];
 
                             if (Balance == 0)
+                            {
                                 break;
+                            }
                         }
 
                         if (Balance != 0)

@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Resources\icon_application.ico</ApplicationIcon>
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
     <SignAssembly>False</SignAssembly>
     <Description>Another windows shell extension that will help you filter and select with ease folder and file items in windows explorer</Description>
     <Copyright>Copyright (C) 2021 Reznicencu Bogdan</Copyright>

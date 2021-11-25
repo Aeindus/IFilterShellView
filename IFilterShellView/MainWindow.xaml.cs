@@ -534,7 +534,9 @@ namespace IFilterShellView
                     if (PidlPtrObj == IntPtr.Zero)
                     {
                         if (FailedAttempts > MaxFailedAttempts)
+                        {
                             throw new UserException("Too many failures while interacting with the shell view");
+                        }
 
                         FailedAttempts++;
                         continue;
@@ -1140,6 +1142,11 @@ namespace IFilterShellView
                     LastComIndex = (int)CommandEntry.Value;
                 }
                 else CmdWrapperUI.CmdAlias += CommandEntry.Key + " | ";
+            }
+
+            if (CmdWrapperUI != null)
+            {
+                list.Add(CmdWrapperUI);
             }
 
             return list;

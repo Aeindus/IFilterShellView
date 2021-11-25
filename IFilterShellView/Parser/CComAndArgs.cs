@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace IFilterShellView.Parser
 {
-    public struct CCommAndArgs
+    public struct CComAndArgs
     {
         public string Command;
         public List<string> Arguments;

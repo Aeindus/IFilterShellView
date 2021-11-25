@@ -37,6 +37,8 @@ namespace IFilterShellView.Parser
             EXTENSION,
             DIRECTORY,
             FILE,
+            CASESENS,
+            CASEINSENS
         }
 
         public static readonly IReadOnlyDictionary<string, ComIndex> ComStrToComIndex = new Dictionary<string, ComIndex>(StringComparer.InvariantCultureIgnoreCase)
@@ -75,8 +77,8 @@ namespace IFilterShellView.Parser
             { "Sw", ComIndex.STARTS },
             { "S", ComIndex.STARTS},
 
-            { "End", ComIndex.ENDS },
             { "Ends", ComIndex.ENDS },
+            { "End", ComIndex.ENDS },
             { "Endswith", ComIndex.ENDS },
             { "Ew", ComIndex.ENDS },
             { "E", ComIndex.ENDS },
@@ -84,7 +86,6 @@ namespace IFilterShellView.Parser
             { "Extension", ComIndex.EXTENSION },
             { "Ext", ComIndex.EXTENSION },
             { "Ex", ComIndex.EXTENSION },
-
 
             { "Directory", ComIndex.DIRECTORY },
             { "Folder", ComIndex.DIRECTORY },
@@ -97,6 +98,17 @@ namespace IFilterShellView.Parser
             { "Item", ComIndex.FILE },
             { "Items", ComIndex.FILE },
             { "F", ComIndex.FILE },
+
+
+            { "CaseSensitive" , ComIndex.CASESENS },
+            { "CaseSens" , ComIndex.CASESENS },
+            { "Cs" , ComIndex.CASESENS },
+
+
+            { "CaseInsensitive" , ComIndex.CASEINSENS},
+            { "CaseInsens" , ComIndex.CASEINSENS},
+            { "Ci" , ComIndex.CASEINSENS}
+
         };
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
@@ -111,6 +123,8 @@ namespace IFilterShellView.Parser
             {ComIndex.EXTENSION, "select items with extension"  },
             {ComIndex.DIRECTORY, "select folder items"  },
             {ComIndex.FILE, "select file items"},
+            {ComIndex.CASESENS, "do not ignore case sensitivity" },
+            {ComIndex.CASEINSENS, "ignore case sensitivity" },
         };
 
 
@@ -126,113 +140,152 @@ namespace IFilterShellView.Parser
             {ComIndex.EXTENSION, 0 },
             {ComIndex.DIRECTORY, 0 },
             {ComIndex.FILE, 0 },
+            {ComIndex.CASESENS, 0 },
+            {ComIndex.CASEINSENS, 0 },
+
             // Size
         };
 
-        public static readonly Dictionary<ComIndex, Func<CPidlData, CCommAndArgs, bool>> CommandAttributeDict = new Dictionary<ComIndex, Func<CPidlData, CCommAndArgs, bool>>()
+        public static readonly Dictionary<ComIndex, Func<CPidlData, CComAndArgs, bool>> CommandAttributeDict = new Dictionary<ComIndex, Func<CPidlData, CComAndArgs, bool>>() 
+        {
+            /* older command */
+            { ComIndex.OLDER, Com_Older },
+
+            /* in command */
+            { ComIndex.IN, Com_In },
+
+            /* between command */
+            { ComIndex.BETWEEN, Com_Between },
+
+            /* newer command */
+            { ComIndex.NEWER, Com_Newer },
+
+            /* starts with command */
+            { ComIndex.STARTS, Com_Starts },
+
+            /* contains command */
+            { ComIndex.CONTAINS, Com_Contains },
+
+            /* ends with command */
+            { ComIndex.ENDS, Com_Ends },
+
+            /* extension */
+            { ComIndex.EXTENSION, Com_Extension },
+
+            /* directory */
+            { ComIndex.DIRECTORY, Com_Directory },
+
+            /* file */
+            { ComIndex.FILE, Com_File },
+            
+            /* case sensitive */
+            { ComIndex.CASESENS, Com_CaseSensitive },
+            
+            /* case insensitive */
+            { ComIndex.CASEINSENS, Com_CaseInsensitive },
+
+        };
+
+
+        public static bool Com_Older(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(ComAndArgs.Arguments[0], -1, out DateTime FormatedDate, out _))
             {
-                /* older command */
-                {
-                    ComIndex.OLDER, (PidlData, CommAndArgs) =>
-                    {
-                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], -1, out DateTime FormatedDate, out _))
-                        {
-                            throw new UserException("Date failed format checks.");
-                        }
+                throw new UserException("Date failed format checks.");
+            }
 
-                        return DateTime.Compare(PidlData.CreationTime, FormatedDate) < 0;
-                    }
-                },
+            return DateTime.Compare(PidlData.CreationTime, FormatedDate) < 0;
+        }
 
-                /* in command */
-                {
-                    ComIndex.IN, (PidlData, CommAndArgs) =>
-                    {
-                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], 0, out DateTime FormatedDate, out bool OnlyYearParsed))
-                        {
-                            throw new UserException("Date failed format checks.");
-                        }
+        public static bool Com_In(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(ComAndArgs.Arguments[0], 0, out DateTime FormatedDate, out bool OnlyYearParsed))
+            {
+                throw new UserException("Date failed format checks.");
+            }
 
-                        if (OnlyYearParsed)
-                        {
-                            return PidlData.CreationTime.Year == FormatedDate.Year;
-                        }
-                        else
-                        {
-                            return PidlData.CreationTime.SameYearMonthAndDay(FormatedDate);
-                        }
-                    }
-                },
+            if (OnlyYearParsed)
+            {
+                return PidlData.CreationTime.Year == FormatedDate.Year;
+            }
+            else
+            {
+                return PidlData.CreationTime.SameYearMonthAndDay(FormatedDate);
+            }
+        }
 
-                /* between command */
-                {
-                    ComIndex.BETWEEN, (PidlData, CommAndArgs) =>
-                    {
-                        if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0],0, out DateTime FormatedDate1, out bool OnlyYearParsed1) ||
-                            !DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[1],0, out DateTime FormatedDate2, out bool OnlyYearParsed2))
-                        {
-                            throw new UserException("Date failed format checks.");
-                        }
+        public static bool Com_Between(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(ComAndArgs.Arguments[0], 0, out DateTime FormatedDate1, out bool OnlyYearParsed1) ||
+                !DateTimeExtensions.ParseTimeByGlobalDateFormat(ComAndArgs.Arguments[1], 0, out DateTime FormatedDate2, out bool OnlyYearParsed2))
+            {
+                throw new UserException("Date failed format checks.");
+            }
 
-                        if (OnlyYearParsed1 != OnlyYearParsed2) throw new UserException("Both date arguments must have the same format.");
+            if (OnlyYearParsed1 != OnlyYearParsed2) throw new UserException("Both date arguments must have the same format.");
 
-                        if (OnlyYearParsed1)
-                        {
-                            return FormatedDate1.Year <= PidlData.CreationTime.Year &&
-                                   PidlData.CreationTime.Year <= FormatedDate2.Year;
-                        }
-                        else
-                        {
-                            return FormatedDate1 <= PidlData.CreationTime && 
-                                   PidlData.CreationTime <= FormatedDate2;
-                        }
-                    }
-                },
+            if (OnlyYearParsed1)
+            {
+                return FormatedDate1.Year <= PidlData.CreationTime.Year &&
+                       PidlData.CreationTime.Year <= FormatedDate2.Year;
+            }
+            else
+            {
+                return FormatedDate1 <= PidlData.CreationTime &&
+                       PidlData.CreationTime <= FormatedDate2;
+            }
+        }
 
-                /* newer command */
-                {
-                    ComIndex.NEWER, (PidlData, CommAndArgs) =>
-                    {
-                        if (! DateTimeExtensions.ParseTimeByGlobalDateFormat(CommAndArgs.Arguments[0], 1, out DateTime FormatedDate, out _))
-                        {
-                            throw new UserException("Date failed format checks.");
-                        }
+        public static bool Com_Newer(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            if (!DateTimeExtensions.ParseTimeByGlobalDateFormat(ComAndArgs.Arguments[0], 1, out DateTime FormatedDate, out _))
+            {
+                throw new UserException("Date failed format checks.");
+            }
 
-                        return DateTime.Compare(PidlData.CreationTime, FormatedDate) > 0;
-                    }
-                },
+            return DateTime.Compare(PidlData.CreationTime, FormatedDate) > 0;
+        }
 
-                /* starts with command */
-                {
-                    ComIndex.STARTS, (PidlData, CommAndArgs) => PidlData.PidlName.StartsWith(CommAndArgs.Arguments[0])
-                },
+        public static bool Com_Starts(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return PidlData.PidlName.StartsWith(ComAndArgs.Arguments[0], XPressParser.ComContext.StringComparisonEq);
+        }
 
-                /* contains command */
-                {
-                    ComIndex.CONTAINS, (PidlData, CommAndArgs) => PidlData.PidlName.Contains(CommAndArgs.Arguments[0])
-                },
+        public static bool Com_Contains(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return PidlData.PidlName.Contains(ComAndArgs.Arguments[0], XPressParser.ComContext.StringComparisonEq);
+        }
 
-                /* ends with command */
-                {
-                    ComIndex.ENDS, (PidlData, CommAndArgs) => Path.GetFileNameWithoutExtension(PidlData.PidlName).EndsWith(CommAndArgs.Arguments[0])
-                },
+        public static bool Com_Ends(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return Path.GetFileNameWithoutExtension(PidlData.PidlName).EndsWith(ComAndArgs.Arguments[0], XPressParser.ComContext.StringComparisonEq);
+        }
 
-                /* extension */
-                {
-                    ComIndex.EXTENSION, (PidlData, CommAndArgs) => PidlData.PidlName.EndsWith(CommAndArgs.Arguments[0])
-                },
+        public static bool Com_Extension(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return PidlData.PidlName.EndsWith(ComAndArgs.Arguments[0]);
+        }
 
-                /* directory */
-                {
-                    ComIndex.DIRECTORY, (PidlData, CommAndArgs) => NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes)
-                },
+        public static bool Com_Directory(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes);
+        }
 
-                /* file */
-                {
-                    ComIndex.FILE, (PidlData, CommAndArgs) => !NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes)
-                },
-            };
+        public static bool Com_File(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            return !NativeUtilities.IsAttributeOfFolder(PidlData.FileAttributes);
+        }
 
+        public static bool Com_CaseSensitive(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            XPressParser.ComContext.SearchSensitivity = CComContext.Sensitivity.CaseSensitive;
+            return true;
+        }
 
+        public static bool Com_CaseInsensitive(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            XPressParser.ComContext.SearchSensitivity = CComContext.Sensitivity.CaseInsensitive;
+            return true;
+        }
     }
 }
