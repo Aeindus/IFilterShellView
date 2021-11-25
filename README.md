@@ -72,8 +72,8 @@ Example of a search query:
 In the image above you can observe the results of a search query. 
 
 Actions that can be performed on a query result item:
-* Right click - invokes a context menu
-* Left click - makes the explorer window navigate to the selected item (if item is a folder) or opens the items with the default associated handler
+* Hovering an item will bring forward an accesibility panel on the right hand side. Multiple actions (i.e delete, invoke context menu, ...) can be performed.
+* `Left clicking a folder` - makes the explorer window navigate to the selected item (if item is a folder). After clicking the window's opacity will be decreased allowing you to observe at a glance some of the files inside the folder. On mouse move the window will regain it's original visibility. To navigate back to the parent folder, click the third button found in the toolbar (right next to the filter textbox) or click the `XButton1` mouse button (i.e the first extended mouse button).
 * `Selecting and dragging` to another window performs a `drag-and-drop` to the target window.
 
 

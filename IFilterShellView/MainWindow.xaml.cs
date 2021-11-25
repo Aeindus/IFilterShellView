@@ -228,6 +228,8 @@ namespace IFilterShellView
                     FilterTb.Text = "";
                 }
 
+                this.Opacity = 1;
+
                 Hide();
             }
         }
@@ -841,6 +843,12 @@ namespace IFilterShellView
                 {
                     // TODO: do something ?
                 }
+                else
+                {
+                    // We browsed to another folder now
+                    // Lower opacity to see through
+                    this.Opacity = 0.1;
+                }
             }
         }
         private void ItemsList_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -858,6 +866,11 @@ namespace IFilterShellView
             }
             else
             {
+                if (!this.Opacity.EpsEq(1))
+                {
+                    this.Opacity = 1;
+                }
+
                 if (ItemsList.Items.Count == 0)
                 {
                     FilterItemsControlBox.Visibility = Visibility.Collapsed;
@@ -915,6 +928,25 @@ namespace IFilterShellView
 
             ((ListView)sender).ScrollIntoView(e.AddedItems[0]);
         }
+        private void ItemsList_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            switch (e.ChangedButton)
+            {
+                case MouseButton.XButton1:
+                    if (Context.Instance.LocationUrlOnStart == Context.Instance.LocationUrl) return;
+
+                    if (!BrowseBackToParentItem())
+                    {
+                        // Failed browsing
+                    }
+
+                    this.Opacity = 1;
+                    break;
+                case MouseButton.XButton2:
+                    break;
+            }
+        }
+
         private void Cmd_RunFile_Click(object sender, RoutedEventArgs e)
         {
             if (!GetHoveredPidlAndFullPath(out _, out string FullyQuallifiedItemName)) return;
@@ -988,10 +1020,16 @@ namespace IFilterShellView
         {
             if (HistoryList.SelectedIndex < 0) return;
 
-            FilterTb.Text = listOfHistoryItems[HistoryList.SelectedIndex].Command;
+            FilterTb.Text = String.Format("{0} {1}", keyModExtendedCommandMode, listOfHistoryItems[HistoryList.SelectedIndex].Command);
+        }
+        private void ClearHistoryBt_Click(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.HistoryListSerialized = "";
+            listOfHistoryItems.Clear();
         }
         private void ShowHistoryList(object sender, RoutedEventArgs e) =>
             ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+
         #endregion
 
 
@@ -1112,6 +1150,50 @@ namespace IFilterShellView
 
             return true;
         }
+        public void UpdateWindowPositionToFixedPin()
+        {
+            // Weird .. some unusual behaviour ever since by KB5007186. 
+            // Fixed by converting points from screen space to wpf logical space
+            // Maybe a rendering rule was enforced ?
+
+            NativeWin32.GetWindowRect(Context.Instance.PrevShellWindowHwnd, out NativeWin32.RECT ShellWindowRect);
+
+            var TopMargin = 4;
+            var matrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
+            var result = new Rect(ShellWindowRect.Left, ShellWindowRect.Top, ShellWindowRect.Right - ShellWindowRect.Left, ShellWindowRect.Bottom - ShellWindowRect.Top);
+            result.Transform(matrix);
+
+            NativeWin32.WINDOWPLACEMENT WinPlacement = NativeWin32.WINDOWPLACEMENT.Default;
+            NativeWin32.GetWindowPlacement(Context.Instance.PrevShellWindowHwnd, ref WinPlacement);
+
+            if (WinPlacement.ShowCmd.HasFlag(NativeWin32.ShowState.SW_SHOWMAXIMIZED))
+            {
+                TopMargin = 10;
+            }
+
+            this.Left = result.X + result.Width / 2 - this.ActualWidth / 2;
+            this.Top = result.Y + TopMargin;
+            FilterTb.MaxWidth = FilterTb.ActualWidth;
+
+
+            //NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
+            //MonitorInfo.Init();
+
+            //IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
+            //NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
+            //NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+
+            //double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
+            //double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+
+            //this.Width = ScreenWidth * widthDPIFactor;
+            //this.Left = 0;
+            //this.Top = 0;
+        }
+        private void ShowSearchResultsPage(bool Visible)
+        {
+            mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
+        }
 
 
         private ObservableCollection<CPidlData> CompilePidlList()
@@ -1164,58 +1246,6 @@ namespace IFilterShellView
         public ObservableCollection<CHistoryItem> CompileHistoryList()
         {
             return new ObservableCollection<CHistoryItem>(SerializeExtensions.MaterializeGenericClassList<CHistoryItem>(Properties.Settings.Default.HistoryListSerialized));
-        }
-
-
-        public void UpdateWindowPositionToFixedPin()
-        {
-            // Weird .. some unusual behaviour ever since by KB5007186. 
-            // Fixed by converting points from screen space to wpf logical space
-            // Maybe a rendering rule was enforced ?
-
-            NativeWin32.GetWindowRect(Context.Instance.PrevShellWindowHwnd, out NativeWin32.RECT ShellWindowRect);
-
-            var TopMargin = 4;
-            var matrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
-            var result = new Rect(ShellWindowRect.Left, ShellWindowRect.Top, ShellWindowRect.Right - ShellWindowRect.Left, ShellWindowRect.Bottom - ShellWindowRect.Top);
-            result.Transform(matrix);
-
-            NativeWin32.WINDOWPLACEMENT WinPlacement = NativeWin32.WINDOWPLACEMENT.Default;
-            NativeWin32.GetWindowPlacement(Context.Instance.PrevShellWindowHwnd, ref WinPlacement);
-
-            if (WinPlacement.ShowCmd.HasFlag(NativeWin32.ShowState.SW_SHOWMAXIMIZED))
-            {
-                TopMargin = 10;
-            }
-
-            this.Left = result.X + result.Width / 2 - this.ActualWidth / 2;
-            this.Top = result.Y + TopMargin;
-            FilterTb.MaxWidth = FilterTb.ActualWidth;
-
-
-            //NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
-            //MonitorInfo.Init();
-
-            //IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
-            //NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-            //NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
-
-            //double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
-            //double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
-
-            //this.Width = ScreenWidth * widthDPIFactor;
-            //this.Left = 0;
-            //this.Top = 0;
-        }
-        private void ShowSearchResultsPage(bool Visible)
-        {
-            mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
-        }
-
-        private void ClearHistoryBt_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.HistoryListSerialized = "";
-            listOfHistoryItems.Clear();
         }
     }
 }

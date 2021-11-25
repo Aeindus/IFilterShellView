@@ -115,19 +115,19 @@ namespace IFilterShellView.Parser
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
         {
-            {ComIndex.OLDER, "Select items older than" },
-            {ComIndex.IN, "Select items created in the year" },
-            {ComIndex.BETWEEN, "Select items created between years" },
-            {ComIndex.NEWER, "Select items newer than"  },
-            {ComIndex.STARTS, "Select items that start with"  },
-            {ComIndex.ENDS, "Select items that end with"  },
-            {ComIndex.CONTAINS, "Select items that contain"  },
-            {ComIndex.EXTENSION, "Select items with extension"  },
-            {ComIndex.DIRECTORY, "Select only folder items"  },
-            {ComIndex.FILE, "Select only file items"},
-            {ComIndex.CASESENS, "Do not ignore case sensitivity" },
-            {ComIndex.CASEINSENS, "Ignore case sensitivity" },
-            {ComIndex.SIZE, "Select files with the size attribute set" },
+            {ComIndex.OLDER, "Select items older than _date_." },
+            {ComIndex.IN, "Select items created in the year _year_." },
+            {ComIndex.BETWEEN, "Select items created between years _date1_ _date2_." },
+            {ComIndex.NEWER, "Select items newer than _date_."  },
+            {ComIndex.STARTS, "Select items that start with _string_."  },
+            {ComIndex.ENDS, "Select items that end with _string_."  },
+            {ComIndex.CONTAINS, "Select items that contain _string_"  },
+            {ComIndex.EXTENSION, "Select items with extension _string_"  },
+            {ComIndex.DIRECTORY, "Select only folder items."  },
+            {ComIndex.FILE, "Select only file items."},
+            {ComIndex.CASESENS, "Do not ignore case sensitivity." },
+            {ComIndex.CASEINSENS, "Ignore case sensitivity." },
+            {ComIndex.SIZE, "Select files with the size _>_ or _<_ than _number_" },
         };
 
 

@@ -75,12 +75,12 @@
             </StackPanel>
         </Grid>
 
-        <ui:HyperlinkButton Content="Application developed by Reznicencu Team - Aerus"
-                            NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension"
+        <ui:HyperlinkButton Content="Application developed by Reznicencu Team - Aeindus"
+                            NavigateUri="https://github.com/Aeindus/IFilterShellView"
                             Margin="0,12,0,0"
                             Padding="0" />
         <ui:HyperlinkButton Padding="0"
                             Content="Licensing"
-                            NavigateUri="https://github.com/ReznicencuBogdan/ExplorerFilterExtension/blob/master/LICENSE" />
+                            NavigateUri="https://github.com/Aeindus/IFilterShellView/blob/main/LICENSE" />
     </StackPanel>
 </Window>
