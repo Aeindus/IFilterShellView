@@ -109,6 +109,8 @@ Notes:
 * If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
 * By default all command related string comparison is case insensitive. If you want to execute a case sensitive query then invoke the command `cs` as seen in the examples above. 
 * An argument must be specified between quotes only if it includes whitespaces. For example the following path _C:\Program Files_ must be specified between quotes.
+* Press anywhere outside the filter window (or lose focus) to close/hide it.
+* Press `[Escape]` in order to close/hide the window.
 
 ### Download the project's source code
 
