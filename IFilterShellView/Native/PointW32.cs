@@ -1,11 +1,11 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace IFilterShellView
+namespace IFilterShellView.Native
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct NativePoint
+    public struct PointW32
     {
-        public NativePoint(int x, int y)
+        public PointW32(int x, int y)
             : this()
         {
             X = x;
@@ -16,27 +16,25 @@ namespace IFilterShellView
 
         public int Y { get; set; }
 
-        public static bool operator ==(NativePoint first, NativePoint second)
+        public static bool operator ==(PointW32 first, PointW32 second)
         {
             return first.X == second.X
                 && first.Y == second.Y;
         }
 
-        public static bool operator !=(NativePoint first, NativePoint second)
+        public static bool operator !=(PointW32 first, PointW32 second)
         {
             return !(first == second);
         }
 
         public override bool Equals(object obj)
         {
-            return (obj != null && obj is NativePoint) ? this == (NativePoint)obj : false;
+            return obj != null && obj is PointW32 w && this == w;
         }
 
         public override int GetHashCode()
         {
-            int hash = X.GetHashCode();
-            hash = hash * 31 + Y.GetHashCode();
-            return hash;
+            return System.HashCode.Combine(X, Y);
         }
     }
 }

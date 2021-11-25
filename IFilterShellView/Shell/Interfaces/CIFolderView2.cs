@@ -40,13 +40,13 @@ namespace IFilterShellView.Shell.Interfaces
         void GetFocusedItem(out int piItem);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void GetItemPosition(IntPtr pidl, out NativePoint ppt);
+        void GetItemPosition(IntPtr pidl, out PointW32 ppt);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void GetSpacing([Out] out NativePoint ppt);
+        void GetSpacing([Out] out PointW32 ppt);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void GetDefaultSpacing(out NativePoint ppt);
+        void GetDefaultSpacing(out PointW32 ppt);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
         void GetAutoArrange();
@@ -55,7 +55,7 @@ namespace IFilterShellView.Shell.Interfaces
         void SelectItem(int iItem, uint dwFlags);
 
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-        void SelectAndPositionItems(uint cidl, IntPtr apidl, ref NativePoint apt, uint dwFlags);
+        void SelectAndPositionItems(uint cidl, IntPtr apidl, ref PointW32 apt, uint dwFlags);
 
         // IFolderView2
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]

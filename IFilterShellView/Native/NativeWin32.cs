@@ -720,9 +720,9 @@ namespace IFilterShellView.Native
 
 			public ShowState ShowCmd;
 
-			public NativePoint MinPosition;
+			public PointW32 MinPosition;
 
-			public NativePoint MaxPosition;
+			public PointW32 MaxPosition;
 
 			public RECT NormalPosition;
 
@@ -807,11 +807,8 @@ namespace IFilterShellView.Native
 
 		public static IntPtr ConvertItemNameToPidl(string ItemName)
 		{
-			IntPtr pidl = IntPtr.Zero;
-			uint psfgaoOut;
-
-			SHParseDisplayName(ItemName, IntPtr.Zero, out pidl, 0, out psfgaoOut);
-			return pidl;
+            SHParseDisplayName(ItemName, IntPtr.Zero, out IntPtr pidl, 0, out uint psfgaoOut);
+            return pidl;
 		}
 
 

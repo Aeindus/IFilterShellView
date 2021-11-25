@@ -8,13 +8,12 @@
         ui:ThemeManager.IsThemeAware="true"
         ui:WindowHelper.UseModernWindowStyle="true"
         ui:TitleBar.ExtendViewIntoTitleBar="true"
-        
         mc:Ignorable="d"
         Title="Settings Window"
         Height="Auto"
         Width="Auto"
-        SizeToContent="WidthAndHeight"
-        ResizeMode="NoResize">
+        SizeToContent="WidthAndHeight" 
+        ResizeMode="CanResize">
 
     <StackPanel Orientation="Vertical"
                 Margin="12">
