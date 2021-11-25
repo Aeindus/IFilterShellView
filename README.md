@@ -81,11 +81,8 @@ Actions that can be performed on a query result item:
 
 <br>
 <hr>
-<br>
-<br>
 
-
-### How to do a complex query
+### How to do write complex query
 If a text placement query or a regex query won't help you, then you can invoke the `xpress parser` via the command symbol `?`. When the parser encounters that symbol it will know that the query that follows will be a special command.
 To obtain the list of available commands installed with the binary, click on the button `Show list of available commands` that can be found inside the far-right command bar.
 
@@ -100,6 +97,8 @@ Example of a command query
 ? o 10/10/2022 & n 5/5/2015 | ( s "Test" ) & file # notice that "s" is an alias for the "start"-with command
 # or
 ? o 10/10/2022 & n 5/5/2015 | s Test & file       # if the argument won't contain white spaces then quotes are not necesary
+# or
+? cs & c "zwm cl" & f & ext ".exe"                # translates to: search `case sensitive (cs)` all where item `contains` string "zwm cl" and is of type `file` and ends with string ".exe"
 # or any other combination
 ```
 `Warning!` If you don't specify a logical grouping then the conditions will be parsed in the order they appear in.
