@@ -30,5 +30,8 @@ namespace IFilterShellView
         public bool AttributesSet { get; set; }
         public string PidlName { get; set; }
         public ulong FileSize { get; set; }
+
+
+        public ulong FileSizeMB => (FileSize / 0x100000);
     }
 }

@@ -77,7 +77,7 @@ namespace IFilterShellView.Parser
         private char MapCharToTransitionChar(char InputCharacter)
         {
             if (InputCharacter == ' ') return StateCharWhiteSpace;
-            if (char.IsLetterOrDigit(InputCharacter) || "/\\".Contains(InputCharacter)) return StateASCIIChar;
+            if (char.IsLetterOrDigit(InputCharacter) || "/\\><".Contains(InputCharacter)) return StateASCIIChar;
             if (InputCharacter == '"') return StateCharQuote;
 
             return InputCharacter;

@@ -38,7 +38,8 @@ namespace IFilterShellView.Parser
             DIRECTORY,
             FILE,
             CASESENS,
-            CASEINSENS
+            CASEINSENS,
+            SIZE
         }
 
         public static readonly IReadOnlyDictionary<string, ComIndex> ComStrToComIndex = new Dictionary<string, ComIndex>(StringComparer.InvariantCultureIgnoreCase)
@@ -49,7 +50,8 @@ namespace IFilterShellView.Parser
             { "Old", ComIndex.OLDER },
             { "O", ComIndex.OLDER},
 
-            { "Inside", ComIndex.IN},
+            { "Year", ComIndex.IN},
+            { "Y", ComIndex.IN},
             { "In", ComIndex.IN},
             { "During", ComIndex.IN},
             { "Du", ComIndex.IN},
@@ -99,16 +101,17 @@ namespace IFilterShellView.Parser
             { "Items", ComIndex.FILE },
             { "F", ComIndex.FILE },
 
-
             { "CaseSensitive" , ComIndex.CASESENS },
             { "CaseSens" , ComIndex.CASESENS },
             { "Cs" , ComIndex.CASESENS },
 
-
             { "CaseInsensitive" , ComIndex.CASEINSENS},
             { "CaseInsens" , ComIndex.CASEINSENS},
-            { "Ci" , ComIndex.CASEINSENS}
+            { "Ci" , ComIndex.CASEINSENS},
 
+
+            { "Size" , ComIndex.SIZE},
+            { "Sz" , ComIndex.SIZE}
         };
 
         public static readonly IReadOnlyDictionary<ComIndex, string> ComIndexDescription = new Dictionary<ComIndex, string>()
@@ -125,6 +128,7 @@ namespace IFilterShellView.Parser
             {ComIndex.FILE, "select file items"},
             {ComIndex.CASESENS, "do not ignore case sensitivity" },
             {ComIndex.CASEINSENS, "ignore case sensitivity" },
+            {ComIndex.SIZE, "select files with the size attribute set" },
         };
 
 
@@ -142,7 +146,7 @@ namespace IFilterShellView.Parser
             {ComIndex.FILE, 0 },
             {ComIndex.CASESENS, 0 },
             {ComIndex.CASEINSENS, 0 },
-
+            {ComIndex.SIZE, 2 },
             // Size
         };
 
@@ -183,6 +187,9 @@ namespace IFilterShellView.Parser
             
             /* case insensitive */
             { ComIndex.CASEINSENS, Com_CaseInsensitive },
+
+            /* size */
+            { ComIndex.SIZE, Com_Size },
 
         };
 
@@ -286,6 +293,31 @@ namespace IFilterShellView.Parser
         {
             XPressParser.ComContext.SearchSensitivity = CComContext.Sensitivity.CaseInsensitive;
             return true;
+        }
+
+        public static bool Com_Size(CPidlData PidlData, CComAndArgs ComAndArgs)
+        {
+            if (!ulong.TryParse(ComAndArgs.Arguments[1], out ulong Size))
+            {
+                throw new UserException("The second parameter (i.e Size) is not a valid number expressed in MB.");
+            }
+
+            if (ComAndArgs.Arguments[0][0] == '<')
+            {
+                if (PidlData.FileSizeMB < Size) return true;
+
+                return false;
+            }
+            else if (ComAndArgs.Arguments[0][0] == '>')
+            {
+                if (PidlData.FileSizeMB > Size) return true;
+
+                return false;
+            }
+            else
+            {
+                throw new UserException("First parameter mismatch! Allowed are only the symbols '<' and '>' that provide a comparison interface.");
+            }
         }
     }
 }
