@@ -1,0 +1,97 @@
+{\pard \ql \f0 \sa180 \li0 \fi0 \par}
+{\pard \ql \f0 \sa0 \li0 \fi0 \par}
+{\pard \ql \f0 \sa0 \li0 \fi0 IFilterShellView - Shell Extension\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 Another tool designed to help you survive in the windows world  View Demo \u183? Report Bug \u183? Request Feature\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 About The Project\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 {\field{\*\fldinst{HYPERLINK "https://github.com/Aeindus/IFilterShellView"}}{\fldrslt{\ul
+{\cf1 [image: Gallery/screenshot.png]\cf0}
+}}}
+\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 The windows explorer is not a {\f1 simple} piece of software built by Microsoft. It is rather a quite complicated system that includes the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 The {\f1 IFilterShellView} is an extension built for the windows explorer that improves the searching experience and allows a broad spectrum of actions to be performed on the filtered folders and files. The following methods of filtering items are suported at the time: * Via text placement (e.g in the beggining or ending or in the middle of the text) * Via regular expresion * Via parsed command that supports filtering via attributes (e.g dates, size, type, extension, ...) as well as the above\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 The methods can be extended and will be in the future with your support and feedback. The plugin extends the normal behaviour of the windows explorer and minimizes the time you would usually spend searching for items. Moreover it is built using controls that feel native to the windows ecosistem and integrate with the current installed theme. It is a theme aware project which means you don't have to worry for a bright light during the night.\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 back to top\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Installing the binaries\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 To install the latest version of the plugin {\f1 IFilterShellView} you have to download the latest binaries from the release page and install them. You can choose to either download the installer or download the portable version.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Getting Started\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 After the intallation is complete, run the recently installed image named distinctively {\f1 IFilterShellView.exe}. It can be found inside the installation folder (either the default one or the one set by you during the installation).\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 To {\f1 /summon/} the instance of {\f1 IFilterShellView} * Bring forward a new explorer window and navigate to a folder populated with items. * Press the hotkey {\f1 CTRL+F}. A nice window should popup on top of the explorer window.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Gallery view\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Light view    Dark view  \par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Warning\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 {\f1 IFilterShellView} can only filter through items that have a physical corespondent on the disk. In other words you cannot filter through elements of a virtual folder inside the namespace such as {\f1 My Computer} or {\f1 This PC} or {\f1 Control Panel} etc.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 How to use\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 With the {\f1 IFilterShellView} filter window now open, start typing a search query inside the text input and results with matched data will start showing up. As an item is matched against your search query, it is automatically selected inside the explorer window. That means that after the searching is done you can move/copy/rename all the selected items from the explorer window.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Example of a search query:  In the image above you can observe the results of a search query.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Actions that can be performed on a query result item: * Hovering an item will bring forward an accesibility panel on the right hand side. Multiple actions (i.e delete, invoke context menu, ...) can be performed. * {\f1 Left clicking a folder} - makes the explorer window navigate to the selected item. The window's opacity will be decreased allowing you to observe at a glance some of the files inside the folder. On mouse move the window will regain it's original visibility. To navigate back to the parent folder, click the third button found in the toolbar (right next to the filter textbox) or click the {\f1 XButton1} mouse button (i.e the first extended mouse button). * {\f1 Selecting and dragging} a file item to another window performs a {\f1 drag-and-drop} to the target window.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 How to write a complex query\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 If a text placement query or a regex query won't help you, then you can invoke the {\f1 xpress parser} via the command symbol {\f1 ?}. When the parser encounters that symbol it will know that the query that follows will be a special command. To obtain the list of available commands installed with the binary, click on the button {\f1 Show list of available commands} that can be found inside the far-right command bar.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Example of a command query\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 ? older 10/10/2022\line
+# or\line
+? older 10/10/2022 & newer 5/5/2015               # older that X date and newer than Y date\line
+# or \line
+? o 10/10/2022 & n 5/5/2015 | ( start "Test" )    # notice that "o" is an alias for the "older" command\line
+# or \line
+? o 10/10/2022 & n 5/5/2015 | ( s "Test" ) & file # notice that "s" is an alias for the "start"-with command\line
+# or\line
+? o 10/10/2022 & n 5/5/2015 | s Test & file       # if the argument won't contain white spaces then quotes are not necesary\line
+# or\line
+? o 2022 & size > 5                               # dates can be YYYY only too; this translates to: all items older than 2022 and whose size is greater that 5 MB\line
+# or\line
+? cs & c "zwm cl" & f & ext ".exe"                # translates to: search `case sensitive (cs)` all where item `contains` string "zwm cl" and is of type `file` and ends with string ".exe"\line
+# or\line
+? in 2017                                         # select all items created in year 2017\line
+# or\line
+? bet 2011 2018                                   # select all items created between 2011 and 2018\line
+# or\line
+? bet 15/10/2011 20/4/2012                        # select all items created between the expanded dates given\line
+# or any other combination\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Notes: * If you don't specify a logical grouping then the conditions will be parsed in the order they appear in. * By default all command related string comparison is case insensitive. If you want to execute a case sensitive query then invoke the command {\f1 cs} as seen in the examples above. * An argument must be specified between quotes only if it includes whitespaces. For example the following path {\i C:Files} must be specified between quotes. * Press anywhere outside the filter window (or lose focus) to close/hide it. * Press {\f1 [Escape]} in order to close/hide the window.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs28 Download the project's source code\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Bellow you can see the steps required to get the code on your machine and get it running 1. Clone the repository\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \f1 git clone https://github.com/Aeindus/IFilterShellView.git\par}
+{\pard \ql \f0 \sa180 \li360 \fi-360 2.\tx360\tab Browse to the solution\par}
+{\pard \ql \f0 \sa180 \li360 \fi0 \f1 cd IFilterShellView\par}
+{\pard \ql \f0 \sa180 \li360 \fi-360 3.\tx360\tab Run {\f1 ExplorerFilter.sln} to start the project\sa180\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 back to top\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Contributing\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 See the {\field{\*\fldinst{HYPERLINK "https://github.com/Aeindus/IFilterShellView/issues"}}{\fldrslt{\ul
+open issues
+}}}
+ for a full list of proposed features (and known issues).\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are {\b greatly appreciated}.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". Don't forget to give the project a star! Thanks again!\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 1.\tx360\tab Fork the Project\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 2.\tx360\tab Create your Feature Branch ({\f1 git checkout -b feature/AmazingFeature})\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 3.\tx360\tab Commit your Changes ({\f1 git commit -m 'Add some AmazingFeature'})\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 4.\tx360\tab Push to the Branch ({\f1 git push origin feature/AmazingFeature})\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 5.\tx360\tab Open a Pull Request\sa180\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 back to top\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 License\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Distributed under the GPL-2.0 License. See {\f1 LICENSE.txt} for more information.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Contact\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 Aiendus - aiendus.inc@gmail.com Project Link: {\field{\*\fldinst{HYPERLINK "https://github.com/Aeindus/IFilterShellView"}}{\fldrslt{\ul
+https://github.com/Aeindus/IFilterShellView
+}}}
+\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 {\i Note 1}: This is a free and opensource project. Consider a donation to suport this project.\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 {\i Note 2}: If you intend to create a similar project or to modify this one - with the purpose of obtaining profit - then leave me a message.\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 {\i Note 3}: If someone decides to deprecate this project and add it as an extension for the PowerToys app, then it'd be nice if I'd be contacted too.\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 back to top\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 \b \fs32 Acknowledgments\par}
+{\pard \ql \f0 \sa180 \li0 \fi0 List of resources that I found helpful and would like to give credit to. I've included a few of my favorites to kick things off!\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://github.com/Kinnara/ModernWpf"}}{\fldrslt{\ul
+ModernWPF Toolkit
+}}}
+\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://github.com/ABTSoftware/SciChart.Wpf.UI"}}{\fldrslt{\ul
+SciChart.Wpf.UI.Transitionz
+}}}
+\par}
+{\pard \ql \f0 \sa0 \li360 \fi-360 \bullet \tx360\tab {\field{\*\fldinst{HYPERLINK "https://pages.github.com"}}{\fldrslt{\ul
+GitHub Pages
+}}}
+\sa180\par}
+{\pard \ql \f0 \sa0 \li0 \fi0 back to top\par}
