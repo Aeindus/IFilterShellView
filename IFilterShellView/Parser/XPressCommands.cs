@@ -140,7 +140,7 @@ namespace IFilterShellView.Parser
             {ComIndex.STARTS, 1 },
             {ComIndex.ENDS, 1 },
             {ComIndex.CONTAINS, 1 },
-            {ComIndex.EXTENSION, 0 },
+            {ComIndex.EXTENSION, 1 },
             {ComIndex.DIRECTORY, 0 },
             {ComIndex.FILE, 0 },
             {ComIndex.CASESENS, 0 },
@@ -269,7 +269,7 @@ namespace IFilterShellView.Parser
 
         public static bool Com_Extension(CPidlData PidlData, CComAndArgs ComAndArgs)
         {
-            return PidlData.PidlName.EndsWith(ComAndArgs.Arguments[0]);
+            return  Path.GetExtension(PidlData.PidlName).Equals(ComAndArgs.Arguments[0]);
         }
 
         public static bool Com_Directory(CPidlData PidlData, CComAndArgs ComAndArgs)

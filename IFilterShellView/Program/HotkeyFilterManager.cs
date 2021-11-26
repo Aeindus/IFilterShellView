@@ -14,6 +14,7 @@
 *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+using IFilterShellView.Native;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,9 +25,9 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
-namespace IFilterShellView.Native
+namespace IFilterShellView.Program
 {
-    public sealed class GlobalKeyboardHook : IDisposable
+    public sealed class HotkeyFilterManager : IDisposable
     {
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN = 0x0100;
@@ -41,7 +42,7 @@ namespace IFilterShellView.Native
         private bool Disposed;
 
 
-        public GlobalKeyboardHook()
+        public HotkeyFilterManager()
         {
             Fn_NativeEventCallback = new NativeWin32.LowLevelKeyboardProc(NativeEventCallback);
             HookEventsDict = new Dictionary<int, KeyValuePair<KeyCombination, Action>>();
@@ -167,7 +168,7 @@ namespace IFilterShellView.Native
             Disposed = true;
         }
         public void Dispose() => Dispose(true);
-        ~GlobalKeyboardHook() => Dispose(false);
+        ~HotkeyFilterManager() => Dispose(false);
 
         #endregion
 

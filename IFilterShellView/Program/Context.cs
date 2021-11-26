@@ -74,6 +74,12 @@ namespace IFilterShellView.Program
         }
 
 
+        public void QueryShellPidlCount()
+        {
+            // Query the view for the number of items that are hosted
+            pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out PidlCount);
+        }
+
         private void Dispose(bool dispose)
         {
             if (Disposed) return;
@@ -83,7 +89,10 @@ namespace IFilterShellView.Program
 
             if (dispose)
             {
-                if (this != null) GC.SuppressFinalize(this);
+                if (this != null)
+                {
+                    GC.SuppressFinalize(this);
+                }
             }
 
             Disposed = true;

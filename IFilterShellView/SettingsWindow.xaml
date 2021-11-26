@@ -82,5 +82,10 @@
         <ui:HyperlinkButton Padding="0"
                             Content="Licensing"
                             NavigateUri="https://github.com/Aeindus/IFilterShellView/blob/main/LICENSE" />
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Assembly version v"/>
+            <TextBlock Name="AssemblyVersion" Text="5.2.4.0"/>
+        </StackPanel>
     </StackPanel>
 </Window>

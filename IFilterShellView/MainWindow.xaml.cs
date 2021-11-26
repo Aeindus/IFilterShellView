@@ -61,20 +61,15 @@ namespace IFilterShellView
         private readonly ObservableCollection<CCommandItem> listOfAvailableCommands;
         private readonly ObservableCollection<CHistoryItem> listOfHistoryItems;
         private readonly List<Key> listOfHotkeys = new List<Key> { Key.LeftCtrl, Key.F };
-
         private readonly ListViewItemData prevListViewItemPidl = new ListViewItemData();
-        private readonly GlobalKeyboardHook globalHookObject;
-        private readonly BackgroundWorker workerObject_SelectionProc;
-        private readonly DispatcherTimer dispatcherInputFilter;
-
+        private readonly HotkeyFilterManager globalHookObject;
+        private readonly DispatcherTimer timerInputFilter;
+        private readonly FilterShell filterShell = new FilterShell();
         public readonly MainWindowModelMerger mainWindowModelMerger = new MainWindowModelMerger();
-
 
         private readonly int filterAfterDelay = 120;
         private const char keyModExtendedCommandMode = '?';
-        private bool flagStringReadyToProcess = false;
         private DateTime lastTimeTextChanged;
-
 
 
 
@@ -87,13 +82,10 @@ namespace IFilterShellView
             // Only Net Framework?
             // AppContext.SetSwitch("Switch.System.Windows.DoNotUsePresentationDpiCapabilityTier2OrGreater", false);
 
-            // Initialize a background worker responsible for the heavy selection task
-            workerObject_SelectionProc = new BackgroundWorker();
-            workerObject_SelectionProc.DoWork += new DoWorkEventHandler(WorkerCallback_SelectionProc_Task);
-            workerObject_SelectionProc.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkerCallback_SelectionProc_Completed);
-            workerObject_SelectionProc.ProgressChanged += new ProgressChangedEventHandler(WorkerCallback_SelectionProc_Progress);
-            workerObject_SelectionProc.WorkerReportsProgress = true;
-            workerObject_SelectionProc.WorkerSupportsCancellation = true;
+            filterShell.ptrOnUiBefore = Callback_UIOnBeforeFiltering;
+            filterShell.ptrOnUiAfter = Callback_UIOnAfterFiltering;
+            filterShell.ptrOnUiProgress = Callback_UIReportSelectionProgress;
+
 
             // Set item source
             listOfPidlData = CompilePidlList();
@@ -110,7 +102,7 @@ namespace IFilterShellView
             {
                 // This can throw - it handles unmanaged resources and it's a critical component
                 Context _unused_ = Context.Instance;
-                globalHookObject = new GlobalKeyboardHook();
+                globalHookObject = new HotkeyFilterManager();
                 globalHookObject.AddHotkeys(listOfHotkeys, Callback_GlobalKeyboardHookSafeSta);
             }
             catch (Exception)
@@ -119,45 +111,68 @@ namespace IFilterShellView
                 throw;
             }
 
-            dispatcherInputFilter = new DispatcherTimer();
-            dispatcherInputFilter.Tick += Callback_TimerPulse;
-            dispatcherInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
+            timerInputFilter = new DispatcherTimer();
+            timerInputFilter.Tick += TimerInputFilter_OnTick;
+            timerInputFilter.Interval = new TimeSpan(0, 0, 0, 0, 300);
         }
         private void Window_Deactivated(object sender, EventArgs e)
         {
-            Callback_OnWindowCancellOrExit(false);
+            Window_OnCancelOrExit(false);
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Callback_OnWindowCancellOrExit(true);
+            Window_OnCancelOrExit(true);
+        }
+        private void Window_OnCancelOrExit(bool ApplicationIsExiting)
+        {
+            filterShell.StopAsync();
+
+            // Re-eanble the shell's filter window.
+            if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
+            {
+                NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
+            }
+
+            ShowSearchResultsPage(false);
+            listOfPidlData.Clear();
+
+            // Disable the timer
+            timerInputFilter.Stop();
+            Context.Instance.HardReset();
+
+            if (ApplicationIsExiting)
+            {
+                // Save settings here as a precaution
+                SaveApplicationSettings();
+
+                globalHookObject.Dispose();
+                Context.Instance.Dispose();
+            }
+            else
+            {
+                if (!Properties.Settings.Default.KeepFilterText)
+                {
+                    FilterTb.Text = "";
+                }
+
+                this.Opacity = 1;
+
+                Hide();
+            }
         }
 
 
 
 
         #region Events that are called on before, after or during the filtering process
-        private void Callback_UIOnBeforeFiltering(bool GoesInDeepProcessing = false)
+        private void Callback_UIOnBeforeFiltering()
         {
             listOfPidlData.Clear();
 
             ShowSearchResultsPage(true);
-
-            if (GoesInDeepProcessing)
-            {
-                ProgressPb.IsIndeterminate = true;
-                ProgressPb.Visibility = Visibility.Visible;
-                FilterTb.IsReadOnly = true;
-            }
         }
-        private void Callback_UIOnAfterFiltering(bool ReturnedFromDeepProcessing, Exception RuntimeException, bool WasQueryExecuted)
+        private void Callback_UIOnAfterFiltering(Exception RuntimeException, bool WasQueryExecuted)
         {
-            if (ReturnedFromDeepProcessing)
-            {
-                ProgressPb.IsIndeterminate = false;
-                ProgressPb.Visibility = Visibility.Collapsed;
-                FilterTb.IsReadOnly = false;
-            }
-
             if (RuntimeException != null)
             {
                 string NormalizedException;
@@ -192,114 +207,9 @@ namespace IFilterShellView
                 }
             }
         }
-        private void Callback_UIReportSelectionProgress(int ReportPecentage, List<CPidlData> ListOfSelections)
+        private void Callback_UIReportSelectionProgress(List<CPidlData> ListOfSelections)
         {
             ListOfSelections.ForEach(pidl_data => listOfPidlData.Add(pidl_data));
-        }
-        private void Callback_OnWindowCancellOrExit(bool ApplicationIsExiting)
-        {
-            if (workerObject_SelectionProc.IsBusy) workerObject_SelectionProc.CancelAsync();
-
-            // Re-eanble the shell's filter window.
-            if (Context.Instance.PrevShellWindowModernSearchBoxHwnd != IntPtr.Zero)
-            {
-                NativeWin32.EnableWindow(Context.Instance.PrevShellWindowModernSearchBoxHwnd, true);
-            }
-
-            ShowSearchResultsPage(false);
-            listOfPidlData.Clear();
-
-            // Disable the timer
-            dispatcherInputFilter.Stop();
-            Context.Instance.HardReset();
-
-            if (ApplicationIsExiting)
-            {
-                // Save settings here as a precaution
-                SaveApplicationSettings();
-
-                globalHookObject.Dispose();
-                Context.Instance.Dispose();
-            }
-            else
-            {
-                if (!Properties.Settings.Default.KeepFilterText)
-                {
-                    FilterTb.Text = "";
-                }
-
-                this.Opacity = 1;
-
-                Hide();
-            }
-        }
-        private void Callback_OnShellWindowCloseEvent()
-        {
-            Callback_OnWindowCancellOrExit(false);
-        }
-        private bool GatherShellInterfacesLinkedToShell(IntPtr ForegroundWindow)
-        {
-            ShellWindows pIShellWindows = new ShellWindows();
-
-            foreach (IWebBrowserApp pIWebBrowserApp in pIShellWindows)
-            {
-                if (pIWebBrowserApp.HWND != (int)ForegroundWindow /*&& pIWebBrowserApp.FullName == ShellPath*/)
-                    continue;
-
-                if (!(pIWebBrowserApp is CIServiceProvider pIServiceProvider))
-                {
-                    Debug.WriteLine("Failed getting IServiceProvider interface");
-                    return false;
-                }
-
-                pIServiceProvider.QueryService(Service.SID_STopLevelBrowser, typeof(CIShellBrowser).GUID, out object sb);
-                CIShellBrowser pIShellBrowser = (CIShellBrowser)sb;
-
-                if (pIShellBrowser == null)
-                {
-                    Debug.WriteLine("Failed getting IShellBrowser interface");
-                    return false;
-                }
-
-                pIShellBrowser.QueryActiveShellView(out CIShellView pIShellView);
-
-                if (!(pIShellView is CIFolderView2 pIFolderView2) || pIShellView == null)
-                {
-                    Debug.WriteLine("Failed getting IFolderView2/IShellView interface");
-                    return false;
-                }
-
-                pIFolderView2.GetFolder(typeof(CIPersistFolder2).GUID, out object ppv);
-                CIPersistFolder2 pIPersistFolder2 = (CIPersistFolder2)ppv; ;
-                CIShellFolder pIShellFolder = (CIShellFolder)ppv;
-
-                if (pIShellFolder == null)
-                {
-                    Debug.WriteLine("Failed getting IShellFolder interface");
-                    return false;
-                }
-
-                // 
-                IntPtr ModernSearchBoxHwnd = WindowExtensions.FindChildWindowByClassName(ForegroundWindow, "ModernSearchBox");
-
-                // Set the rest of the Context.Instance class
-                Context.Instance.PrevShellWindowModernSearchBoxHwnd = ModernSearchBoxHwnd;
-                Context.Instance.PrevShellWindowHwnd = ForegroundWindow;
-                Context.Instance.pIShellBrowser = pIShellBrowser;
-                Context.Instance.pIFolderView2 = pIFolderView2;
-                Context.Instance.pIShellFolder = pIShellFolder;
-                Context.Instance.pIShellView = pIShellView;
-
-                // This can occur if the focused shell window is presenting a virtual namespace
-                if (pIWebBrowserApp.LocationURL == null || pIWebBrowserApp.LocationURL.Length == 0)
-                    return false;
-
-                Context.Instance.LocationUrl = new Uri(pIWebBrowserApp.LocationURL).LocalPath;
-
-                return true;
-            }
-
-            return false;
         }
         private void Callback_GlobalKeyboardHookSafeSta()
         {
@@ -342,317 +252,120 @@ namespace IFilterShellView
                 UpdateWindowPositionToFixedPin();
 
                 // Subscribe to the shell's message pump and filter close messages
-                Context.Instance.EventManager.ResubscribeToExtCloseEvent(ForegroundWindow, Callback_OnShellWindowCloseEvent);
+                Context.Instance.EventManager.ResubscribeToExtCloseEvent(ForegroundWindow, () => Window_OnCancelOrExit(false));
 
                 /* Note: Do not move this line. We will create a copy of the current location url and store it inside LocationUrlBefore browse
                  * because we will need a copy when we click on a filtered item. When we click we call GatherShellInterfacesLinkedToShell 
                  * which resets LocationUrl. 
                  */
                 Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
-
-                // Enable dispatcher timer
-                dispatcherInputFilter.Start();
             }
         }
-        private void Callback_TimerPulse(object sender, EventArgs e)
+        #endregion
+
+        private bool GatherShellInterfacesLinkedToShell(IntPtr ForegroundWindow)
+        {
+            ShellWindows pIShellWindows = new ShellWindows();
+            CIShellBrowser pIShellBrowser;
+            CIPersistFolder2 pIPersistFolder2;
+            CIShellFolder pIShellFolder;
+
+            foreach (IWebBrowserApp pIWebBrowserApp in pIShellWindows)
+            {
+                if (pIWebBrowserApp.HWND != (int)ForegroundWindow)
+                {
+                    continue;
+                }
+
+                if (!(pIWebBrowserApp is CIServiceProvider pIServiceProvider))
+                {
+                    return false;
+                }
+
+                pIServiceProvider.QueryService(Service.SID_STopLevelBrowser, typeof(CIShellBrowser).GUID, out object sb);
+                pIShellBrowser = (CIShellBrowser)sb;
+
+                if (pIShellBrowser == null)
+                {
+                    return false;
+                }
+
+                pIShellBrowser.QueryActiveShellView(out CIShellView pIShellView);
+
+                if (!(pIShellView is CIFolderView2 pIFolderView2) || pIShellView == null)
+                {
+                    return false;
+                }
+
+                pIFolderView2.GetFolder(typeof(CIPersistFolder2).GUID, out object ppv);
+                pIPersistFolder2 = (CIPersistFolder2)ppv; ;
+                pIShellFolder = (CIShellFolder)ppv;
+
+                if (pIShellFolder == null)
+                {
+                    return false;
+                }
+
+                // Get the modern search box hwnd
+                IntPtr ModernSearchBoxHwnd = WindowExtensions.FindChildWindowByClassName(ForegroundWindow, "ModernSearchBox");
+
+                // Set the rest of the Context.Instance class
+                Context.Instance.PrevShellWindowModernSearchBoxHwnd = ModernSearchBoxHwnd;
+                Context.Instance.PrevShellWindowHwnd = ForegroundWindow;
+                Context.Instance.pIShellBrowser = pIShellBrowser;
+                Context.Instance.pIFolderView2 = pIFolderView2;
+                Context.Instance.pIShellFolder = pIShellFolder;
+                Context.Instance.pIShellView = pIShellView;
+
+                // This can occur if the focused shell window is presenting a virtual namespace
+                if (pIWebBrowserApp.LocationURL == null || pIWebBrowserApp.LocationURL.Length == 0)
+                    return false;
+
+                Context.Instance.LocationUrl = new Uri(pIWebBrowserApp.LocationURL).LocalPath;
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+
+        private void TimerInputFilter_OnTick(object sender, EventArgs e)
         {
             TimeSpan DeltaTime = DateTime.Now - lastTimeTextChanged;
 
-            if (DeltaTime.TotalMilliseconds < filterAfterDelay || !flagStringReadyToProcess)
+            if (DeltaTime.TotalMilliseconds < filterAfterDelay)
+            {
                 return;
-
-            flagStringReadyToProcess = false;
+            }
+            else if (DeltaTime.TotalMilliseconds > 5000)
+            {
+                Debug.WriteLine("Timer autostoped");
+                timerInputFilter.Stop();
+                return;
+            }
 
             // Handle Context.Instance's exposed interfaces
-            if (Context.Instance.pIFolderView2 == null || Context.Instance.pIShellFolder == null || Context.Instance.pIShellView == null)
+            if (Context.Instance.pIFolderView2 == null ||
+                Context.Instance.pIShellFolder == null ||
+                Context.Instance.pIShellView == null)
+            {
                 return;
+            }
 
-            if (!FilterTb.IsFocused || Context.Instance.FilterText.Equals(Context.Instance.PrevFilterText) /*|| Context.Instance.FilterText.Length == 0*/)
+            if (!FilterTb.IsFocused || 
+                Context.Instance.FilterText.Equals(Context.Instance.PrevFilterText))
+            {
                 return;
+            }
 
-            Exception RuntimeException = null;
             Context.Instance.PrevFilterText = Context.Instance.FilterText;
-            bool WasQueryExecuted = false;
 
-            try
-            {
-                // Don't move this line. It must be placed right before checking the FilterText.Length and returning
-                Callback_UIOnBeforeFiltering();
+            Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), Context.Instance.FilterText));
 
-                // If there is no command then jump into the finally block
-                if (Context.Instance.FilterText.Length == 0)
-                {
-                    return;
-                }
-
-                // Query the view for the number of items that are hosted
-                Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
-                // The query provided is in fact a command that need special parsing
-
-                Context.Instance.FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
-
-                // Check if the number of items in folder is greater than the maximum accepted
-                Context.Instance.FlagRunInBackgroundWorker =
-                    Context.Instance.FlagExtendedFilterMod | Context.Instance.FlagTooManyItems;
-
-                if (Context.Instance.FlagRunInBackgroundWorker)
-                {
-                    return;
-                }
-
-                Debug.WriteLine(string.Format("[{0}] executing command: '{1}'", DateTime.Now.ToString(), Context.Instance.FilterText));
-
-                StartFilteringTheNamespaceFolderInContext();
-                WasQueryExecuted = true;
-            }
-            catch (Exception ExceptionMessage)
-            {
-                RuntimeException = ExceptionMessage;
-            }
-            finally
-            {
-                Callback_UIOnAfterFiltering(false, RuntimeException, WasQueryExecuted);
-            }
+            filterShell.StartSync(null, null);
         }
-        #endregion
-
-
-
-        #region Worker registered events
-        private void WorkerCallback_SelectionProc_Task(object sender, DoWorkEventArgs e)
-        {
-            StartFilteringTheNamespaceFolderInContext(sender as BackgroundWorker);
-        }
-        private void WorkerCallback_SelectionProc_Progress(object sender, ProgressChangedEventArgs e)
-        {
-            if (e.UserState != null)
-                Callback_UIReportSelectionProgress(e.ProgressPercentage, (List<CPidlData>)e.UserState);
-        }
-        private void WorkerCallback_SelectionProc_Completed(object sender, RunWorkerCompletedEventArgs e)
-        {
-            Exception RuntimeException = e.Error;
-
-            if (RuntimeException == null && Context.Instance.FlagExtendedFilterMod)
-            {
-                var CommandText = Context.Instance.FilterTextWithoutCommandModifier;
-                var CommandFound = listOfHistoryItems.Any(o => o.Command.Equals(CommandText));
-
-                if (!CommandFound)
-                {
-                    listOfHistoryItems.Insert(0, new CHistoryItem(CommandText));
-                }
-            }
-
-            Callback_UIOnAfterFiltering(true, RuntimeException, true);
-
-            Context.Instance.FlagRunInBackgroundWorker = false;
-        }
-        #endregion Worker registered events
-
-
-
-
-        #region The actual processing unit - handles both filtering and exception handling
-        /// <summary> Called both by the dispatcher and the background worker </summary>
-        private void StartFilteringTheNamespaceFolderInContext(BackgroundWorker worker = null)
-        {
-            List<CPidlData> LocalSelectionBuffer = new List<CPidlData>();
-            Func<CPidlData, bool> ILLanguageFunct = null;
-            IntPtr PidlPtrObj = IntPtr.Zero;
-            Exception LastException = null;
-
-            bool IsOnWorkerThread = worker != null;
-            bool FlagFlushBuffer = true;
-            int NumberOfIntervals = Math.Min(10, Context.Instance.PidlCount);
-            int NumberOfItemsPerInterval = Math.Min(Context.Instance.PidlCount / NumberOfIntervals, NumberOfIntervals);
-            int ReportPecentage = 0;
-            int TempCounter = 0;
-            int FailedAttempts = 0;
-            int MaxFailedAttempts = 15;
-
-            // Callback that handles report management - dispatches reports according to the caller's context.
-            void ReportAction()
-            {
-                List<CPidlData> NewList = LocalSelectionBuffer.GetRange(0, LocalSelectionBuffer.Count);
-                if (IsOnWorkerThread)
-                {
-                    worker.ReportProgress(ReportPecentage, (object)NewList);
-                }
-                else
-                {
-                    Callback_UIReportSelectionProgress(ReportPecentage, NewList);
-                }
-
-                LocalSelectionBuffer.Clear();
-            }
-
-            // Reset filter count
-            Context.Instance.FilterCount = 0;
-
-            // Disable redrawing for faster selection
-            Context.Instance.pIFolderView2.SetRedraw(false);
-
-            // No point in unselecting all items if I don't want to select any
-            if (Properties.Settings.Default.AutoSelectFiltered)
-            {
-                Context.Instance.pIShellView.SelectItem(IntPtr.Zero, SVSI.SVSI_DESELECTOTHERS);
-            }
-
-            // After deselecting all items check if the filter is empty
-            if (Context.Instance.FilterText.Length == 0)
-            {
-                goto LabelRestoreState;
-            }
-
-            // Compile the predicate chain if needed
-            if (Context.Instance.FlagExtendedFilterMod)
-            {
-                XPressParser XLanguageParser = new XPressParser(Context.Instance.FilterTextWithoutCommandModifier);
-                ILLanguageFunct = XLanguageParser.Compile();
-
-                if (ILLanguageFunct == null)
-                {
-                    throw new UserException("Parser couldn't compile the given command");
-                }
-            }
-
-            try
-            {
-                // Iterate through all the items inside the shell and start matching
-                for (int PidlIndex = 0; PidlIndex < Context.Instance.PidlCount; PidlIndex++, TempCounter++)
-                {
-                    bool FilterMatched = false;
-
-                    // If I want to return only a sepcific number of elements
-                    if (Properties.Settings.Default.MaxNumberFilterUpTo > 0 &&
-                        Properties.Settings.Default.MaxNumberFilterUpTo <= Context.Instance.FilterCount)
-                    {
-                        break;
-                    }
-
-                    Context.Instance.pIFolderView2.Item(PidlIndex, out PidlPtrObj);
-                    ReportPecentage = (int)((float)PidlIndex / Context.Instance.PidlCount * 100.0f);
-
-                    if (PidlPtrObj == IntPtr.Zero)
-                    {
-                        if (FailedAttempts > MaxFailedAttempts)
-                        {
-                            throw new UserException("Too many failures while interacting with the shell view");
-                        }
-
-                        FailedAttempts++;
-                        continue;
-                    }
-                    else
-                    {
-                        FailedAttempts = 0;
-                    }
-
-                    NativeWin32.HResult hr = NativeWin32.SHGetDataFromIDListW(
-                        Context.Instance.pIShellFolder,
-                        PidlPtrObj,
-                        NativeWin32.SHGDFIL_FINDDATA,
-                        out NativeWin32.WIN32_FIND_DATA Pidl_Win32_FindData,
-                        NativeWin32.WIN32_FIND_DATA_SIZE);
-
-                    CPidlData PidlData = new CPidlData();
-
-                    if (hr == NativeWin32.HResult.Ok)
-                    {
-                        PidlData.PidlName = Pidl_Win32_FindData.cFileName;
-                        PidlData.FileAttributes = Pidl_Win32_FindData.dwFileAttributes;
-                        PidlData.FileSize = ((ulong)Pidl_Win32_FindData.nFileSizeHigh << 32) | Pidl_Win32_FindData.nFileSizeLow;
-                        PidlData.CreationTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftCreationTime);
-                        PidlData.LastAccessTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftLastAccessTime);
-                        PidlData.LastWriteTime = FileTimeExtension.ToDateTime(Pidl_Win32_FindData.ftLastWriteTime);
-                        PidlData.AttributesSet = true;
-                    }
-                    else
-                    {
-                        Context.Instance.pIShellFolder.GetDisplayNameOf
-                        (
-                            PidlPtrObj,
-                            SHGNO.INFOLDER | SHGNO.FORPARSING,
-                            Context.Instance.MarshalPIDLNativeDataHolder.STRRET
-                        );
-
-                        NativeWin32.StrRetToBuf
-                        (
-                            Context.Instance.MarshalPIDLNativeDataHolder.STRRET,
-                            PidlPtrObj,
-                            Context.Instance.MarshalPIDLNativeDataHolder.BUFFER,
-                            Context.Instance.MarshalPIDLNativeDataHolder.MAX_PATH
-                        );
-
-                        PidlData.PidlName = Context.Instance.MarshalPIDLNativeDataHolder.BUFFER.ToString();
-                        PidlData.AttributesSet = false;
-                    }
-
-                    if (Context.Instance.FlagExtendedFilterMod)
-                    {
-                        // Then all the matching will be done according to an expression tree
-                        FilterMatched = ILLanguageFunct(PidlData);
-                    }
-                    else
-                    {
-                        // Then all the matching will be done according to settings enabled by the user
-                        FilterMatched = FilterBasedOnSettings(PidlData, Context.Instance.FilterText);
-                    }
-
-                    // If there was a match then this pidl must be selected
-                    if (FilterMatched)
-                    {
-                        LocalSelectionBuffer.Add(PidlData);
-
-                        if (Properties.Settings.Default.AutoSelectFiltered)
-                        {
-                            Context.Instance.pIShellView.SelectItem(PidlPtrObj, SVSI.SVSI_SELECT);
-                        }
-
-                        Context.Instance.FilterCount++;
-                    }
-
-                    Marshal.FreeCoTaskMem(PidlPtrObj);
-                    PidlPtrObj = IntPtr.Zero;
-
-                    if (TempCounter >= NumberOfItemsPerInterval)
-                    {
-                        ReportAction();
-                        TempCounter = 0;
-                    }
-
-                    if (IsOnWorkerThread && worker.CancellationPending)
-                    {
-                        FlagFlushBuffer = false;
-                        break;
-                    }
-                }
-            }
-            catch (Exception ExceptionMessage)
-            {
-                if (PidlPtrObj != IntPtr.Zero)
-                    Marshal.FreeCoTaskMem(PidlPtrObj);
-
-                LastException = ExceptionMessage;
-            }
-
-
-        LabelRestoreState:
-
-            // Flush the last reports inside the buffer
-            if (FlagFlushBuffer && LocalSelectionBuffer.Count != 0)
-            {
-                ReportAction();
-            }
-
-            Context.Instance.pIFolderView2.SetRedraw(true);
-
-            if (LastException != null) throw LastException;
-        }
-        #endregion
-
-
-
 
 
         /*
@@ -718,16 +431,27 @@ namespace IFilterShellView
 
 
 
+
         #region Filter input handlers
         private void FilterTb_TextChanged(object sender, TextChangedEventArgs e)
         {
             Context.Instance.FilterText = FilterTb.Text.TrimStart();
             Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
-            Context.Instance.FlagRunInBackgroundWorker = Context.Instance.FlagExtendedFilterMod;
             Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
+            // The query provided is in fact a command that need special parsing
+            Context.Instance.QueryShellPidlCount();
+            Context.Instance.FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
+            Context.Instance.FlagRunInBackgroundWorker =
+                Context.Instance.FlagExtendedFilterMod | Context.Instance.FlagTooManyItems;
+
+            // Start the timer if it wasn't enabled
+            if (!timerInputFilter.IsEnabled)
+            {
+                timerInputFilter.Start();
+            }
+
             lastTimeTextChanged = DateTime.Now;
-            flagStringReadyToProcess = true;
         }
         private void FilterTb_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -735,31 +459,68 @@ namespace IFilterShellView
             {
                 case Key.Enter:
                     {
-                        if (!Context.Instance.FlagRunInBackgroundWorker || workerObject_SelectionProc.IsBusy)
+                        if (!Context.Instance.FlagRunInBackgroundWorker)
+                        {
                             return;
+                        }
 
                         // Start worker
-                        Callback_UIOnBeforeFiltering(true);
-                        workerObject_SelectionProc.RunWorkerAsync();
+                        filterShell.StartAsync(
+                            /* on before */
+                            () =>
+                            {
+                                // Disable timer
+                                timerInputFilter.Stop();
+
+                                // Goes in deep processing
+                                ProgressPb.IsIndeterminate = true;
+                                ProgressPb.Visibility = Visibility.Visible;
+                                FilterTb.IsReadOnly = true;
+                            },
+                            /* on after */
+                            (Exception RuntimeException, bool WasQueryExecuted) =>
+                            {
+                                // No need to re-enable timer
+                                // timerInputFilter.Start();
+
+                                // Came out of deep processing
+                                ProgressPb.IsIndeterminate = false;
+                                ProgressPb.Visibility = Visibility.Collapsed;
+                                FilterTb.IsReadOnly = false;
+
+                                if (RuntimeException == null && Context.Instance.FlagExtendedFilterMod)
+                                {
+                                    var CommandText = Context.Instance.FilterTextWithoutCommandModifier;
+                                    var CommandFound = listOfHistoryItems.Any(o => o.Command.Equals(CommandText));
+
+                                    if (!CommandFound)
+                                    {
+                                        listOfHistoryItems.Insert(0, new CHistoryItem(CommandText));
+                                    }
+                                }
+                            });
+
                         break;
                     }
                 case Key.Escape:
                     {
-                        if (!workerObject_SelectionProc.IsBusy)
+                        if (!filterShell.StopAsync())
                         {
-                            Callback_OnWindowCancellOrExit(false);
+                            Window_OnCancelOrExit(false);
                             return;
                         }
-
-                        workerObject_SelectionProc.CancelAsync();
                         break;
                     }
                 case Key.Up:
                     {
                         if (ItemsList.SelectedIndex > 0)
+                        {
                             ItemsList.SelectedIndex--;
+                        }
                         else
+                        {
                             ItemsList.SelectedIndex = ItemsList.Items.Count - 1;
+                        }
 
                         e.Handled = true;
                         break;
@@ -767,9 +528,13 @@ namespace IFilterShellView
                 case Key.Down:
                     {
                         if (ItemsList.SelectedIndex < ItemsList.Items.Count - 1)
+                        {
                             ItemsList.SelectedIndex++;
+                        }
                         else
+                        {
                             ItemsList.SelectedIndex = 0;
+                        }
 
                         e.Handled = true;
                         break;
@@ -783,11 +548,9 @@ namespace IFilterShellView
             {
                 case Key.Back:
                     {
-                        if (workerObject_SelectionProc.IsBusy)
+                        if (filterShell.StopAsync())
                         {
-                            workerObject_SelectionProc.CancelAsync();
                             e.Handled = true;
-                            return;
                         }
                         break;
                     }
@@ -795,9 +558,6 @@ namespace IFilterShellView
             }
         }
         #endregion
-
-
-
 
         #region Toolbar Settings
         private void PlacementSettingsBt_Click(object sender, RoutedEventArgs e) =>
@@ -825,11 +585,6 @@ namespace IFilterShellView
             }
         }
         #endregion
-
-
-
-
-
 
         #region Item List Viewer - Folders and files
         private void ItemsList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -1003,18 +758,6 @@ namespace IFilterShellView
         #endregion
 
 
-        #region Related functions
-
-        private void UpdateNotificationData(NotificationManager.NotificationData notification)
-        {
-            mainWindowModelMerger.SearchPageNoticeTitle.Text = notification.Title;
-            mainWindowModelMerger.SearchPageNoticeMessage.Text = notification.Message;
-        }
-
-        #endregion
-
-
-
         #region History List
         private void HistoryList_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
@@ -1029,7 +772,6 @@ namespace IFilterShellView
         }
         private void ShowHistoryList(object sender, RoutedEventArgs e) =>
             ModernWpf.Controls.Primitives.FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
-
         #endregion
 
 
@@ -1046,29 +788,9 @@ namespace IFilterShellView
         #endregion
 
 
-
-
         /*
          * Helpers and extensions
          */
-
-        private bool FilterBasedOnSettings(CPidlData PidlData, string input)
-        {
-            uint SettingsPlacementId = Properties.Settings.Default.SettingsPlacementId;
-            uint SettingsCaseId = Properties.Settings.Default.SettingsCaseId;
-            string PidlName = PidlData.PidlName;
-
-            // Case insensitive
-            if (SettingsCaseId == 2)
-            {
-                PidlName = PidlData.PidlName.ToLower();
-                input = input.ToLower();
-            }
-
-            // Find applicable actions
-            var action = FitlerActions.SettingsActionMap[(FilterSettingsFlags)SettingsPlacementId];
-            return action(PidlName, input);
-        }
         private bool BrowseToFolderByDisplayName(string FullyQuallifiedItemName)
         {
             // Parse display name to pidl
@@ -1194,6 +916,12 @@ namespace IFilterShellView
         {
             mainWindowModelMerger.SearchPageVisibilityModel.Visible = Visible;
         }
+        private void UpdateNotificationData(NotificationManager.NotificationData notification)
+        {
+            mainWindowModelMerger.SearchPageNoticeTitle.Text = notification.Title;
+            mainWindowModelMerger.SearchPageNoticeMessage.Text = notification.Message;
+        }
+
 
 
         private ObservableCollection<CPidlData> CompilePidlList()

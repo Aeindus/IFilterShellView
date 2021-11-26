@@ -28,6 +28,10 @@ namespace IFilterShellView
             assemblyImageLocation = Path.Combine(Path.GetDirectoryName(CurrentImageAssembly.Location), assemblyImageName + ".exe");
 
             LoadApplicationSettings();
+
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            AssemblyVersion.Text = fvi.FileVersion;
         }
 
         private void LoadApplicationSettings()

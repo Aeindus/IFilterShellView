@@ -37,6 +37,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -181,15 +189,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IFilterShellView-Setup"
-        "ProductCode" = "8:{19661781-7ED4-4988-A6D9-DA5C5F3F222C}"
-        "PackageCode" = "8:{9698D139-5993-473B-BBBF-3D82C2A20166}"
+        "ProductCode" = "8:{3DFFE25F-D820-4CEF-97C9-87D8D206CCE5}"
+        "PackageCode" = "8:{ABEA6A79-A018-4017-9420-08746A814143}"
         "UpgradeCode" = "8:{456EE8DC-2C0C-4711-B127-B645AA27F7A1}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:2.5.3"
+        "ProductVersion" = "8:2.5.5"
         "Manufacturer" = "8:Aeindus Inc."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://github.com/Aeindus/IFilterShellView"
