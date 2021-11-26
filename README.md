@@ -26,9 +26,7 @@
 The windows explorer is not a `simple` piece of software built by Microsoft. It is rather a quite complicated system that includes the tools and exposes the interfaces required so as to make development and integration a not that hard of a process. All that is required is access to documentation and code samples that /lead the way/. With that knowledge at hand the explorer is as customizable as it could be - to some extent - of course. 
 
 
-However, windows namespace extensions are not developed - Microsoft lacks the will and developers lack both knowledge and will :-)
-
-The `IFilterShellView` is an extension built for the windows explorer that improves the searching experience and allows a broader spectrum of actions to be performed on the filtered folders and files. The following methods of filtering items are suported at the time:
+The `IFilterShellView` is an extension built for the windows explorer that improves the searching experience and allows a broad spectrum of actions to be performed on the filtered folders and files. The following methods of filtering items are suported at the time:
 * Via text placement (e.g in the beggining or ending or in the middle of the text)
 * Via regular expresion
 * Via parsed command that supports filtering via attributes (e.g dates, size, type, extension, ...) as well as the above
