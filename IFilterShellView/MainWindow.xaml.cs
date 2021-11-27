@@ -339,9 +339,8 @@ namespace IFilterShellView
             {
                 return;
             }
-            else if (DeltaTime.TotalMilliseconds > 5000)
+            else if (DeltaTime.TotalMilliseconds > 2000)
             {
-                Debug.WriteLine("Timer autostoped");
                 timerInputFilter.Stop();
                 return;
             }
@@ -439,16 +438,23 @@ namespace IFilterShellView
             Context.Instance.FlagExtendedFilterMod = Context.Instance.FilterText.StartsWith(keyModExtendedCommandMode);
             Context.Instance.LocationUrlOnStart = Context.Instance.LocationUrl;
 
-            // The query provided is in fact a command that need special parsing
-            Context.Instance.QueryShellPidlCount();
+            // Query the view for the number of items that are hosted
+            Context.Instance.pIFolderView2.ItemCount(SVGIO.SVGIO_ALLVIEW, out Context.Instance.PidlCount);
             Context.Instance.FlagTooManyItems = Context.Instance.PidlCount >= Properties.Settings.Default.MaxFolderPidlCount_Deepscan;
             Context.Instance.FlagRunInBackgroundWorker =
                 Context.Instance.FlagExtendedFilterMod | Context.Instance.FlagTooManyItems;
 
-            // Start the timer if it wasn't enabled
-            if (!timerInputFilter.IsEnabled)
+            if (filterShell.IsBusy)
             {
-                timerInputFilter.Start();
+                filterShell.StopAsync();
+            } 
+            else
+            {
+                // Start the timer if it wasn't enabled
+                if (!timerInputFilter.IsEnabled)
+                {
+                    timerInputFilter.Start();
+                }
             }
 
             lastTimeTextChanged = DateTime.Now;
@@ -475,7 +481,7 @@ namespace IFilterShellView
                                 // Goes in deep processing
                                 ProgressPb.IsIndeterminate = true;
                                 ProgressPb.Visibility = Visibility.Visible;
-                                FilterTb.IsReadOnly = true;
+                                //FilterTb.IsReadOnly = true;
                             },
                             /* on after */
                             (Exception RuntimeException, bool WasQueryExecuted) =>
@@ -486,7 +492,7 @@ namespace IFilterShellView
                                 // Came out of deep processing
                                 ProgressPb.IsIndeterminate = false;
                                 ProgressPb.Visibility = Visibility.Collapsed;
-                                FilterTb.IsReadOnly = false;
+                                //FilterTb.IsReadOnly = false;
 
                                 if (RuntimeException == null && Context.Instance.FlagExtendedFilterMod)
                                 {
@@ -881,9 +887,9 @@ namespace IFilterShellView
             NativeWin32.GetWindowRect(Context.Instance.PrevShellWindowHwnd, out NativeWin32.RECT ShellWindowRect);
 
             var TopMargin = 4;
-            var matrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
-            var result = new Rect(ShellWindowRect.Left, ShellWindowRect.Top, ShellWindowRect.Right - ShellWindowRect.Left, ShellWindowRect.Bottom - ShellWindowRect.Top);
-            result.Transform(matrix);
+            var TransformationMatrix = PresentationSource.FromVisual(this).CompositionTarget.TransformFromDevice;
+            var TransformedShellWindowRect = new Rect(ShellWindowRect.Left, ShellWindowRect.Top, ShellWindowRect.Right - ShellWindowRect.Left, ShellWindowRect.Bottom - ShellWindowRect.Top);
+            TransformedShellWindowRect.Transform(TransformationMatrix);
 
             NativeWin32.WINDOWPLACEMENT WinPlacement = NativeWin32.WINDOWPLACEMENT.Default;
             NativeWin32.GetWindowPlacement(Context.Instance.PrevShellWindowHwnd, ref WinPlacement);
@@ -893,24 +899,47 @@ namespace IFilterShellView
                 TopMargin = 10;
             }
 
-            this.Left = result.X + result.Width / 2 - this.ActualWidth / 2;
-            this.Top = result.Y + TopMargin;
+            double WinLeft = TransformedShellWindowRect.X + TransformedShellWindowRect.Width / 2 - this.ActualWidth / 2;
+            double WinTop = TransformedShellWindowRect.Y + TopMargin;
             FilterTb.MaxWidth = FilterTb.ActualWidth;
 
 
-            //NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
-            //MonitorInfo.Init();
+            NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
+            MonitorInfo.Init();
+            IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
+            NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
+            Rect MonitorRect = new Rect()
+            {
+                X = MonitorInfo.Monitor.Left,
+                Y = MonitorInfo.Monitor.Top,
+                Width = MonitorInfo.Monitor.Right - MonitorInfo.Monitor.Left,
+                Height = MonitorInfo.Monitor.Bottom - MonitorInfo.Monitor.Top
+            };
+            MonitorRect.Transform(TransformationMatrix);
 
-            //IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
-            //NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-            //NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+            if (/* Left side */
+                WinLeft + this.ActualWidth >= MonitorRect.X + MonitorRect.Width ||
+                /* Right side */
+                WinLeft <= MonitorRect.X || 
+                /* Top side */
+                WinTop <= MonitorRect.Y || 
+                /* Bottom side */
+                WinTop + this.ActualHeight >= MonitorRect.Y + MonitorRect.Height)
+            {
+                WinLeft = MonitorRect.X + MonitorRect.Width / 2 - this.ActualWidth / 2;
+                WinTop = MonitorInfo.WorkArea.Top + TopMargin; // + MonitorRect.Height / 2 - this.ActualHeight / 2;
+            }
 
-            //double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
-            //double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+            this.Left = WinLeft;
+            this.Top = WinTop;
 
-            //this.Width = ScreenWidth * widthDPIFactor;
-            //this.Left = 0;
-            //this.Top = 0;
+            // NativeWin32.RECT CurrentMonitorRect = MonitorInfo.Monitor;
+            // double widthDPIFactor = this.GetWindowDPIFactorClass().widthDPIFactor;
+            // double ScreenWidth = CurrentMonitorRect.ToRectangle().Width;
+
+            // this.Width = ScreenWidth * widthDPIFactor;
+            // this.Left = 0;
+            // this.Top = 0;
         }
         private void ShowSearchResultsPage(bool Visible)
         {
