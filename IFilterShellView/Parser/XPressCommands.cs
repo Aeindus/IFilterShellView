@@ -269,7 +269,10 @@ namespace IFilterShellView.Parser
 
         public static bool Com_Extension(CPidlData PidlData, CComAndArgs ComAndArgs)
         {
-            return  Path.GetExtension(PidlData.PidlName).Equals(ComAndArgs.Arguments[0]);
+            var extension = Path.GetExtension(PidlData.PidlName);
+            if (extension == string.Empty) return false;
+
+            return extension[1..].Equals(ComAndArgs.Arguments[0]); 
         }
 
         public static bool Com_Directory(CPidlData PidlData, CComAndArgs ComAndArgs)
