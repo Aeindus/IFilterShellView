@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "IFilterShellView"
-#define MyAppVersion "5.2.6"
+#define MyAppVersion "5.2.7"
 #define MyAppPublisher "Aeindus, Inc."
 #define MyAppURL "https://github.com/Aeindus/IFilterShellView"
 #define MyAppExeName "IFilterShellView.exe"

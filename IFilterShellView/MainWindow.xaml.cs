@@ -906,28 +906,38 @@ namespace IFilterShellView
 
             NativeWin32.MONITORINFOEX MonitorInfo = new NativeWin32.MONITORINFOEX();
             MonitorInfo.Init();
-            IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(this.GetHWND(), NativeWin32.MONITOR_DEFAULTTONEAREST);
+            IntPtr CurrentMonitorHandle = NativeWin32.MonitorFromWindow(Context.Instance.PrevShellWindowHwnd, NativeWin32.MONITOR_DEFAULTTONEAREST);
             NativeWin32.GetMonitorInfo(CurrentMonitorHandle, ref MonitorInfo);
-            Rect MonitorRect = new Rect()
+            Rect TansformedMonitorRect = new Rect()
             {
                 X = MonitorInfo.Monitor.Left,
                 Y = MonitorInfo.Monitor.Top,
                 Width = MonitorInfo.Monitor.Right - MonitorInfo.Monitor.Left,
                 Height = MonitorInfo.Monitor.Bottom - MonitorInfo.Monitor.Top
             };
-            MonitorRect.Transform(TransformationMatrix);
+            TansformedMonitorRect.Transform(TransformationMatrix);
+
+            var f1 = WinLeft + this.ActualWidth >= TansformedMonitorRect.X + TansformedMonitorRect.Width;
+            var f2 = WinLeft <= TansformedMonitorRect.X;
+            var f3 = WinTop <= TansformedMonitorRect.Y;
+            var f4 = WinTop + this.ActualHeight >= TansformedMonitorRect.Y + TansformedMonitorRect.Height;
 
             if (/* Left side */
-                WinLeft + this.ActualWidth >= MonitorRect.X + MonitorRect.Width ||
+                f1 ||
                 /* Right side */
-                WinLeft <= MonitorRect.X || 
+                f2 || 
                 /* Top side */
-                WinTop <= MonitorRect.Y || 
+                f3 || 
                 /* Bottom side */
-                WinTop + this.ActualHeight >= MonitorRect.Y + MonitorRect.Height)
+                f4)
             {
-                WinLeft = MonitorRect.X + MonitorRect.Width / 2 - this.ActualWidth / 2;
+                WinLeft = TansformedMonitorRect.X + TansformedMonitorRect.Width / 2 - this.ActualWidth / 2;
                 WinTop = MonitorInfo.WorkArea.Top + TopMargin; // + MonitorRect.Height / 2 - this.ActualHeight / 2;
+                
+                if (WinTop < 0)
+                {
+                    WinTop += this.ActualHeight / 2;
+                }
             }
 
             this.Left = WinLeft;
