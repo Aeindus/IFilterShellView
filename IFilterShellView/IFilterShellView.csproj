@@ -17,8 +17,8 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>filer; wpf-ui;shell;windows-search;windows-explorer;windows-filter;</PackageTags>
     <PackageReleaseNotes>- Fixed placement bug; - Improved gui</PackageReleaseNotes>
-    <AssemblyVersion>5.2.7.0</AssemblyVersion>
-    <FileVersion>5.2.7.0</FileVersion>
+    <AssemblyVersion>5.2.8.0</AssemblyVersion>
+    <FileVersion>5.2.8.0</FileVersion>
     <PackageLicenseFile>D:\Local Projects\Github Projects\Aeindus Group\IFilterShellView\LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <BaseOutputPath>D:\Local Projects\Github Projects\Aeindus Group\IFilterShellView\bin</BaseOutputPath>
