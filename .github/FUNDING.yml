@@ -3,7 +3,4 @@
 # github: # Replace with up to 4 GitHub Sponsors-enabled usernames e.g., [user1, user2]
 # custom: # Replace with up to 4 custom sponsorship URLs e.g., ['link1', 'link2']
 
-github: [octocat, surftocat]
-patreon: octocat
-tidelift: npm/octo-package
-custom: ["https://www.paypal.me/octocat", octocat.com]
+custom: ["https://www.paypal.com/donate/?hosted_button_id=WXFCUVTQZL3CA"]
