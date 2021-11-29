@@ -16,11 +16,7 @@
   </p>
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=WXFCUVTQZL3CA)
-
 </div>
-
-<br clear="left"/>
-
 
 ## About The Project
 
